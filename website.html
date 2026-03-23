@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Quiz Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00d2ff;
+            --secondary: #3a7bd5;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-light: #ffffff;
+            --text-muted: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            /* Animated Gradient Background */
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a2a6c, #11998e);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-light);
+            min-height: 100vh;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating background shapes for creativity */
+        .shape {
+            position: absolute;
+            filter: blur(50px);
+            z-index: -1;
+            opacity: 0.5;
+            border-radius: 50%;
+            animation: float 10s infinite ease-in-out;
+        }
+        .shape1 { top: 10%; left: 10%; width: 300px; height: 300px; background: #00d2ff; }
+        .shape2 { bottom: 10%; right: 10%; width: 400px; height: 400px; background: #3a7bd5; animation-delay: -5s; }
+        .shape3 { top: 50%; left: 50%; width: 250px; height: 250px; background: #8e2de2; animation-delay: -2s; }
+
+        @keyframes float {
+            0% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-30px) scale(1.1); }
+            100% { transform: translateY(0px) scale(1); }
+        }
+
+        /* Header Section */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: -webkit-linear-gradient(45deg, #00d2ff, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        /* Search Bar */
+        .search-container {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 15px 25px;
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 1.1rem;
+            outline: none;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+        }
+
+        .search-container input::placeholder {
+            color: #aaa;
+        }
+
+        .search-container input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+        }
+
+        /* Main Grid */
+        main {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            max-width: 1300px;
+            margin: 0 auto;
+            z-index: 1;
+            position: relative;
+        }
+
+        /* Glassmorphism Cards */
+        .category-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .category-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 210, 255, 0.2);
+            border-color: rgba(255,255,255,0.4);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1rem;
+        }
+
+        .category-icon {
+            font-size: 2.5rem;
+        }
+
+        .category-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .quiz-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        /* Interactive Quiz Links */
+        .quiz-item a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid transparent;
+            border-radius: 12px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-item a:hover {
+            background: rgba(0, 210, 255, 0.15);
+            border-color: var(--primary);
+            padding-left: 25px; /* Cool indentation effect on hover */
+            color: #fff;
+            text-shadow: 0 0 8px rgba(0,210,255,0.6);
+        }
+
+        .quiz-item a::after {
+            content: '→';
+            font-size: 1.2rem;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .quiz-item a:hover::after {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            z-index: 1;
+            position: relative;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            main { grid-template-columns: 1fr; }
+            body { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="shape shape1"></div>
+    <div class="shape shape2"></div>
+    <div class="shape shape3"></div>
+
+    <header>
+        <h1>BSME DASH A QUIZZES Portal</h1>
+        <p>Eme eme ug toun lang gud HAHAHAHAHAHAAHHAAH</p>
+        
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="🔍 Search the topic here..." onkeyup="filterQuizzes()">
+        </div>
+    </header>
+
+    <main id="quizContainer">
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon"> </div>
+                <div class="category-title">Workshop</div>
+            </div>
+            <ul class="quiz-list">
+                <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/1" target="_blank">1. Hand Tools</a></li>
+                <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/2" target="_blank">2. Layout Tools</a></li>
+                <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/3" target="_blank">3. Measurement</a></li>
+                <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/4" target="_blank">4. Safety</a></li>
+                <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/5" target="_blank">5. Drilling</a></li>
+                <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/6" target="_blank">6. Lathe</a></li>
+                <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/7" target="_blank">7. Milling</a></li>
+                <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/8" target="_blank">8. Shaper</a></li>
+                <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-1" target="_blank">9. Elements (1-100)</a></li>
+                <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-2" target="_blank">10. Elements (101-200)</a></li>
+                <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-3" target="_blank">11. Elements (201-300)</a></li>
+                <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-4" target="_blank">12. Elements (301-400)</a></li>
+                <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-5" target="_blank">13. Elements (400+)</a></li>
+            </ul>
+        </div>
+
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon"></div>
+                <div class="category-title">Materials</div>
+            </div>
+            <ul class="quiz-list">
+                <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials1" target="_blank">Quiz 1: Fundamentals</a></li>
+                <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials2" target="_blank">Quiz 2: Properties</a></li>
+                <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials3" target="_blank">Quiz 3: Testing</a></li>
+                <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials4" target="_blank">Quiz 4: Processing</a></li>
+                <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials5" target="_blank">Quiz 5: Selection</a></li>
+                <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials6" target="_blank">Quiz 6: Advanced</a></li>
+            </ul>
+        </div>
+
+        <div class="category-card">
+            <div class="category-header">
+                <div class="category-icon"></div>
+                <div class="category-title">Industrial</div>
+            </div>
+            <ul class="quiz-list">
+                <li class="quiz-item"><a href="https://regal-cheesecake-f9775f.netlify.app/air" target="_blank">Air Pollution</a></li>
+                <li class="quiz-item"><a href="https://regal-cheesecake-f9775f.netlify.app/waterA" target="_blank">Waste Water (Set A)</a></li>
+                <li class="quiz-item"><a href="https://regal-cheesecake-f9775f.netlify.app/waterB" target="_blank">Waste Water (Set B)</a></li>
+                <li class="quiz-item"><a href="https://dreamy-gumption-fab1e9.netlify.app/pumps" target="_blank">Pumps</a></li>
+            </ul>
+        </div>
+    </main>
+
+    <footer>
+        <p>Good luck nyaknyaknyaknyaknyakHAHAHSHAHAHAAH</p>
+    </footer>
+
+    <script>
+        function filterQuizzes() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            let cards = document.querySelectorAll('.category-card');
+
+            cards.forEach(card => {
+                let items = card.querySelectorAll('.quiz-item');
+                let cardHasVisibleItems = false;
+
+                items.forEach(item => {
+                    let text = item.textContent.toLowerCase();
+                    if (text.includes(input)) {
+                        item.style.display = "block";
+                        cardHasVisibleItems = true;
+                    } else {
+                        item.style.display = "none";
+                    }
+                });
+
+                // Hide the whole category card if no quizzes match the search
+                if (cardHasVisibleItems) {
+                    card.style.display = "flex";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
