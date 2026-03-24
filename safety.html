@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Shop Safety Mastery Quiz</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #e74c3c;
+            --accent-hover: #c0392b;
+            --correct: #27ae60;
+            --incorrect: #e74c3c;
+            --text-main: #333;
+            --text-light: #fff;
+            --explanation-bg: #e8f8f5;
+            --explanation-border: #2ecc71;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Hamburger Menu Button */
+        #hamburger-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: 0.3s;
+        }
+
+        #hamburger-btn:hover { background-color: var(--accent); }
+        #hamburger-btn div { width: 24px; height: 3px; background-color: var(--text-light); border-radius: 2px; }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            position: fixed;
+            top: 0; left: -350px; width: 320px; height: 100vh;
+            background-color: var(--primary); color: var(--text-light);
+            transition: left 0.3s ease-in-out; z-index: 999;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column;
+        }
+
+        #sidebar.open { left: 0; }
+
+        .sidebar-header {
+            padding: 30px 20px 20px 20px; text-align: center;
+            background-color: var(--secondary); font-size: 1.2rem;
+            font-weight: bold; border-bottom: 2px solid var(--accent); margin-top: 50px;
+        }
+
+        .nav-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+            padding: 20px; overflow-y: auto; flex-grow: 1;
+        }
+
+        .nav-btn {
+            background-color: var(--secondary); color: var(--text-light);
+            border: 1px solid #4a6278; border-radius: 4px; padding: 8px 0;
+            font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+
+        .nav-btn:hover { background-color: var(--accent); border-color: var(--accent); }
+        .nav-btn.answered-correct { background-color: var(--correct); border-color: var(--correct); }
+        .nav-btn.answered-incorrect { background-color: var(--incorrect); border-color: var(--incorrect); }
+        .nav-btn.active { box-shadow: 0 0 0 3px #f1c40f; transform: scale(1.1); z-index: 2; }
+
+        /* Main Quiz Container */
+        .quiz-container {
+            background-color: #fff; width: 92%; max-width: 850px;
+            border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 40px; margin: 40px 0; position: relative;
+        }
+
+        .quiz-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #eee;
+            font-size: 1.1rem; font-weight: bold; color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.25rem; line-height: 1.6; margin-bottom: 25px;
+            color: var(--primary); font-weight: 600;
+        }
+
+        .options-container { display: flex; flex-direction: column; gap: 10px; }
+
+        .option {
+            background-color: #f8f9fa; border: 2px solid #dcdde1; border-radius: 8px;
+            padding: 15px 20px; font-size: 1.05rem; color: var(--text-main);
+            text-align: left; cursor: pointer; transition: 0.2s; font-weight: 500;
+        }
+
+        .option:hover:not(:disabled) { background-color: #e2e8f0; border-color: #b2bec3; }
+        .option:disabled { cursor: not-allowed; opacity: 0.95; }
+        .option.correct { background-color: var(--correct) !important; border-color: #219a52 !important; color: var(--text-light) !important; }
+        .option.incorrect { background-color: var(--incorrect) !important; border-color: #a93226 !important; color: var(--text-light) !important; }
+
+        /* Explanation Box */
+        .explanation-box {
+            display: none; margin-top: 20px; padding: 20px;
+            background-color: var(--explanation-bg); border-left: 5px solid var(--explanation-border);
+            border-radius: 0 8px 8px 0; font-size: 1rem; line-height: 1.5; color: #2c3e50;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        .explanation-box strong { color: var(--primary); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .action-btn {
+            background-color: var(--accent); color: var(--text-light);
+            border: none; border-radius: 8px; padding: 15px 30px;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            margin-top: 20px; width: 100%; transition: 0.2s; display: none;
+        }
+
+        .action-btn:hover { background-color: var(--accent-hover); }
+
+        #results-screen { display: none; text-align: center; }
+        #results-screen h1 { font-size: 2.8rem; color: var(--primary); margin-bottom: 15px; }
+        #results-screen p { font-size: 1.3rem; color: #7f8c8d; margin-bottom: 30px; }
+        .restart-btn { background-color: var(--correct); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .restart-btn:hover { background-color: #219a52; }
+    </style>
+</head>
+<body>
+
+    <button id="hamburger-btn" onclick="toggleSidebar()">
+        <div></div><div></div><div></div>
+    </button>
+
+    <div id="sidebar">
+        <div class="sidebar-header">Question Navigator</div>
+        <div class="nav-grid" id="nav-grid"></div>
+    </div>
+
+    <div class="quiz-container">
+        <div id="quiz-screen">
+            <div class="quiz-header">
+                <span id="question-tracker">Question 1 of 100</span>
+                <span id="score-tracker">Score: 0</span>
+            </div>
+            <div class="question-text" id="question-text">Loading question...</div>
+            <div class="options-container" id="options-container"></div>
+            
+            <div class="explanation-box" id="explanation-box"></div>
+            
+            <button class="action-btn" id="next-btn" onclick="nextQuestion()">Next Question ➔</button>
+        </div>
+
+        <div id="results-screen">
+            <h1>Quiz Completed!</h1>
+            <p id="final-score"></p>
+            <button class="restart-btn" onclick="location.reload()">Retake & Reshuffle</button>
+        </div>
+    </div>
+
+    <script>
+        const rawData = [
+            { q: "According to the introduction, what is usually the most correct and efficient way to work?", opts: ["The safe way", "The fastest way", "The traditional way", "The cheapest way"], ans: "The safe way", expl: "The text states: 'Working safely is of the first things a student should learn because of the safe way is usually the most correct and efficient way.' Speed or cost are not mentioned as the primary metric for efficiency here." },
+            { q: "What is cited as the usual cause of an accident in the machine shop?", opts: ["Carelessness on someone's part", "Faulty machine manufacturing", "Power surges", "Poor lighting"], ans: "Carelessness on someone's part", expl: "The document explicitly states: 'The cause of an accident can usually be traced to carelessness on someone's part.' It does not blame the equipment or environmental factors primarily." },
+            { q: "Which of the following injuries is specifically linked in the text to not wearing safety glasses?", opts: ["Loss of eyesight", "Loss of a limb", "Hearing damage", "Respiratory issues"], ans: "Loss of eyesight", expl: "The introduction specifically warns of 'A loss of eyesight due to not wearing of safety glasses'. Limbs are lost due to loose clothing." },
+            { q: "Which of the following injuries is specifically linked to wearing loose clothing near a machine?", opts: ["Loss of a limb", "Loss of eyesight", "Spontaneous combustion", "Electrical shock"], ans: "Loss of a limb", expl: "The text warns of 'the loss of a limb due to loose clothing caught in the machine.' Eyesight is linked to glasses, and combustion to oily rags." },
+            { q: "What is the primary motto or safety slogan mentioned in the introduction?", opts: ["THINK SAFE, WORK SAFE, and BE SAFE", "SAFETY FIRST, SPEED SECOND", "CLEAN MACHINES, CLEAR MINDS", "NO GUARDS, NO WORK"], ans: "THINK SAFE, WORK SAFE, and BE SAFE", expl: "The introduction concludes with the capitalized motto: 'THINK SAFE, WORK SAFE, and BE SAFE.' The other mottos are fabricated." },
+            { q: "Who initiates the safety programs attempting to reduce industrial accidents?", opts: ["Accident prevention associations, safety councils, government agencies, and industrial firms", "Only local supervisors and foremen", "Only government health inspectors", "Machine manufacturers exclusively"], ans: "Accident prevention associations, safety councils, government agencies, and industrial firms", expl: "The text explicitly lists these four entities under 'Safety on the job' as the initiators of safety programs." },
+            { q: "According to the text, do accidents 'just happen'?", opts: ["No, they are caused.", "Yes, they are inevitable.", "Yes, due to machine wear and tear.", "No, they only happen to untrained workers."], ans: "No, they are caused.", expl: "The text explicitly states: 'Accidents don't just happen; they are caused.' This emphasizes personal responsibility." },
+            { q: "A safe worker should be neat, tidy, and what else?", opts: ["Safely dressed for the job", "Working as quickly as possible", "Able to operate all machines blindly", "A certified mechanic"], ans: "Safely dressed for the job", expl: "Under 'Safety on the job', it states a safe worker should 'Be neat, tidy, and safely dressed for the job he or she is performing.'" },
+            { q: "What type of safety glasses must be worn in the shop?", opts: ["Approved safety glasses", "Any tinted sunglasses", "Standard reading glasses", "Plastic fashion goggles"], ans: "Approved safety glasses", expl: "Rule #1 states: 'Always wear approved safety glasses.' Standard reading glasses are only acceptable if fitted with safety lenses." },
+            { q: "If you wear prescription glasses, what must you do to comply with shop safety rules?", opts: ["They must be fitted with safety lenses.", "You must wear contact lenses instead.", "You don't need any additional protection.", "You must tape the edges of the glasses."], ans: "They must be fitted with safety lenses.", expl: "Rule #1 notes that if you wear prescription glasses, 'make sure they are fitted with safety lenses' to ensure they provide actual protection." },
+            { q: "How should sleeves be worn when operating a machine?", opts: ["Rolled up above the elbows", "Buttoned tightly at the wrist", "Cut off at the shoulder", "Tucked into gloves"], ans: "Rolled up above the elbows", expl: "Rule #2 dictates to 'Roll up sleeves above elbows' so they do not get caught in moving parts." },
+            { q: "Which of the following is strictly prohibited to wear while operating a machine?", opts: ["Rings, watches, and bracelets", "Steel-toed boots", "Safety glasses", "A hairnet"], ans: "Rings, watches, and bracelets", expl: "Rule #2 strictly warns: 'Never wear loose clothing, rings, watches, or bracelets' as they can easily catch on machinery." },
+            { q: "If you have long hair, what must you do before working?", opts: ["Keep it safely away from moving parts, usually by wearing a hairnet.", "Tie it in a loose ponytail.", "Wash it to remove flammable oils.", "Cut it short."], ans: "Keep it safely away from moving parts, usually by wearing a hairnet.", expl: "Rule #3 says 'Keep your hair safely away from moving machine parts' and specifically suggests wearing a hairnet." },
+            { q: "What type of footwear is strictly forbidden in the machine shop?", opts: ["Canvas shoes or open-toed shoes", "Leather shoes", "Hard-toed shoes", "Steel-toed boots"], ans: "Canvas shoes or open-toed shoes", expl: "Rule #4 states: 'Canvas shoes or open-toed shoes should not be worn in the machine shop.' Hard-toed or leather shoes are recommended." },
+            { q: "What footwear is recommended to protect your feet from falling objects?", opts: ["Hard-toed shoes or leather shoes", "Rubber rain boots", "Running sneakers", "Slip-on sandals"], ans: "Hard-toed shoes or leather shoes", expl: "Rule #4 recommends wearing 'hard-toed shoes or leather shoes' to provide proper protection." },
+            { q: "What should you do before attempting to operate a machine you are not familiar with?", opts: ["Ask the instructor or read the instruction manual", "Turn it on slowly to see what happens", "Ask a fellow student to do it for you", "Test the safety guards while it runs"], ans: "Ask the instructor or read the instruction manual", expl: "Rule #5 strictly states: 'Never operate a machine unless you are familiar with it... ask the instructor or read the instruction manual.'" },
+            { q: "Before starting a machine, what must you check regarding the setup?", opts: ["Check to see if the workpiece is properly set up and everything is in place", "Check to see if the floor is freshly painted", "Check the weather outside", "Check if you have enough stock material for the week"], ans: "Check to see if the workpiece is properly set up and everything is in place", expl: "Rule #6 requires workers to 'Check to see if the workpiece is properly set up and everything is in place' before powering on." },
+            { q: "What must you ensure about safety guards before starting a machine?", opts: ["Make sure they are securely in place", "Make sure they are removed for better visibility", "Make sure they are painted yellow", "Make sure they are loose enough to adjust while running"], ans: "Make sure they are securely in place", expl: "Rule #7 clearly dictates: 'Make sure all safety guards are securely in place.' Removing them is highly dangerous." },
+            { q: "Where should wrenches, tools, and rags NOT be kept?", opts: ["On the machine", "In a toolbox", "On a workbench", "In an approved storage cabinet"], ans: "On the machine", expl: "Rule #8 says: 'Keep the machine clear of wrenches, tools, and rags.' These items can fall into moving parts or cause interference." },
+            { q: "What three specific substances/items should be kept off the floor?", opts: ["Oil, grease, and metal cuttings", "Water, soap, and chalk", "Paper, plastic, and cardboard", "Paint, thinner, and tape"], ans: "Oil, grease, and metal cuttings", expl: "Rule #9 specifies: 'Keep the floor clean and free of oil, grease, tools, and metal cuttings' to prevent slips and falls." },
+            { q: "What must you be completely sure of before starting a machine?", opts: ["That no one is in danger", "That your shift is about to end", "That the machine has been cleaned with compressed air", "That you have a smartphone ready for emergencies"], ans: "That no one is in danger", expl: "Rule #10 states: 'Never start a machine until you are sure no one is in danger.' Ensuring the safety of others is paramount." },
+            { q: "If you need to leave your workstation, what must you do with your running machine?", opts: ["Turn it off; never leave a running machine unattended", "Leave a sign saying 'Running'", "Ask someone to watch it for you", "Slow it down to the lowest speed"], ans: "Turn it off; never leave a running machine unattended", expl: "Rule #11 explicitly states: 'Never leave a running machine unattended.' You must stop it before walking away." },
+            { q: "What should you do with your hands while the machine is operating?", opts: ["Keep them away from moving parts", "Rest them lightly on the guard", "Use them to guide metal cuttings away", "Keep them in your pockets"], ans: "Keep them away from moving parts", expl: "Rule #12 is a fundamental safety rule: 'Keep your hands away from moving parts.' Touching moving parts can cause amputation." },
+            { q: "What three actions require you to stop the machine FIRST?", opts: ["Measuring, cleaning, or making adjustments", "Looking at the blueprint, talking, or resting", "Adding cutting fluid, inspecting the guard, or sweeping the floor", "Turning on the lights, taking a break, or putting on glasses"], ans: "Measuring, cleaning, or making adjustments", expl: "Rule #13 states: 'Always stop the machine before measuring, cleaning, or making any adjustments.' Doing these while running is hazardous." },
+            { q: "Why is talking to someone while operating a machine prohibited?", opts: ["It is a distraction that can lead to accidents", "The machine is too loud to hear properly", "It slows down production", "It violates union rules"], ans: "It is a distraction that can lead to accidents", expl: "Rule #14 ('Do not talk to anyone while operating a machine') and 10 Rules #5 ('Avoid Distractions') emphasize that focus is required to prevent accidents." },
+            { q: "What type of behavior is explicitly banned in the machine shop because it causes accidents?", opts: ["Horseplay", "Asking questions", "Cleaning up", "Taking breaks"], ans: "Horseplay", expl: "Rule #15 explicitly bans this: 'Do not engage in horseplay in the machine shop.' It is a major source of needless accidents." },
+            { q: "Regarding fire safety, what must every worker know?", opts: ["Where the fire extinguishers are and how to use them", "How to build a fire", "The phone number of the fire department only", "How to use a fire hose only"], ans: "Where the fire extinguishers are and how to use them", expl: "Rule #16 mandates that workers 'Know where the fire extinguishers are and how to use them.' Relying only on calling 911 isn't enough." },
+            { q: "What should you do if you receive an injury, even a minor cut?", opts: ["Seek first aid immediately", "Ignore it until the end of the shift", "Wash it in the machine coolant", "Wrap it in a dirty shop rag"], ans: "Seek first aid immediately", expl: "Rule #17 states: 'Seek first aid for any injury, no matter how small.' Minor injuries can become infected if ignored." },
+            { q: "What is the proper technique for lifting heavy objects?", opts: ["Lift with your legs, not your back", "Bend at the waist and pull up", "Keep your legs straight and lift with your arms", "Lift quickly with a jerking motion"], ans: "Lift with your legs, not your back", expl: "Rule #18 specifies: 'Lift with your legs, not your back.' This prevents severe spinal injuries." },
+            { q: "Why should you never use compressed air to clean machines or clothes?", opts: ["It can blow chips into your eyes or force air into your skin", "It makes too much noise", "It ruins the air compressor", "It cools the machine down too fast"], ans: "It can blow chips into your eyes or force air into your skin", expl: "Rule #19 warns: 'Never use compressed air to clean machines or your clothes. It can blow chips into your eyes or force air into your skin.'" },
+            { q: "Where must oily rags be disposed of?", opts: ["In proper metal safety containers", "In the regular trash can", "On the shop floor", "In a cardboard box"], ans: "In proper metal safety containers", expl: "Rule #20 states: 'Dispose of oily rags in proper metal safety containers.' Other materials are not fire-safe." },
+            { q: "What specific chemical hazard is prevented by disposing of oily rags in metal containers?", opts: ["Spontaneous combustion", "Toxic gas emission", "Acid burns", "Radiation leaks"], ans: "Spontaneous combustion", expl: "Rule #20 notes that using metal containers 'prevents spontaneous combustion', which is when oily rags ignite on their own due to heat buildup." },
+            { q: "According to the '10 Rules for Working Safely Around Machines', what is the first rule?", opts: ["Ensure Proper Training", "Never Remove Safety Guards", "Wear Necessary PPE", "Avoid Distractions"], ans: "Ensure Proper Training", expl: "The first rule listed in the 10 Rules section is 'Ensure Proper Training.' Operating machinery without training is the quickest way to get hurt." },
+            { q: "What does 'Ensure Proper Training' specifically mean?", opts: ["You should not operate any machine unless authorized and trained", "You only need to watch a video to be trained", "Training is only required for supervisors", "You can learn by trial and error on the machine"], ans: "You should not operate any machine unless authorized and trained", expl: "Rule 1 explains that workers must be authorized and understand how the machine operates, including emergency stops, before using it." },
+            { q: "Why are machine guards installed on equipment?", opts: ["To protect you from moving parts, sparks, and debris", "To make the machine look better", "To keep the machine from running too fast", "To hide the internal wiring"], ans: "To protect you from moving parts, sparks, and debris", expl: "Rule 2 states that machine guards 'protect you from moving parts, sparks and debris.' They are a critical physical barrier." },
+            { q: "What does PPE stand for in the context of shop safety?", opts: ["Personal Protective Equipment", "Professional Production Environment", "Primary Protective Environment", "Personal Performance Evaluation"], ans: "Personal Protective Equipment", expl: "Rule 3 is 'Wear Necessary PPE', which stands for Personal Protective Equipment (glasses, face shields, gloves, etc.)." },
+            { q: "Which of the following is listed as an example of PPE?", opts: ["Face shields", "Wrenches", "Machine guards", "Hairnets"], ans: "Face shields", expl: "Rule 3 lists 'safety glasses, face shields, gloves and steel-toed boots' as PPE. Guards are machine parts, not personal equipment." },
+            { q: "What extreme dangers are associated with moving parts if caution is not taken?", opts: ["They can crush, sever, or amputate limbs", "They can cause spontaneous combustion", "They only cause minor scrapes", "They emit radiation"], ans: "They can crush, sever, or amputate limbs", expl: "Rule 4 warns that moving parts are unforgiving and 'can crush, sever or amputate' if hands or clothing get caught." },
+            { q: "Which of the following is considered a dangerous distraction while operating a machine?", opts: ["Using a smartphone", "Wearing safety glasses", "Looking at the blueprint", "Checking the machine's setup"], ans: "Using a smartphone", expl: "Rule 5 says 'Avoid Distractions' and explicitly mentions 'Don't use smartphones' as it takes focus away from the hazardous task." },
+            { q: "What does keeping the area clean and organized help prevent?", opts: ["Trips, falls, and interference with machine operation", "The machine from overheating", "Rust on the machine tools", "Electrical surges"], ans: "Trips, falls, and interference with machine operation", expl: "Rule 6 states that clutter leads to 'trips, falls and interference.' A clean workspace removes these physical hazards." },
+            { q: "When should you inspect a machine?", opts: ["Before use", "Only at the end of the day", "Once a month", "While it is running"], ans: "Before use", expl: "Rule 7 is 'Inspect Machines Before Use.' You must check for damage, fraying cords, or leaks before turning the power on." },
+            { q: "What should you do if you find a frayed cord or a leak during inspection?", opts: ["Tag it out and report it to a supervisor", "Tape it up and use it carefully", "Ignore it if the machine still turns on", "Clean the leak with compressed air"], ans: "Tag it out and report it to a supervisor", expl: "Rule 7 instructs workers to 'Tag out/report' broken equipment to ensure no one else uses a dangerous machine." },
+            { q: "What does Rule 9, 'Communicate with Others', entail?", opts: ["Signaling when turning a machine on or off to give a heads up", "Talking loudly over the machine noise about your weekend", "Texting your supervisor while working", "Writing a formal report after every cut"], ans: "Signaling when turning a machine on or off to give a heads up", expl: "Rule 9 states you should 'Signal when turning on/off. Give a heads up' so others know the machine status." },
+            { q: "What is an 'Arc Flash'?", opts: ["A severe electrical hazard that requires specific PPE", "A type of welding technique taught in the shop", "A cool down period for the machine", "A flash of light from a camera smartphone"], ans: "A severe electrical hazard that requires specific PPE", expl: "Rule 10 shows a label warning of an 'Arc Flash Hazard' which requires appropriate PPE, highlighting the importance of reading visual signs." },
+            { q: "Why should a facility install signs and labels on machines?", opts: ["To alert employees to hazards and provide instructions", "To decorate the workshop", "To cover up scratches on the metal", "To list the manufacturer's warranty information"], ans: "To alert employees to hazards and provide instructions", expl: "Rule 10 explains that labels answer questions and alert employees to hazards, making the workplace 'safer and more efficient.'" },
+            { q: "Which part of the body should bear the brunt of the weight when lifting?", opts: ["The legs", "The lower back", "The upper back", "The arms exclusively"], ans: "The legs", expl: "Rule 18 explicitly says 'Lift with your legs, not your back' because leg muscles are stronger and less prone to severe injury." },
+            { q: "According to the text, 'Safety is ______ business.'", opts: ["everyone's", "the instructor's", "the manager's", "nobody's"], ans: "everyone's", expl: "The introduction concludes by declaring 'Safety is everyone's business and responsibility.' It relies on collective effort." },
+            { q: "Why is a metal container specifically required for oily rags?", opts: ["Metal does not catch fire easily, preventing spontaneous combustion from spreading", "Metal containers look more professional", "Plastic containers will melt from the oil chemically", "The metal absorbs the oil"], ans: "Metal does not catch fire easily, preventing spontaneous combustion from spreading", expl: "Rule 20 emphasizes metal containers specifically to contain and prevent 'spontaneous combustion' of the flammable oils." },
+            { q: "Is it acceptable to clean your shirt with the compressed air hose at the end of the day?", opts: ["No, it can force air into your skin or blow chips into your eyes", "Yes, as long as you close your eyes", "Yes, it is the standard way to remove dust", "No, it wastes expensive electricity"], ans: "No, it can force air into your skin or blow chips into your eyes", expl: "Rule 19 explicitly forbids using compressed air on clothes because of the medical danger of forcing air or chips into the body." },
+            { q: "What should you do if the safety guard is obstructing your view of a precise cut?", opts: ["Stop the machine and consult the instructor; never remove the guard", "Remove the guard temporarily until the cut is done", "Bend the guard out of the way while the machine runs", "Ask a friend to hold the guard back"], ans: "Stop the machine and consult the instructor; never remove the guard", expl: "Rule 7 (General) and Rule 2 (10 Rules) make it clear: 'Never Remove Safety Guards.' Removing them for convenience is never permitted." },
+            { q: "What rule addresses the danger of wearing a watch in the shop?", opts: ["Never wear loose clothing, rings, watches, bracelets", "Always wear approved safety glasses", "Wear appropriate shoes", "Keep your hair safely away"], ans: "Never wear loose clothing, rings, watches, bracelets", expl: "General Rule 2 explicitly lists 'watches' among the items that must never be worn due to entanglement risks." },
+            { q: "If your machine breaks down, the first thing you should do is:", opts: ["Turn it off and tag it out", "Try to fix the internal wiring yourself", "Leave it running and go find the instructor", "Clean it with compressed air"], ans: "Turn it off and tag it out", expl: "Rule 7 of the 10 Rules says to 'Inspect... Tag out/report if broken' and never leave a machine running (General Rule 11)." },
+            { q: "What does 'Tag out' mean in the context of machine safety?", opts: ["Placing a warning tag on a broken machine so others don't use it", "Playing a game in the shop", "Scanning your ID card to turn the machine on", "Logging out of the computer terminal"], ans: "Placing a warning tag on a broken machine so others don't use it", expl: "Rule 7 mentions 'Tag out/report if broken'. This is an industrial safety procedure to prevent the use of faulty equipment." },
+            { q: "Why is 'horseplay' specifically highlighted as a hazard?", opts: ["It leads to needless accidents and loss of focus", "It damages the tools", "It causes spontaneous combustion", "It makes the instructor angry"], ans: "It leads to needless accidents and loss of focus", expl: "General Rule 15 says 'Do not engage in horseplay'. The intro states accidents are caused by carelessness, and horseplay is the peak of carelessness." },
+            { q: "The phrase 'Accidents don't just happen; they are caused' implies what about safety?", opts: ["Safety is entirely within human control through proper habits", "Safety is purely based on luck", "Machines are inherently evil", "You will eventually get hurt no matter what"], ans: "Safety is entirely within human control through proper habits", expl: "The phrase emphasizes that accidents are not random acts of fate; they are the direct result of human carelessness or rule-breaking." },
+            { q: "If you drop a heavy wrench on your foot, what prevented your toes from being crushed?", opts: ["Hard-toed or steel-toed boots", "Canvas shoes", "A thick pair of socks", "The machine guard"], ans: "Hard-toed or steel-toed boots", expl: "General Rule 4 and 10 Rules #3 require 'hard-toed shoes' or 'steel-toed boots' to protect against falling objects." },
+            { q: "Which statement best describes the policy on machine setups?", opts: ["Check that the workpiece is properly set up before starting", "Setup doesn't matter if the machine is new", "Only the instructor can set up a machine", "Set up the machine while it is running at a slow speed"], ans: "Check that the workpiece is properly set up before starting", expl: "General Rule 6 requires you to 'Check to see if the workpiece is properly set up and everything is in place' before powering on." },
+            { q: "What is the very first step in the 10 Rules for Working Safely Around Machines?", opts: ["Ensure Proper Training", "Inspect Machines Before Use", "Wear Necessary PPE", "Avoid Distractions"], ans: "Ensure Proper Training", expl: "Rule 1 of the 10 Rules is 'Ensure Proper Training'. Education precedes all physical safety measures." },
+            { q: "Why are open-toed shoes banned in the machine shop?", opts: ["They offer no protection against falling metal, sharp chips, or hot sparks", "They violate the dress code for aesthetic reasons", "They cause static electricity", "They make it hard to reach the pedals"], ans: "They offer no protection against falling metal, sharp chips, or hot sparks", expl: "General Rule 4 explicitly bans open-toed shoes because they leave the foot entirely exposed to the severe hazards of a machine shop." },
+            { q: "What should you do if a machine is making an unusual noise?", opts: ["Stop the machine and inspect or report it", "Put on earmuffs and keep working", "Turn up the radio", "Hit the machine with a wrench"], ans: "Stop the machine and inspect or report it", expl: "Rule 7 ('Inspect Machines') and Rule 13 ('Stop machine before... making adjustments') dictate that abnormal operation requires stopping and investigating." },
+            { q: "Which tool should be used to clean metal cuttings off the floor?", opts: ["A broom (implied by 'Keep floor clean/Sweep floors')", "Compressed air", "Your bare hands", "A wet rag"], ans: "A broom (implied by 'Keep floor clean/Sweep floors')", expl: "10 Rules #6 mentions 'Sweep floors'. Compressed air is banned (Rule 19), and bare hands invite severe cuts from metal shavings." },
+            { q: "Why must you stop a machine before measuring your workpiece?", opts: ["Measuring tools and hands can get caught in the moving parts", "The measurements change when the machine is hot", "The vibrations make the numbers hard to read", "Measuring tools are magnetic"], ans: "Measuring tools and hands can get caught in the moving parts", expl: "General Rule 13 dictates stopping before measuring. Moving parts 'can crush, sever or amputate' (10 Rules #4), making near-contact highly dangerous." },
+            { q: "What should a safety manager do if a machine has specific hazards?", opts: ["Install visual signs and labels", "Hide the machine in a corner", "Only tell the senior employees", "Remove the safety guards"], ans: "Install visual signs and labels", expl: "10 Rules #10 states: 'If a facility doesn't already have signs... safety managers can install them to make the workplace safer'." },
+            { q: "A label says 'EYE PROTECTION REQUIRED IN THIS AREA'. What must you do?", opts: ["Put on approved safety glasses before entering", "Cover your eyes with your hands", "Turn off the lights", "Walk backwards"], ans: "Put on approved safety glasses before entering", expl: "10 Rules #10 requires workers to 'Follow Visual and Written Instructions.' Ignoring this violates both this rule and General Rule 1." },
+            { q: "If you cut your finger on a sharp edge, what is the correct action according to the text?", opts: ["Seek first aid, no matter how small the injury", "Wrap it in a tissue and keep working", "Wash it with industrial degreaser", "Wait until you go home to treat it"], ans: "Seek first aid, no matter how small the injury", expl: "General Rule 17 mandates: 'Seek first aid for any injury, no matter how small.' This ensures proper treatment and documentation." },
+            { q: "The text states that 'each machine operates differently'. Because of this, what is required?", opts: ["You must be familiar with that specific machine before operating it", "You can apply the exact same setup to every machine", "All machines have the same safety guards", "You only need training on one machine to use them all"], ans: "You must be familiar with that specific machine before operating it", expl: "The Conclusion states 'Each machine operates differently', reinforcing General Rule 5: 'Never operate a machine unless you are familiar with it.'" },
+            { q: "What is the danger of leaving a wrench on top of a running machine?", opts: ["It can vibrate into moving parts and become a dangerous projectile", "It will get greasy", "Someone might steal it", "It will magnetize the machine"], ans: "It can vibrate into moving parts and become a dangerous projectile", expl: "General Rule 8 says 'Keep the machine clear of wrenches'. 10 Rules #6 warns that clutter interferes with operation and causes accidents." },
+            { q: "How does the document describe moving parts?", opts: ["They can crush, sever, or amputate", "They are generally safe if you are careful", "They only cause bruises", "They automatically stop if you touch them"], ans: "They can crush, sever, or amputate", expl: "10 Rules #4 explicitly warns: 'Moving parts can crush, sever or amputate.' They are highly unforgiving." },
+            { q: "What is the primary reason for keeping your hair tied back or in a hairnet?", opts: ["To prevent it from getting caught and pulling you into the machine", "To keep it clean from oil and grease", "Because it is part of the uniform", "To keep your vision perfectly clear"], ans: "To prevent it from getting caught and pulling you into the machine", expl: "General Rule 3 states 'Keep your hair safely away from moving machine parts'. Hair caught in spindles can cause catastrophic scalp and neck injuries." },
+            { q: "According to the safety philosophy, is it sensible to learn by suffering the consequences of an accident?", opts: ["No, it is much more sensible to develop safe work habits first", "Yes, experience is the best teacher", "Yes, minor accidents build character", "No, because accidents are unavoidable anyway"], ans: "No, it is much more sensible to develop safe work habits first", expl: "The intro states: 'It is easier and much more sensible to develop safe work habits than to suffer the consequences of an accident.'" },
+            { q: "What must you do if you are unsure how to use a machine's emergency stop?", opts: ["Do not operate it; read the manual or ask the instructor", "Turn the machine on and test all the buttons", "Assume the red button works and proceed", "Wait for someone else to turn it off for you"], ans: "Do not operate it; read the manual or ask the instructor", expl: "10 Rules #1 states training involves understanding 'machine operations, emergency stops'. General Rule 5 says ask the instructor if unfamiliar." },
+            { q: "Why is it important to communicate with others before turning a machine on?", opts: ["To ensure no one is in danger or doing maintenance on it", "To ask them for tools", "To show off your skills", "To see if they want to talk"], ans: "To ensure no one is in danger or doing maintenance on it", expl: "10 Rules #9 says 'Signal when turning on/off.' General Rule 10 says 'Never start a machine until you are sure no one is in danger.'" },
+            { q: "A fellow student is measuring a part while the lathe is still spinning. What rule are they violating?", opts: ["Always stop the machine before measuring", "Never leave a running machine unattended", "Do not engage in horseplay", "Keep the floor clean"], ans: "Always stop the machine before measuring", expl: "General Rule 13 states clearly: 'Always stop the machine before measuring, cleaning, or making any adjustments.'" },
+            { q: "What is the primary danger of wearing a bracelet while milling?", opts: ["It can catch on the rotating cutter and pull your hand in", "It will get scratched", "It reflects light into your eyes", "It conducts electricity"], ans: "It can catch on the rotating cutter and pull your hand in", expl: "General Rule 2 forbids bracelets. Moving parts 'can crush, sever or amputate' (10 Rules #4) anything caught in them." },
+            { q: "If you need to sweep metal cuttings, why should you not use your hands?", opts: ["Metal cuttings are sharp and will cause injury; use a brush or broom", "Your hands will get dirty", "It violates the no talking rule", "The machine will automatically restart"], ans: "Metal cuttings are sharp and will cause injury; use a brush or broom", expl: "General Rule 9 says keep floors free of cuttings. While the tool isn't explicitly named, doing it by hand risks the injury mentioned in Rule 17. Broom is implied by 'Sweep' in 10 Rules #6." },
+            { q: "When lifting a heavy box of raw materials, your back should be:", opts: ["Straight, with the lifting force coming from your legs", "Bent over at a 90-degree angle", "Twisted to one side", "Curved to absorb the shock"], ans: "Straight, with the lifting force coming from your legs", expl: "General Rule 18 says 'Lift with your legs, not your back.' Bending the back puts severe strain on the spine." },
+            { q: "What does the text mean by 'Accident prevention associations'?", opts: ["Organizations dedicated to reducing industrial accidents", "Lawyers who sue injured workers", "Insurance companies that raise rates", "Mechanics who fix broken machines"], ans: "Organizations dedicated to reducing industrial accidents", expl: "The text states these associations 'are constantly attempting to reduce the number of industrial accidents' through safety programs." },
+            { q: "If you have a conversation with a coworker while feeding material into a saw, what rule are you breaking?", opts: ["Do not talk to anyone while operating a machine", "Do not engage in horseplay", "Never leave a machine unattended", "Communicate with others"], ans: "Do not talk to anyone while operating a machine", expl: "General Rule 14 strictly forbids talking while operating. 10 Rules #5 reiterates 'Avoid Distractions'." },
+            { q: "Why is 'spontaneous combustion' mentioned in the text?", opts: ["As the reason for throwing oily rags in metal containers", "As the reason machines overheat", "As a risk of mixing cutting fluids", "As a danger of electrical arc flash"], ans: "As the reason for throwing oily rags in metal containers", expl: "General Rule 20 explains that metal containers are required for oily rags specifically because it 'prevents spontaneous combustion'." },
+            { q: "What type of hazard does the 'Arc Flash' sign indicate?", opts: ["A severe electrical hazard", "A tripping hazard", "A slip and fall hazard", "A respiratory hazard"], ans: "A severe electrical hazard", expl: "The label in 10 Rules #10 warns of an 'Arc Flash Hazard' associated with electrical equipment, requiring specific PPE." },
+            { q: "If you are unsure where the fire extinguisher is, what should you do?", opts: ["Find out immediately before beginning work", "Wait until there is a fire to look for it", "Assume the instructor will handle any fires", "Call 911 instead"], ans: "Find out immediately before beginning work", expl: "General Rule 16 mandates that you 'Know where the fire extinguishers are and how to use them.' This implies proactive knowledge." },
+            { q: "What happens if a worker ignores visual cues like signs and labels?", opts: ["They put themselves and others at extreme risk of injury", "Nothing, signs are just suggestions", "They will just get a verbal warning", "The machine will not turn on"], ans: "They put themselves and others at extreme risk of injury", expl: "10 Rules #10 says 'Everyone should obey these visual cues. They'll keep people safe'. Ignoring them invites the severe accidents mentioned throughout the text." },
+            { q: "Which statement reflects the text's view on 'common sense'?", opts: ["Always stay alert, follow instructions, and use common sense", "Common sense is not needed if you read the manual", "Common sense replaces formal training", "Machines have common sense built in"], ans: "Always stay alert, follow instructions, and use common sense", expl: "The conclusion explicitly advises: 'Always stay alert, follow instructions and use common sense when working around machinery.'" },
+            { q: "If your prescription glasses do not have safety lenses, what is the consequence in the shop?", opts: ["You are not properly protected from eye loss and violate Rule 1", "You will see better than with safety lenses", "You are exempt from wearing safety glasses", "You must wear a full hazmat suit"], ans: "You are not properly protected from eye loss and violate Rule 1", expl: "General Rule 1 requires approved safety glasses. Prescription glasses without safety lenses offer inadequate impact protection." },
+            { q: "What is the text's stance on cell phones/smartphones?", opts: ["They are a distraction and should not be used", "They should be used to look up machine manuals online", "They are required for emergency communication", "They can be used if you use a hands-free headset"], ans: "They are a distraction and should not be used", expl: "10 Rules #5 explicitly says: 'Don't use smartphones or have conversations' because focus must be completely on the task." },
+            { q: "Why is sweeping the floor considered a safety rule and not just a cleaning rule?", opts: ["Because clutter leads to trips, falls, and interference with machinery", "Because a dirty floor ruins the aesthetics of the shop", "Because the instructor doesn't want to clean", "Because dust ruins the paint on the walls"], ans: "Because clutter leads to trips, falls, and interference with machinery", expl: "10 Rules #6 ('Keep the Area Clean') states that clutter directly 'leads to trips, falls and interference'." },
+            { q: "If you must walk away from a machine for just 10 seconds to grab a wrench, what must you do?", opts: ["Turn the machine off completely", "Leave it running but put the guard down", "Ask someone to watch it", "Run fast so you get back in time"], ans: "Turn the machine off completely", expl: "General Rule 11 states 'Never leave a running machine unattended.' Time is irrelevant; it must be turned off." },
+            { q: "When working near a moving lathe chuck, where must your hands be?", opts: ["Kept away from the moving parts", "Resting on the chuck for stability", "Holding the metal cutting chips", "Adjusting the tool post while it spins"], ans: "Kept away from the moving parts", expl: "General Rule 12 is 'Keep your hands away from moving parts.' 10 Rules #4 reiterates this due to the risk of amputation." },
+            { q: "What rule prevents you from blowing metal dust off your workbench with an air hose?", opts: ["Never use compressed air to clean machines or clothes", "Keep the machine clear of tools", "Keep the floor clean", "Do not engage in horseplay"], ans: "Never use compressed air to clean machines or clothes", expl: "General Rule 19 strictly forbids using compressed air for cleaning due to the severe risk of blowing chips into eyes/skin." },
+            { q: "If the machine manual is lost, what is the safest course of action?", opts: ["Ask the instructor for guidance before operating", "Guess how the controls work based on similar machines", "Turn the machine on to figure it out", "Refuse to ever use the machine again"], ans: "Ask the instructor for guidance before operating", expl: "General Rule 5 requires you to 'ask the instructor or read the instruction manual.' If one is missing, rely on the other." },
+            { q: "Why must you check if the workpiece is properly set up before starting?", opts: ["A loose workpiece can be thrown violently from the machine, causing severe injury", "It saves electricity", "It makes the machine run quieter", "It prevents the layout fluid from drying"], ans: "A loose workpiece can be thrown violently from the machine, causing severe injury", expl: "General Rule 6 requires checking the setup. A loose part becomes a dangerous projectile in high-speed machinery." },
+            { q: "What is the primary function of a 'face shield' as mentioned in the text?", opts: ["It acts as a form of Personal Protective Equipment (PPE)", "It protects the machine's control panel", "It keeps your hair out of the way", "It prevents you from talking to others"], ans: "It acts as a form of Personal Protective Equipment (PPE)", expl: "10 Rules #3 lists 'face shields' as an example of required PPE." },
+            { q: "If you notice a puddle of oil near your milling machine, what should you do?", opts: ["Clean it up immediately to prevent slips and falls", "Step over it carefully", "Throw a dirty rag on it and leave it", "Assume the janitor will get it later"], ans: "Clean it up immediately to prevent slips and falls", expl: "General Rule 9 demands you 'Keep the floor clean and free of oil'. Oil is a major slipping hazard in an environment with sharp machinery." },
+            { q: "Why is 'canvas shoes' specifically listed as something not to wear?", opts: ["Canvas offers zero protection against heavy or sharp objects falling on your feet", "Canvas shoes conduct electricity", "Canvas shoes are highly flammable", "Canvas shoes cause trips and falls"], ans: "Canvas offers zero protection against heavy or sharp objects falling on your feet", expl: "General Rule 4 forbids canvas shoes, instead requiring 'hard-toed shoes or leather shoes' for physical protection." },
+            { q: "The phrase 'The safe way is usually the most correct and efficient way' refutes what common misconception?", opts: ["That taking safety shortcuts saves time", "That safety equipment is too expensive", "That old machines are safer than new ones", "That manuals are useless"], ans: "That taking safety shortcuts saves time", expl: "The introduction argues that safety actually *improves* efficiency, countering the idea that cutting corners saves time." },
+            { q: "What is the purpose of the 'Emergency Stop' button?", opts: ["To immediately halt machine operations in case of danger or malfunction", "To turn the machine on", "To pause the machine for a coffee break", "To clean the machine automatically"], ans: "To immediately halt machine operations in case of danger or malfunction", expl: "10 Rules #1 states you must understand 'emergency stops', which are critical for preventing or minimizing injury when something goes wrong." },
+            { q: "If a coworker begins to playfully toss a rag at you while you are operating a drill press, what should you do?", opts: ["Tell them to stop immediately as horseplay is forbidden and dangerous", "Catch it and throw it back", "Ignore it and hope they stop", "Report them to the police"], ans: "Tell them to stop immediately as horseplay is forbidden and dangerous", expl: "General Rule 15 strictly bans horseplay. You must enforce this rule to protect your own safety while operating." },
+            { q: "What is the text's advice regarding machine guards and visibility?", opts: ["Never remove safety guards, even if they slightly impede your view", "Remove guards only if you cannot see the cut", "Paint the guards clear", "Guards are optional for experienced users"], ans: "Never remove safety guards, even if they slightly impede your view", expl: "10 Rules #2 is absolute: 'Never Remove Safety Guards.' There are no exceptions for convenience or visibility." },
+            { q: "If you have a question about how to adjust a machine's speed, when is the best time to figure it out?", opts: ["While the machine is completely stopped", "While the machine is running but not cutting", "While the machine is cutting", "While you are talking on the phone"], ans: "While the machine is completely stopped", expl: "General Rule 13 requires you to 'Always stop the machine before... making any adjustments.'" },
+            { q: "What should you do if you are assigned to a machine you have never seen before?", opts: ["Do not operate it until you receive authorization and proper training", "Watch a YouTube video and try it out", "Ask the person next to you to do it", "Turn it on to see how loud it is"], ans: "Do not operate it until you receive authorization and proper training", expl: "10 Rules #1 ('Ensure Proper Training') states: 'Don't operate a machine unless you've been authorized and trained.'" },
+            { q: "According to the text, what limits the effectiveness of safety programs?", opts: ["Individual carelessness and bad work habits", "A lack of funding", "Poorly written manuals", "Old machinery"], ans: "Individual carelessness and bad work habits", expl: "The text notes programs attempt to reduce accidents, but 'The cause of an accident can usually be traced to carelessness'. Individual habits override programs." },
+            { q: "If you have to lift a 50 lb block of steel onto your workbench, what is the primary muscle group you should use?", opts: ["The leg muscles", "The back muscles", "The arm muscles", "The neck muscles"], ans: "The leg muscles", expl: "General Rule 18 states: 'Lift with your legs, not your back.' The legs are biologically designed for heavy lifting." },
+            { q: "What is the underlying reason for keeping tools off the machine itself?", opts: ["Vibrations could cause them to fall into moving parts and cause catastrophic damage", "They will scratch the paint", "They will get too hot to touch", "It looks messy"], ans: "Vibrations could cause them to fall into moving parts and cause catastrophic damage", expl: "General Rule 8 says 'Keep the machine clear of wrenches, tools, and rags.' These items are foreign objects that destroy gears and harm users." },
+            { q: "How should an operator handle a situation where a machine is leaking cutting fluid?", opts: ["Tag out the machine and report the leak immediately", "Wipe it up while the machine runs", "Put a bucket under it and keep working", "Ignore it, fluids leak all the time"], ans: "Tag out the machine and report the leak immediately", expl: "10 Rules #7 states 'Check for damage, fraying cords or leaks. Tag out/report if broken.'" },
+            { q: "If a coworker is focused on operating a lathe, and you need to ask them a question, what should you do?", opts: ["Wait until they turn off the machine and step away", "Tap them on the shoulder immediately", "Shout over the noise of the machine", "Throw a small object to get their attention"], ans: "Wait until they turn off the machine and step away", expl: "General Rule 14 says 'Do not talk to anyone while operating a machine.' Interrupting them creates a deadly distraction." },
+            { q: "What does the text imply about the severity of machine shop accidents?", opts: ["They can affect someone for the rest of their life", "They are usually minor and easily fixed", "They only happen to old workers", "They are fully covered by insurance so they don't matter"], ans: "They can affect someone for the rest of their life", expl: "The intro warns: 'Far too many accidents... can affect someone for the rest of his life', giving examples of limb or eyesight loss." },
+            { q: "Is 'common sense' explicitly mentioned in the document?", opts: ["Yes, in the concluding remarks about staying safe", "No, the text relies entirely on written rules", "Yes, as a substitute for PPE", "No, common sense is deemed dangerous"], ans: "Yes, in the concluding remarks about staying safe", expl: "The final slide says: 'Always stay alert, follow instructions and use common sense when working around machinery.'" },
+            { q: "What is the primary danger of wearing an unbuttoned, loose long-sleeve shirt?", opts: ["The loose fabric can be pulled into spinning spindles or gears", "It will get stained with oil", "It poses a fire hazard", "It restricts your arm movement"], ans: "The loose fabric can be pulled into spinning spindles or gears", expl: "General Rule 2 ('Never wear loose clothing... Roll up sleeves') and 10 Rules #4 warn that moving parts can catch clothing and sever limbs." },
+            { q: "If a machine does not have warning signs, what does the text suggest should happen?", opts: ["Safety managers can install them to make the workplace safer", "Workers should refuse to work", "The machine is deemed 100% safe", "Workers should draw their own signs with markers"], ans: "Safety managers can install them to make the workplace safer", expl: "10 Rules #10 explicitly states: 'If a facility doesn't already have signs and labels... safety managers can install them'." },
+            { q: "What is the overarching theme of the 39-slide document?", opts: ["Safety is a proactive, constant responsibility requiring focus and adherence to rules", "Machines are safe as long as you work quickly", "Only the instructor is responsible for your safety", "Accidents are bound to happen, so just wear a helmet"], ans: "Safety is a proactive, constant responsibility requiring focus and adherence to rules", expl: "The entire document frames safety around proactive habits (THINK SAFE, WORK SAFE, BE SAFE), strict rules, and personal accountability." },
+            { q: "What should you do with a rag that is soaked in machine oil?", opts: ["Place it in a metal safety container immediately", "Leave it on your workbench to dry", "Throw it in the plastic trash bin", "Use it to wipe off your safety glasses"], ans: "Place it in a metal safety container immediately", expl: "General Rule 20 states: 'Dispose of oily rags in proper metal safety containers' to prevent spontaneous combustion." },
+            { q: "Why is it important to keep hair tied back or in a net?", opts: ["Hair can be caught in spinning parts, causing horrific scalp injuries", "It prevents hair from getting dirty", "It ensures the safety glasses fit better", "It is a standard dress code for aesthetics"], ans: "Hair can be caught in spinning parts, causing horrific scalp injuries", expl: "General Rule 3 states 'Keep your hair safely away from moving machine parts'. Hair entanglement is a primary cause of amputation/injury mentioned in Rule 4." },
+            { q: "What does the rule 'Avoid Distractions' explicitly forbid?", opts: ["Using smartphones and having conversations", "Listening to the machine's motor", "Looking at the blueprint", "Checking the time on the wall clock"], ans: "Using smartphones and having conversations", expl: "10 Rules #5 says: 'Focus completely on the task. Don't use smartphones or have conversations.'" },
+            { q: "If a piece of metal gets stuck in the machine, what is the first thing you must do?", opts: ["Turn the machine off completely", "Use your hands to pull it out", "Use a wrench to pry it out while running", "Call the fire department"], ans: "Turn the machine off completely", expl: "General Rule 13 mandates stopping the machine before making any adjustments or cleaning to avoid the severe hazards of moving parts." },
+            { q: "Why are open-toed shoes not allowed?", opts: ["They expose the toes to falling heavy objects and hot metal chips", "They do not provide enough arch support", "They are too casual for the shop environment", "They melt easily"], ans: "They expose the toes to falling heavy objects and hot metal chips", expl: "General Rule 4 requires hard-toed or leather shoes because the shop environment involves heavy tools and sharp cuttings that will injure exposed feet." },
+            { q: "What is the purpose of 'Tagging out' a machine?", opts: ["To visually and physically warn others that the machine is broken and dangerous", "To reserve the machine for later use", "To indicate the machine is fully operational", "To record the machine's serial number"], ans: "To visually and physically warn others that the machine is broken and dangerous", expl: "10 Rules #7 ('Tag out/report if broken') ensures that a malfunctioning machine is not accidentally turned on by someone else." },
+            { q: "What is the correct protocol when leaving a machine?", opts: ["Turn it off; never leave a running machine unattended", "Leave it running but put the guard down", "Ask a friend to watch it", "Just walk away quickly and come right back"], ans: "Turn it off; never leave a running machine unattended", expl: "General Rule 11 and 10 Rules #8 strictly state: 'Never leave a running machine unattended. Turn it off before walking away.'" },
+            { q: "Why must you check that the workpiece is properly set up before turning on the machine?", opts: ["An improperly secured workpiece can be violently thrown, causing injury", "It saves electricity", "It makes the machine run faster", "It prevents the tools from rusting"], ans: "An improperly secured workpiece can be violently thrown, causing injury", expl: "General Rule 6 emphasizes checking the setup. Improperly secured metal in a high-speed machine becomes a deadly projectile." },
+            { q: "What is the consequence of not knowing where the fire extinguisher is?", opts: ["A small fire could become an uncontrollable disaster while you search for it", "You will fail the class immediately", "The machine will automatically shut down", "Nothing, the sprinkler system handles everything"], ans: "A small fire could become an uncontrollable disaster while you search for it", expl: "General Rule 16 mandates knowing the location to ensure an immediate response to emergencies, preventing small fires (like spontaneous combustion) from spreading." },
+            { q: "Why is horseplay banned?", opts: ["It demonstrates carelessness, which is the primary cause of severe accidents", "It damages the shop floor", "It wastes expensive cutting fluid", "It annoys the instructor"], ans: "It demonstrates carelessness, which is the primary cause of severe accidents", expl: "The intro states accidents are traced to carelessness. General Rule 15 bans horseplay because it is the ultimate form of carelessness in a deadly environment." },
+            { q: "What is the danger of using compressed air to clean your clothes?", opts: ["Air pressure can force metal chips into your skin or eyes", "It makes your clothes shrink", "It makes the clothes highly flammable", "It causes deafness"], ans: "Air pressure can force metal chips into your skin or eyes", expl: "General Rule 19 explicitly warns: 'It can blow chips into your eyes or force air into your skin.'" },
+            { q: "If you have a minor scratch, why must you seek first aid?", opts: ["To prevent infection and ensure the injury is properly documented", "So you can take the rest of the day off", "To get a bandage so you look tough", "Because it is illegal to bleed in a shop"], ans: "To prevent infection and ensure the injury is properly documented", expl: "General Rule 17 states: 'Seek first aid for any injury, no matter how small.' Minor cuts in a shop are highly prone to infection from oils and metal." },
+            { q: "What is the purpose of communicating with others before turning a machine on?", opts: ["To ensure no one's hands are near the moving parts", "To show off that you know how to use it", "To ask what time it is", "To make sure they are watching you"], ans: "To ensure no one's hands are near the moving parts", expl: "10 Rules #9 and General Rule 10 require ensuring no one is in danger. A 'heads up' prevents someone from being caught off guard." },
+            { q: "Why must you lift with your legs and not your back?", opts: ["Leg muscles are stronger and lifting with the back causes severe spinal injuries", "Your legs have better balance", "It looks more professional", "It is an outdated rule that doesn't matter"], ans: "Leg muscles are stronger and lifting with the back causes severe spinal injuries", expl: "General Rule 18 mandates lifting with legs to prevent the severe ergonomic injuries associated with back lifting." },
+            { q: "What does a safe worker look like?", opts: ["Neat, tidy, safely dressed, wearing PPE, with hair tied back", "Covered in grease with loose sleeves", "Wearing shorts and sandals for comfort", "Wearing sunglasses and headphones"], ans: "Neat, tidy, safely dressed, wearing PPE, with hair tied back", expl: "Under 'Safety on the Job', it defines a safe worker as 'neat, tidy, and safely dressed'. This includes all PPE and clothing rules." },
+            { q: "Why is 'THINK SAFE, WORK SAFE, BE SAFE' a good motto?", opts: ["Because safety starts with awareness (thinking) before any physical action (working)", "Because it rhymes", "Because it is the only rule you need to know", "Because it was invented by Einstein"], ans: "Because safety starts with awareness (thinking) before any physical action (working)", expl: "The motto implies a chronological process: mental awareness leads to safe physical habits, resulting in a safe outcome." },
+            { q: "If a machine has an 'Arc Flash' warning, what must you do?", opts: ["Wear appropriate PPE and use proper tools when working on it", "Pour water on it", "Never use it under any circumstances", "Only use it in the dark"], ans: "Wear appropriate PPE and use proper tools when working on it", expl: "10 Rules #10 shows the Arc Flash label, which explicitly states 'Appropriate PPE and tools required'." },
+            { q: "What is the primary function of safety glasses?", opts: ["To prevent loss of eyesight from flying chips, sparks, and debris", "To improve your vision of the blueprint", "To protect against toxic fumes", "To look like a professional machinist"], ans: "To prevent loss of eyesight from flying chips, sparks, and debris", expl: "The intro warns of 'loss of eyesight' and 10 Rules #2/#3 mention protecting from 'sparks and debris'." },
+            { q: "Why is a clean floor critical in a machine shop?", opts: ["It prevents slips, trips, and falls near deadly machinery", "It makes it easier to find dropped coins", "It keeps the air smelling fresh", "It prevents the machines from sinking"], ans: "It prevents slips, trips, and falls near deadly machinery", expl: "General Rule 9 (Keep floor clean) and 10 Rules #6 (Clutter leads to trips, falls) highlight the severe danger of slipping near moving parts." },
+            { q: "What should you do if you see a frayed electrical cord on a drill press?", opts: ["Do not use it; tag it out and report it", "Wrap it in duct tape and use it", "Cut the cord off", "Plug it in to see if it sparks"], ans: "Do not use it; tag it out and report it", expl: "10 Rules #7 says 'Inspect Machines... Check for damage, fraying cords... Tag out/report if broken.'" },
+            { q: "Why are rings and bracelets dangerous?", opts: ["They can catch on moving parts and drag your hand into the machine", "They conduct heat and will burn you", "They reflect light and cause glare", "They might get scratched and lose value"], ans: "They can catch on moving parts and drag your hand into the machine", expl: "General Rule 2 bans jewelry because moving parts 'can crush, sever or amputate' (10 Rules #4)." },
+            { q: "What is the fundamental lesson about machines and 'forgiveness'?", opts: ["Moving parts are unforgiving and will crush or sever limbs without hesitation", "Machines will stop if they sense a human hand", "Machines are designed to only cut metal", "Machines are generally safe and forgiving"], ans: "Moving parts are unforgiving and will crush or sever limbs without hesitation", expl: "10 Rules #4 emphasizes: 'Moving parts can crush, sever or amputate'. They do not differentiate between metal and bone." },
+            { q: "If you drop a rag into a spinning lathe, what is the safest response?", opts: ["Hit the emergency stop button immediately; do not reach in", "Try to grab it quickly before it gets tangled", "Use a wrench to fish it out", "Run away from the machine"], ans: "Hit the emergency stop button immediately; do not reach in", expl: "General Rule 12 (Keep hands away) and Rule 13 (Stop machine before cleaning) dictate that you must stop the power before intervening." },
+            { q: "What is the danger of relying purely on 'luck' in the machine shop?", opts: ["Luck runs out; accidents are caused by carelessness, not bad luck", "Luck is only for experienced machinists", "Luck makes you work too fast", "Luck is the best safety tool"], ans: "Luck runs out; accidents are caused by carelessness, not bad luck", expl: "The text states 'Accidents don't just happen; they are caused.' Relying on luck is the definition of carelessness." },
+            { q: "According to the document, developing safe work habits is easier than what?", opts: ["Suffering the consequences of an accident for the rest of your life", "Learning how to run the machine", "Reading the manual", "Cleaning the floor"], ans: "Suffering the consequences of an accident for the rest of your life", expl: "The intro states: 'It is easier and much more sensible to develop safe work habits than to suffer the consequences of an accident.'" },
+            { q: "What does the text say about 'conversations' near machines?", opts: ["They are a distraction and must be avoided", "They are fine as long as you whisper", "They are encouraged for team building", "They are only allowed during setup"], ans: "They are a distraction and must be avoided", expl: "10 Rules #5 explicitly says: 'Don't use smartphones or have conversations' to avoid deadly distractions." },
+            { q: "Why must you check the machine setup before starting?", opts: ["To ensure safety guards are in place and the workpiece is secure", "To make sure the machine is plugged in", "To check the color of the metal", "To ensure the manual is nearby"], ans: "To ensure safety guards are in place and the workpiece is secure", expl: "General Rules 6 & 7 mandate checking the setup and ensuring all safety guards are securely in place before power is applied." },
+            { q: "What is the best way to deal with metal cuttings on the machine?", opts: ["Stop the machine and use a brush to clear them", "Use your bare hands while it runs", "Use compressed air to blow them away", "Leave them there indefinitely"], ans: "Stop the machine and use a brush to clear them", expl: "General Rule 13 requires stopping the machine. General Rule 19 forbids compressed air. Using bare hands risks severe cuts." },
+            { q: "If the instructor is not around, and you don't know how to use a machine, what should you do?", opts: ["Read the instruction manual, or simply do not use the machine", "Experiment with the buttons to figure it out", "Ask a student who used it once", "Turn it on and see what happens"], ans: "Read the instruction manual, or simply do not use the machine", expl: "General Rule 5 requires you to 'ask the instructor or read the instruction manual.' Without either, 10 Rules #1 says 'Don't operate... unless authorized'." },
+            { q: "What is the text's final reminder regarding machinery?", opts: ["Always stay alert, follow instructions, and use common sense", "Work as fast as possible", "Never use machines unless absolutely necessary", "Safety is only for beginners"], ans: "Always stay alert, follow instructions, and use common sense", expl: "The final slide verbatim states: 'Always stay alert, follow instructions and use common sense when working around machinery.'" }
+        ];
+
+        let questions = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function initQuiz() {
+            let clonedData = JSON.parse(JSON.stringify(rawData));
+            questions = shuffle(clonedData);
+            
+            questions.forEach(q => {
+                q.opts = shuffle(q.opts);
+            });
+
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            
+            buildSidebar();
+            loadQuestion(0);
+        }
+
+        function buildSidebar() {
+            const grid = document.getElementById("nav-grid");
+            grid.innerHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                const btn = document.createElement("button");
+                btn.className = "nav-btn";
+                btn.innerText = i + 1;
+                btn.id = "nav-btn-" + i;
+                btn.onclick = () => {
+                    loadQuestion(i);
+                    toggleSidebar();
+                };
+                grid.appendChild(btn);
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function loadQuestion(index) {
+            currentQuestion = index;
+            const q = questions[currentQuestion];
+            
+            document.getElementById("question-tracker").innerText = `Question ${currentQuestion + 1} of 100`;
+            document.getElementById("score-tracker").innerText = `Score: ${score}`;
+            document.getElementById("question-text").innerText = q.q;
+
+            const container = document.getElementById("options-container");
+            container.innerHTML = '';
+            document.getElementById("explanation-box").style.display = "none";
+
+            q.opts.forEach((opt) => {
+                const btn = document.createElement("button");
+                btn.className = "option";
+                btn.innerText = opt;
+                
+                if (userAnswers[currentQuestion] !== null) {
+                    btn.disabled = true;
+                    if (opt === q.ans) {
+                        btn.classList.add("correct");
+                    } else if (opt === userAnswers[currentQuestion]) {
+                        btn.classList.add("incorrect");
+                    }
+                } else {
+                    btn.onclick = () => selectOption(opt);
+                }
+                
+                container.appendChild(btn);
+            });
+
+            if (userAnswers[currentQuestion] !== null) {
+                showExplanation(q.ans, userAnswers[currentQuestion] === q.ans, q.expl);
+            }
+
+            const nextBtn = document.getElementById("next-btn");
+            if (userAnswers[currentQuestion] !== null) {
+                nextBtn.style.display = "block";
+                nextBtn.innerText = (currentQuestion === questions.length - 1) ? "Finish Quiz ➔" : "Next Question ➔";
+            } else {
+                nextBtn.style.display = "none";
+            }
+
+            updateSidebarHighlight();
+        }
+
+        function selectOption(selectedOpt) {
+            const q = questions[currentQuestion];
+            userAnswers[currentQuestion] = selectedOpt;
+
+            const isCorrect = (selectedOpt === q.ans);
+            if (isCorrect) score++;
+
+            const navBtn = document.getElementById(`nav-btn-${currentQuestion}`);
+            navBtn.classList.add(isCorrect ? "answered-correct" : "answered-incorrect");
+
+            loadQuestion(currentQuestion);
+        }
+
+        function showExplanation(correctAnswer, isCorrect, explanation) {
+            const expBox = document.getElementById("explanation-box");
+            expBox.style.display = "block";
+            let statusText = isCorrect ? "<strong style='color: #27ae60;'>Correct!</strong>" : `<strong style='color: #e74c3c;'>Incorrect.</strong> The correct answer is: <em>${correctAnswer}</em>.`;
+            expBox.innerHTML = `${statusText}<br><br><strong>Explanation:</strong> ${explanation}`;
+            expBox.style.borderLeftColor = isCorrect ? "#27ae60" : "#e74c3c";
+            expBox.style.backgroundColor = isCorrect ? "#e8f8f5" : "#fdedec";
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                loadQuestion(currentQuestion + 1);
+            } else {
+                document.getElementById("quiz-screen").style.display = "none";
+                const results = document.getElementById("results-screen");
+                results.style.display = "block";
+                document.getElementById("final-score").innerText = `You scored ${score} out of 100.`;
+            }
+        }
+
+        function updateSidebarHighlight() {
+            document.querySelectorAll(".nav-btn").forEach((btn, idx) => {
+                btn.classList.remove("active");
+                if (idx === currentQuestion) {
+                    btn.classList.add("active");
+                }
+            });
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
