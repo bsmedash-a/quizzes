@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mechanisms & Kinematics Mastery Quiz</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #8e44ad;
+            --accent-hover: #9b59b6;
+            --correct: #27ae60;
+            --incorrect: #e74c3c;
+            --text-main: #333;
+            --text-light: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Hamburger Menu Button */
+        #hamburger-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: 0.3s;
+        }
+
+        #hamburger-btn:hover {
+            background-color: var(--accent);
+        }
+
+        #hamburger-btn div {
+            width: 24px;
+            height: 3px;
+            background-color: var(--text-light);
+            border-radius: 2px;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: -350px;
+            width: 320px;
+            height: 100vh;
+            background-color: var(--primary);
+            color: var(--text-light);
+            transition: left 0.3s ease-in-out;
+            z-index: 999;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 30px 20px 20px 20px;
+            text-align: center;
+            background-color: var(--secondary);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 2px solid var(--accent);
+            margin-top: 50px;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .nav-btn {
+            background-color: var(--secondary);
+            color: var(--text-light);
+            border: 1px solid #4a6278;
+            border-radius: 4px;
+            padding: 10px 0;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .nav-btn:hover { background-color: var(--accent); border-color: var(--accent); }
+        .nav-btn.answered-correct { background-color: var(--correct); border-color: var(--correct); }
+        .nav-btn.answered-incorrect { background-color: var(--incorrect); border-color: var(--incorrect); }
+        .nav-btn.active { box-shadow: 0 0 0 3px #f1c40f; transform: scale(1.1); z-index: 2; }
+
+        /* Main Quiz Container */
+        .quiz-container {
+            background-color: #fff;
+            width: 92%;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 40px;
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background-color: #f8f9fa;
+            border: 2px solid #dcdde1;
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+
+        .option:hover:not(:disabled) {
+            background-color: #e2e8f0;
+            border-color: #b2bec3;
+        }
+
+        .option:disabled {
+            cursor: not-allowed;
+            opacity: 0.95;
+        }
+
+        .option.correct {
+            background-color: var(--correct) !important;
+            border-color: #219a52 !important;
+            color: var(--text-light) !important;
+        }
+
+        .option.incorrect {
+            background-color: var(--incorrect) !important;
+            border-color: #a93226 !important;
+            color: var(--text-light) !important;
+        }
+
+        .action-btn {
+            background-color: var(--accent);
+            color: var(--text-light);
+            border: none;
+            border-radius: 8px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 30px;
+            width: 100%;
+            transition: 0.2s;
+            display: none;
+        }
+
+        .action-btn:hover { background-color: var(--accent-hover); }
+
+        /* Results Screen */
+        #results-screen {
+            display: none;
+            text-align: center;
+        }
+
+        #results-screen h1 { font-size: 2.8rem; color: var(--primary); margin-bottom: 15px; }
+        #results-screen p { font-size: 1.3rem; color: #7f8c8d; margin-bottom: 30px; }
+        
+        .restart-btn {
+            background-color: var(--correct);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .restart-btn:hover { background-color: #219a52; }
+
+    </style>
+</head>
+<body>
+
+    <button id="hamburger-btn" onclick="toggleSidebar()">
+        <div></div>
+        <div></div>
+        <div></div>
+    </button>
+
+    <div id="sidebar">
+        <div class="sidebar-header">Question Navigator</div>
+        <div class="nav-grid" id="nav-grid"></div>
+    </div>
+
+    <div class="quiz-container">
+        <div id="quiz-screen">
+            <div class="quiz-header">
+                <span id="question-tracker">Question 1 of 100</span>
+                <span id="score-tracker">Score: 0</span>
+            </div>
+            <div class="question-text" id="question-text">Loading question...</div>
+            <div class="options-container" id="options-container"></div>
+            <button class="action-btn" id="next-btn" onclick="nextQuestion()">Next Question ➔</button>
+        </div>
+
+        <div id="results-screen">
+            <h1>Quiz Completed!</h1>
+            <p id="final-score"></p>
+            <button class="restart-btn" onclick="location.reload()">Retake & Reshuffle</button>
+        </div>
+    </div>
+
+    <script>
+        const rawData = [
+            // LECTURE 1: MECHANISM
+            { q: "What branch of Theory of Machines deals with the relative motion between various parts of machines, disregarding forces?", opts: ["Kinematics", "Dynamics", "Kinetics", "Statics"], ans: "Kinematics" },
+            { q: "What branch of Theory of Machines deals with the forces and their effects on machine parts in motion?", opts: ["Dynamics", "Kinetics", "Kinematics", "Statics"], ans: "Dynamics" },
+            { q: "What branch of Theory of Machines deals with the inertia forces from mass and motion?", opts: ["Kinetics", "Statics", "Kinematics", "Dynamics"], ans: "Kinetics" },
+            { q: "What branch of Theory of Machines deals with forces and their effects while machine parts are at rest?", opts: ["Statics", "Kinematics", "Dynamics", "Kinetics"], ans: "Statics" },
+            { q: "A combination of resistant bodies so arranged that they compel the mechanical forces of nature to produce work with determinate motions.", opts: ["Machine", "Mechanism", "Structure", "Particle"], ans: "Machine" },
+            { q: "A combination of resistant bodies arranged to transfer or modify motion, where the motion of one compels the motion of others.", opts: ["Mechanism", "Machine", "Frame", "Rigid Body"], ans: "Mechanism" },
+            { q: "A combination of resistant bodies capable of transmitting forces or carrying loads but having no relative motion between parts.", opts: ["Structure", "Mechanism", "Machine", "Joint"], ans: "Structure" },
+            { q: "A structure that supports moving parts and regulates their path or kind of motion.", opts: ["Frame", "Link", "Follower", "Driver"], ans: "Frame" },
+            { q: "An infinitesimal part of a body represented on a drawing by a point.", opts: ["Particle", "Node", "Link", "Axis"], ans: "Particle" },
+            { q: "A body whose component particles remain at a constant distance and does not suffer distortion.", opts: ["Rigid Body", "Particle", "Structure", "Fluid"], ans: "Rigid Body" },
+            { q: "In a mechanism, what is the piece called that causes the motion?", opts: ["Driver", "Follower", "Link", "Node"], ans: "Driver" },
+            { q: "In a mechanism, what is the piece called whose motion is affected?", opts: ["Follower", "Driver", "Frame", "Joint"], ans: "Follower" },
+            { q: "What type of kinematic pair exists when one element envelops the other, has surface contact, and geometrically identical forms?", opts: ["Closed or Lower Pair", "Higher Pair", "Intermediate Connector", "Flexible Pair"], ans: "Closed or Lower Pair" },
+            { q: "What type of kinematic pair exists when the elements do not enclose each other and have point or line contact?", opts: ["Higher Pair", "Lower Pair", "Closed Pair", "Rigid Pair"], ans: "Higher Pair" },
+            { q: "The exchange of the fixedness of an element with its partner is called what?", opts: ["Inversion of Pairs", "Kinematic Chain", "Dimensional Synthesis", "Grashof Condition"], ans: "Inversion of Pairs" },
+            
+            // LECTURE 2: MOTION
+            { q: "Which type of motion occurs when a point continues to move indefinitely in a given path in the same sense?", opts: ["Continuous Motion", "Reciprocating Motion", "Oscillation", "Intermittent Motion"], ans: "Continuous Motion" },
+            { q: "Which type of motion traverses the same path and reverses its motion at the ends?", opts: ["Reciprocating Motion", "Continuous Motion", "Oscillation", "Intermittent Motion"], ans: "Reciprocating Motion" },
+            { q: "What is the term applied to reciprocating circular motion, such as a pendulum?", opts: ["Oscillation", "Continuous Motion", "Intermittent Motion", "Translational Motion"], ans: "Oscillation" },
+            { q: "Which type of motion occurs when the motion of a point is interrupted by periods of rest?", opts: ["Intermittent Motion", "Reciprocating Motion", "Continuous Motion", "Oscillation"], ans: "Intermittent Motion" },
+            { q: "The time rate of motion of a point along its path, expressed in linear units per unit of time.", opts: ["Linear Speed", "Angular Speed", "Harmonic Speed", "Constant Acceleration"], ans: "Linear Speed" },
+            { q: "The time rate of turning a body about an axis, expressed in angular units per unit of time.", opts: ["Angular Speed", "Linear Speed", "Variable Acceleration", "Tangential Speed"], ans: "Angular Speed" },
+            { q: "What is the formula for the linear speed (V) of a point on a rotating body?", opts: ["V = ωR", "V = ω/R", "V = R/ω", "V = 2πω"], ans: "V = ωR" },
+            { q: "In what type of motion is the acceleration zero and velocity constant?", opts: ["Uniform Motion", "Uniformly Varying Motion", "Harmonic Motion", "Variable Acceleration"], ans: "Uniform Motion" },
+            { q: "In what type of motion does the speed change by equal amounts in equal intervals of time?", opts: ["Uniformly Varying Motion", "Uniform Motion", "Harmonic Motion", "Oscillating Motion"], ans: "Uniformly Varying Motion" },
+            { q: "What type of motion has an acceleration that varies directly as the displacement?", opts: ["Harmonic Motion", "Uniform Motion", "Uniformly Varying Motion", "Constant Acceleration"], ans: "Harmonic Motion" },
+            { q: "In harmonic motion, the acceleration of particle P (Ap) is expressed as what?", opts: ["ω²R cos(θ)", "ωR sin(θ)", "R(1 - cos(θ))", "ωR cos(θ)"], ans: "ω²R cos(θ)" },
+            
+            // LECTURE 3: LINKAGES
+            { q: "An arm rotating or oscillating about an axis is called a:", opts: ["Crank", "Lever", "Node", "Joint"], ans: "Crank" },
+            { q: "Two cranks rigidly connected to each other on the same axis is called a:", opts: ["Lever", "Coupler", "Node", "Follower"], ans: "Lever" },
+            { q: "A lever with an angle less than 90 degrees is known as a:", opts: ["Bell Crank Lever", "Rocker", "Slider", "Follower"], ans: "Bell Crank Lever" },
+            { q: "A lever with an angle more than 90 degrees is known as a:", opts: ["Rocker", "Bell Crank Lever", "Crank", "Piston"], ans: "Rocker" },
+            { q: "A rigid piece which transmits force from one piece to another and possesses at least two nodes.", opts: ["Link", "Joint", "Frame", "Pinion"], ans: "Link" },
+            { q: "What are the points for attachment to other links called?", opts: ["Nodes", "Joints", "Poles", "Centros"], ans: "Nodes" },
+            { q: "It consists of a number of pairs of elements connected to each other by joints.", opts: ["Linkage", "Structure", "Particle", "Rigid Body"], ans: "Linkage" },
+            { q: "An interconnected system of links in which not a single link is fixed is called a:", opts: ["Kinematic Chain", "Mechanism", "Structure", "Frame"], ans: "Kinematic Chain" },
+            { q: "When one of the links in a kinematic chain is fixed, it becomes a:", opts: ["Mechanism", "Structure", "Free Chain", "Particle"], ans: "Mechanism" },
+            { q: "A mechanism consisting of two cranks attached to a stationary piece and connected by a floating link.", opts: ["Four-Bar Linkage", "Slider-Crank Mechanism", "Six-Bar Linkage", "Cylindric Joint"], ans: "Four-Bar Linkage" },
+            { q: "A connection between two or more links at their nodes that allows motion is called a:", opts: ["Joint (Kinematic Pair)", "Frame", "Particle", "Node"], ans: "Joint (Kinematic Pair)" },
+            { q: "How many degrees of freedom does a Spherical (S) joint have?", opts: ["3", "1", "2", "6"], ans: "3" },
+            { q: "How many degrees of freedom does a Cylindric (C) joint have?", opts: ["2", "1", "3", "4"], ans: "2" },
+            { q: "The order of a joint is defined as:", opts: ["One less than the number of links joined", "The number of links joined", "Twice the number of links joined", "The number of degrees of freedom"], ans: "One less than the number of links joined" },
+            
+            // LECTURE 4: MOBILITY
+            { q: "The number of inputs which need to be provided in order to create a predictable output.", opts: ["Degree of Freedom", "Mobility Parameter", "Kinematic Inversion", "Order of a joint"], ans: "Degree of Freedom" },
+            { q: "A low-pair joint reduces the mobility of a planar mechanism by how many Degrees of Freedom?", opts: ["2", "1", "3", "0"], ans: "2" },
+            { q: "A high-pair joint reduces the mobility of a planar mechanism by how many Degrees of Freedom?", opts: ["1", "2", "3", "0"], ans: "1" },
+            { q: "The equation m = 3(n-1) - 2j₁ - j₂ is known as:", opts: ["Kutzbach's Equation of Mobility", "Grashof's Condition", "Kennedy's Rule", "Euler's Equation"], ans: "Kutzbach's Equation of Mobility" },
+            { q: "In Kutzbach's Equation, what does j₁ represent?", opts: ["Number of low-pair joints", "Number of links", "Number of high-pair joints", "Mobility of mechanism"], ans: "Number of low-pair joints" },
+            { q: "In Kutzbach's Equation, what does n represent?", opts: ["Number of links", "Number of low-pair joints", "Degrees of freedom", "Number of nodes"], ans: "Number of links" },
+            { q: "Linkages that do not behave as predicted by the Kutzbach mobility equation are known as:", opts: ["Gruebler Paradox", "Grashof Special-case", "Kinematic Chain", "Indeterminate Linkages"], ans: "Gruebler Paradox" },
+            { q: "According to Kutzbach's Equation, what is the mobility of a planar mechanism with 3 links and 3 low-pair joints?", opts: ["0", "1", "2", "-1"], ans: "0" },
+            { q: "According to Kutzbach's Equation, what is the mobility of a planar four-bar mechanism with 4 links and 4 low-pair joints?", opts: ["1", "0", "2", "-1"], ans: "1" },
+            { q: "According to Kutzbach's Equation, what is the mobility of a mechanism with 5 links and 5 low-pair joints?", opts: ["2", "1", "3", "0"], ans: "2" },
+            { q: "According to Kutzbach's Equation, what is the mobility of a rigid truss with 4 links and 6 low-pair joints?", opts: ["-1", "0", "1", "2"], ans: "-1" },
+
+            // LECTURE 5: GRASHOF'S CONDITION
+            { q: "The process of choosing different links in the chain as frames is called:", opts: ["Kinematic Inversion", "Grashof Condition", "Dimensional Synthesis", "Kennedy's Rule"], ans: "Kinematic Inversion" },
+            { q: "How many kinematic inversions does a given linkage have?", opts: ["As many inversions as it has links", "Always four inversions", "Twice the number of links", "Half the number of links"], ans: "As many inversions as it has links" },
+            { q: "What relationship predicts the rotation behavior of a four-bar linkage's inversions based on link lengths?", opts: ["Grashof Condition", "Kutzbach's Equation", "Kennedy's Rule", "Velocity Polygon"], ans: "Grashof Condition" },
+            { q: "According to the Grashof Condition, if S + L < P + Q, at least one of the links will be:", opts: ["Revolving", "Oscillating", "Stationary", "Translating"], ans: "Revolving" },
+            { q: "In a Grashof linkage, grounding either link adjacent to the shortest link results in a:", opts: ["Crank rocker", "Double Crank", "Double Rocker", "Triple Rocker"], ans: "Crank rocker" },
+            { q: "In a Grashof linkage, grounding the shortest link results in a:", opts: ["Double Crank", "Crank rocker", "Double Rocker", "Triple Rocker"], ans: "Double Crank" },
+            { q: "In a Grashof linkage, grounding the link opposite the shortest link results in a:", opts: ["Double Rocker", "Double Crank", "Crank rocker", "Triple Rocker"], ans: "Double Rocker" },
+            { q: "What happens in a Class II Case (S + L > P + Q)?", opts: ["All inversions are Triple Rockers", "It becomes a Double Crank", "It acts as a Crank Rocker", "Output behavior is indeterminate"], ans: "All inversions are Triple Rockers" },
+            { q: "What happens in a Class III Case (S + L = P + Q)?", opts: ["It becomes a Special-case Grashof with change points", "All inversions are Triple Rockers", "Mobility drops to zero", "It operates strictly as a Double Rocker"], ans: "It becomes a Special-case Grashof with change points" },
+            { q: "Why is the output behavior of a Special-case Grashof linkage indeterminate at change points?", opts: ["It may assume either of the two configurations", "The shortest link breaks", "It locks into a rigid structure", "The velocity drops to zero"], ans: "It may assume either of the two configurations" },
+            { q: "A motor-driven windshield wiper mechanism typically uses what kind of linkage inversion?", opts: ["Crank rocker", "Double crank", "Double rocker", "Triple rocker"], ans: "Crank rocker" },
+            { q: "In a crank rocker mechanism, which link will fully rotate?", opts: ["The shortest link", "The longest link", "The grounded link", "The coupler"], ans: "The shortest link" },
+
+            // LECTURE 6: GRAPHICAL SYNTHESIS
+            { q: "The creation of potential solutions in the absence of a well-defined algorithm is called:", opts: ["Qualitative Synthesis", "Quantitative Synthesis", "Analytical Synthesis", "Dimensional Synthesis"], ans: "Qualitative Synthesis" },
+            { q: "What type of synthesis refers to defining the proper mechanism (e.g., linkages vs. cams) best suited for the problem?", opts: ["Type Synthesis", "Dimensional Synthesis", "Quantitative Synthesis", "Analytical Synthesis"], ans: "Type Synthesis" },
+            { q: "What type of synthesis refers to determining the proportions or lengths of the links?", opts: ["Dimensional Synthesis", "Type Synthesis", "Quantitative Synthesis", "Function Synthesis"], ans: "Dimensional Synthesis" },
+            { q: "The generation of one or more solutions with a defined synthesis algorithm is known as:", opts: ["Quantitative Synthesis", "Qualitative Synthesis", "Type Synthesis", "Dimensional Synthesis"], ans: "Quantitative Synthesis" },
+            { q: "The correlation of an input motion with an output motion in a mechanism is called:", opts: ["Function Generation", "Path Generation", "Motion Generation", "Coupler Generation"], ans: "Function Generation" },
+            { q: "The control of a point in the plane such that it follows some prescribed path is called:", opts: ["Path Generation", "Function Generation", "Motion Generation", "Dimensional Generation"], ans: "Path Generation" },
+            { q: "The control of a line in the plane such that it assumes some prescribed set of sequential positions is called:", opts: ["Motion Generation", "Path Generation", "Function Generation", "Type Generation"], ans: "Motion Generation" },
+            { q: "Rocker Output is an example of what kind of generation?", opts: ["Function Generation", "Motion Generation", "Path Generation", "Type Generation"], ans: "Function Generation" },
+            { q: "Coupler Output is an example of what kind of generation?", opts: ["Motion Generation", "Function Generation", "Path Generation", "Type Generation"], ans: "Motion Generation" },
+            { q: "To make a motion generation linkage motor-driven, you can add a two-bar chain called a:", opts: ["Dyad", "Coupler", "Rocker", "Slider"], ans: "Dyad" },
+            { q: "In the 2-position synthesis of a Rocker Output, what is bisected to help find the fixed pivot?", opts: ["The chord between the two extreme positions", "The driver crank", "The ground link", "The output angle"], ans: "The chord between the two extreme positions" },
+
+            // LECTURE 7: INSTANT CENTERS
+            { q: "A point common to two bodies in plane motion wherein the absolute instantaneous velocity in each body is the same.", opts: ["Instant Center", "Node", "Pivot", "Frame"], ans: "Instant Center" },
+            { q: "Instant centers are also known as:", opts: ["Centros or poles", "Nodes", "Couplers", "Joints"], ans: "Centros or poles" },
+            { q: "Instant centers that remain in the same place for all configurations of the mechanism are called:", opts: ["Fixed instant centers", "Permanent instant centers", "Moving instant centers", "Virtual instant centers"], ans: "Fixed instant centers" },
+            { q: "Instant centers that move when the mechanism moves but belong to joints of a permanent nature are called:", opts: ["Permanent instant centers", "Fixed instant centers", "Moving instant centers", "Translational instant centers"], ans: "Permanent instant centers" },
+            { q: "Instant centers that vary with the configuration of the mechanism are called:", opts: ["Moving instant centers", "Fixed instant centers", "Permanent instant centers", "Locked instant centers"], ans: "Moving instant centers" },
+            { q: "What is the formula for the number of instant centers (N) in a mechanism with n links?", opts: ["N = n(n-1) / 2", "N = 3(n-1) - 2j", "N = n² / 2", "N = 2n - 1"], ans: "N = n(n-1) / 2" },
+            { q: "How many instant centers are in a standard four-bar mechanism?", opts: ["6", "4", "8", "10"], ans: "6" },
+            { q: "How many instant centers are in a slider-crank mechanism?", opts: ["6", "4", "5", "8"], ans: "6" },
+            { q: "How many instant centers are in a six-bar mechanism?", opts: ["15", "12", "18", "6"], ans: "15" },
+            { q: "The rule stating that 'Any three bodies in plane motion will have exactly three instant centers, and they will lie on the same straight line.'", opts: ["Kennedy's Rule", "Grashof's Condition", "Kutzbach's Rule", "Gruebler's Paradox"], ans: "Kennedy's Rule" },
+
+            // LECTURE 8: VELOCITY ANALYSIS
+            { q: "Which velocity analysis method considers any displacement as pure rotational motion about a center of rotation?", opts: ["Instant Center Method", "Resolution and Composition", "Relative Velocity", "Acceleration Polygon"], ans: "Instant Center Method" },
+            { q: "The magnitude of velocity of a point on a rigid link is directly proportional to its:", opts: ["Distance from the instantaneous center", "Angular acceleration", "Distance from the frame", "Mass of the link"], ans: "Distance from the instantaneous center" },
+            { q: "The direction of the velocity vector is what in relation to the line joining the point to the instant center?", opts: ["Perpendicular", "Parallel", "Collinear", "At 45 degrees"], ans: "Perpendicular" },
+            { q: "Which of the following is NOT one of the 3 methods for Velocity Analysis mentioned in the lectures?", opts: ["Virtual Work", "Resolution and Composition", "Instantaneous axis of velocity", "Relative velocity"], ans: "Virtual Work" },
+            { q: "If the linear velocity of point A is V_A and its distance to the instant center is R_A, what does the ratio V_A / R_A equal?", opts: ["Angular velocity (ω)", "Angular acceleration (α)", "Linear Acceleration", "Tangential velocity"], ans: "Angular velocity (ω)" },
+            { q: "In a slider-crank mechanism, the instant center between the slider and the frame (I_14) lies at:", opts: ["Infinity", "The center of the crank", "The connecting rod joint", "The middle of the slider"], ans: "Infinity" },
+            { q: "The Instant Center Method is based on the assumption that a link's motion is pure:", opts: ["Rotational motion", "Translational motion", "Linear motion", "Harmonic motion"], ans: "Rotational motion" },
+
+            // LECTURE 9: ACCELERATION ANALYSIS
+            { q: "What is the rate of change of velocity with respect to time?", opts: ["Acceleration", "Angular velocity", "Linear speed", "Harmonic displacement"], ans: "Acceleration" },
+            { q: "What component of acceleration represents the rate of change of velocity in direction-sense?", opts: ["Centripetal (Radial/Normal) component", "Tangential component", "Linear component", "Angular component"], ans: "Centripetal (Radial/Normal) component" },
+            { q: "The normal component of acceleration is always what to the velocity of the particle?", opts: ["Perpendicular", "Parallel", "Collinear", "At 45 degrees"], ans: "Perpendicular" },
+            { q: "What component of acceleration represents the rate of change of velocity in magnitude?", opts: ["Tangential component", "Radial component", "Centripetal component", "Normal component"], ans: "Tangential component" },
+            { q: "The tangential component of acceleration is always what to the velocity of the particle?", opts: ["Parallel", "Perpendicular", "Orthogonal", "Intersecting"], ans: "Parallel" },
+            { q: "Which equation represents the radial (normal) acceleration of link AB?", opts: ["V²/R (or ω²R)", "αR", "V = ωR", "R(1 - cosθ)"], ans: "V²/R (or ω²R)" },
+            { q: "Which equation represents the tangential acceleration of link AB?", opts: ["αR", "ω²R", "V²/R", "2πN"], ans: "αR" },
+            { q: "Acceleration is considered what type of mathematical quantity?", opts: ["Vector quantity", "Scalar quantity", "Dimensionless quantity", "Imaginary quantity"], ans: "Vector quantity" },
+            { q: "The resultant linear acceleration is solved by adding what two components vectorially?", opts: ["Radial and Tangential accelerations", "Velocity and Distance", "Angular speed and Linear speed", "Mass and Inertia"], ans: "Radial and Tangential accelerations" }
+        ];
+
+        let questions = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+
+        // Fisher-Yates Shuffle
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function initQuiz() {
+            // Clone and Shuffle Data
+            let clonedData = JSON.parse(JSON.stringify(rawData));
+            questions = shuffle(clonedData);
+            
+            questions.forEach(q => {
+                q.opts = shuffle(q.opts);
+            });
+
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            
+            buildSidebar();
+            loadQuestion(0);
+        }
+
+        function buildSidebar() {
+            const grid = document.getElementById("nav-grid");
+            grid.innerHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                const btn = document.createElement("button");
+                btn.className = "nav-btn";
+                btn.innerText = i + 1;
+                btn.id = "nav-btn-" + i;
+                btn.onclick = () => {
+                    loadQuestion(i);
+                    toggleSidebar(); // Close sidebar on mobile after clicking
+                };
+                grid.appendChild(btn);
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function loadQuestion(index) {
+            currentQuestion = index;
+            const q = questions[currentQuestion];
+            
+            // Update Header
+            document.getElementById("question-tracker").innerText = `Question ${currentQuestion + 1} of 100`;
+            document.getElementById("score-tracker").innerText = `Score: ${score}`;
+            document.getElementById("question-text").innerText = q.q;
+
+            // Render Options
+            const container = document.getElementById("options-container");
+            container.innerHTML = '';
+
+            q.opts.forEach((opt) => {
+                const btn = document.createElement("button");
+                btn.className = "option";
+                btn.innerText = opt;
+                
+                // If already answered
+                if (userAnswers[currentQuestion] !== null) {
+                    btn.disabled = true;
+                    if (opt === q.ans) {
+                        btn.classList.add("correct");
+                    } else if (opt === userAnswers[currentQuestion]) {
+                        btn.classList.add("incorrect");
+                    }
+                } else {
+                    btn.onclick = () => selectOption(opt);
+                }
+                
+                container.appendChild(btn);
+            });
+
+            // Handle Next Button visibility
+            const nextBtn = document.getElementById("next-btn");
+            if (userAnswers[currentQuestion] !== null) {
+                nextBtn.style.display = "block";
+                nextBtn.innerText = (currentQuestion === questions.length - 1) ? "Finish Quiz ➔" : "Next Question ➔";
+            } else {
+                nextBtn.style.display = "none";
+            }
+
+            updateSidebarHighlight();
+        }
+
+        function selectOption(selectedOpt) {
+            const q = questions[currentQuestion];
+            userAnswers[currentQuestion] = selectedOpt;
+
+            if (selectedOpt === q.ans) {
+                score++;
+                document.getElementById(`nav-btn-${currentQuestion}`).classList.add("answered-correct");
+            } else {
+                document.getElementById(`nav-btn-${currentQuestion}`).classList.add("answered-incorrect");
+            }
+
+            // Re-render to show colors and disable buttons
+            loadQuestion(currentQuestion);
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                loadQuestion(currentQuestion + 1);
+            } else {
+                document.getElementById("quiz-screen").style.display = "none";
+                const results = document.getElementById("results-screen");
+                results.style.display = "block";
+                document.getElementById("final-score").innerText = `You scored ${score} out of 100.`;
+            }
+        }
+
+        function updateSidebarHighlight() {
+            document.querySelectorAll(".nav-btn").forEach((btn, idx) => {
+                btn.classList.remove("active");
+                if (idx === currentQuestion) {
+                    btn.classList.add("active");
+                }
+            });
+        }
+
+        window.onload = initQuiz;
+
+    </script>
+</body>
+</html>
