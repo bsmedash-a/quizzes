@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout & Marking Tools Mastery Quiz</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #2980b9;
+            --accent-hover: #3498db;
+            --correct: #27ae60;
+            --incorrect: #e74c3c;
+            --text-main: #333;
+            --text-light: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Hamburger Menu Button */
+        #hamburger-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: 0.3s;
+        }
+
+        #hamburger-btn:hover {
+            background-color: var(--accent);
+        }
+
+        #hamburger-btn div {
+            width: 24px;
+            height: 3px;
+            background-color: var(--text-light);
+            border-radius: 2px;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: -350px;
+            width: 320px;
+            height: 100vh;
+            background-color: var(--primary);
+            color: var(--text-light);
+            transition: left 0.3s ease-in-out;
+            z-index: 999;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 30px 20px 20px 20px;
+            text-align: center;
+            background-color: var(--secondary);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 2px solid var(--accent);
+            margin-top: 50px;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .nav-btn {
+            background-color: var(--secondary);
+            color: var(--text-light);
+            border: 1px solid #4a6278;
+            border-radius: 4px;
+            padding: 10px 0;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .nav-btn:hover { background-color: var(--accent); border-color: var(--accent); }
+        .nav-btn.answered-correct { background-color: var(--correct); border-color: var(--correct); }
+        .nav-btn.answered-incorrect { background-color: var(--incorrect); border-color: var(--incorrect); }
+        .nav-btn.active { box-shadow: 0 0 0 3px #f1c40f; transform: scale(1.1); z-index: 2; }
+
+        /* Main Quiz Container */
+        .quiz-container {
+            background-color: #fff;
+            width: 92%;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 40px;
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background-color: #f8f9fa;
+            border: 2px solid #dcdde1;
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+
+        .option:hover:not(:disabled) {
+            background-color: #e2e8f0;
+            border-color: #b2bec3;
+        }
+
+        .option:disabled {
+            cursor: not-allowed;
+            opacity: 0.95;
+        }
+
+        .option.correct {
+            background-color: var(--correct) !important;
+            border-color: #219a52 !important;
+            color: var(--text-light) !important;
+        }
+
+        .option.incorrect {
+            background-color: var(--incorrect) !important;
+            border-color: #a93226 !important;
+            color: var(--text-light) !important;
+        }
+
+        .action-btn {
+            background-color: var(--accent);
+            color: var(--text-light);
+            border: none;
+            border-radius: 8px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 30px;
+            width: 100%;
+            transition: 0.2s;
+            display: none;
+        }
+
+        .action-btn:hover { background-color: var(--accent-hover); }
+
+        #results-screen {
+            display: none;
+            text-align: center;
+        }
+
+        #results-screen h1 { font-size: 2.8rem; color: var(--primary); margin-bottom: 15px; }
+        #results-screen p { font-size: 1.3rem; color: #7f8c8d; margin-bottom: 30px; }
+        
+        .restart-btn {
+            background-color: var(--correct);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .restart-btn:hover { background-color: #219a52; }
+
+    </style>
+</head>
+<body>
+
+    <button id="hamburger-btn" onclick="toggleSidebar()">
+        <div></div>
+        <div></div>
+        <div></div>
+    </button>
+
+    <div id="sidebar">
+        <div class="sidebar-header">Question Navigator</div>
+        <div class="nav-grid" id="nav-grid"></div>
+    </div>
+
+    <div class="quiz-container">
+        <div id="quiz-screen">
+            <div class="quiz-header">
+                <span id="question-tracker">Question 1 of 100</span>
+                <span id="score-tracker">Score: 0</span>
+            </div>
+            <div class="question-text" id="question-text">Loading question...</div>
+            <div class="options-container" id="options-container"></div>
+            <button class="action-btn" id="next-btn" onclick="nextQuestion()">Next Question ➔</button>
+        </div>
+
+        <div id="results-screen">
+            <h1>Quiz Completed!</h1>
+            <p id="final-score"></p>
+            <button class="restart-btn" onclick="location.reload()">Retake & Reshuffle</button>
+        </div>
+    </div>
+
+    <script>
+        const rawData = [
+            // Introduction (1-6)
+            { q: "What is the process of scribing or marking center points, circles, arcs, or straight lines on metal to indicate the shape of the object?", opts: ["Laying out", "Machining", "Milling", "Broaching"], ans: "Laying out" },
+            { q: "The layout helps the machinist determine the amount of material to be removed, but the size for rough and finish cuts must be checked by what?", opts: ["Actual measurements", "Visual inspection", "The blueprint", "The combination square"], ans: "Actual measurements" },
+            { q: "All layouts must be made from a specific line or finished surface to ensure accuracy. What is this reference called?", opts: ["Baseline (datum)", "Centerline", "Tangent line", "Secant line"], ans: "Baseline (datum)" },
+            { q: "What happens if a layout is not made from a baseline or datum?", opts: ["Inaccurate layout, incorrect dimensions, and improper location of holes", "The layout dye will not stick to the metal", "The scriber will become dull", "The metal will warp during machining"], ans: "Inaccurate layout, incorrect dimensions, and improper location of holes" },
+            { q: "According to the text, the accuracy of the finished product depends greatly on the accuracy of the:", opts: ["Layout", "Machining speed", "Tool material", "Cutting fluid"], ans: "Layout" },
+            { q: "Which tool is generally NOT used in conjunction with a scriber to draw straight lines?", opts: ["Hermaphrodite caliper", "Combination square", "Rule", "Straight edge"], ans: "Hermaphrodite caliper" },
+            
+            // Scribers (7-15)
+            { q: "What tool has a hardened steel point and is used to draw straight lines on metal?", opts: ["Scriber", "Center punch", "Prick punch", "Trammel"], ans: "Scriber" },
+            { q: "Why must the point of a scriber always be sharp?", opts: ["To produce fine lines required for accuracy", "To deeply penetrate the metal", "To prevent the layout dye from chipping", "To avoid bending the tool"], ans: "To produce fine lines required for accuracy" },
+            { q: "On some scribers, one end is bent at an angle. What is the purpose of this bent end?", opts: ["To allow marking lines in hard to reach places", "To act as a pivot point for drawing circles", "To hold a piece of chalk or pencil", "To pry open small metal gaps"], ans: "To allow marking lines in hard to reach places" },
+            { q: "What is the approximate length of a Pocket Scriber?", opts: ["100mm (4\")", "150mm (6\")", "200mm (8\")", "50mm (2\")"], ans: "100mm (4\")" },
+            { q: "Pocket scribers often feature a hexagonal head. What is its purpose?", opts: ["To prevent them from rolling off work surfaces", "To allow loosening with a wrench", "To serve as an anvil for a hammer", "To gauge 60-degree angles"], ans: "To prevent them from rolling off work surfaces" },
+            { q: "Which type of scriber has a knurled body, is double-ended, and features one straight point and one bent point?", opts: ["Machinist's scriber", "Pocket scriber", "Trammel scriber", "Compass scriber"], ans: "Machinist's scriber" },
+            { q: "A pocket scriber often features a chuck that allows for what?", opts: ["Replaceable tips", "Attaching to a drill", "Holding a pencil lead", "Adjusting the length of the tool"], ans: "Replaceable tips" },
+            { q: "What is the textured surface on the body of a Machinist's scriber called that provides a better grip?", opts: ["Knurled body", "Hexagonal head", "Fluted shank", "Threaded shaft"], ans: "Knurled body" },
+            { q: "A scriber's point is typically made of what material to ensure it remains sharp?", opts: ["Hardened steel", "Cast iron", "Aluminum alloy", "Brass"], ans: "Hardened steel" },
+
+            // Dividers (16-25)
+            { q: "Which tool is primarily used for scribing arcs and circles on metal?", opts: ["Divider", "Scriber", "Hermaphrodite caliper", "Combination square"], ans: "Divider" },
+            { q: "Besides scribing arcs and circles, what is another common use for dividers?", opts: ["Transferring dimensions and stepping off distances", "Marking 90-degree angles", "Making deep indentations for drilling", "Checking the flatness of a surface"], ans: "Transferring dimensions and stepping off distances" },
+            { q: "Which type of divider is adjusted by turning a knurled nut that forces the legs apart against spring tension?", opts: ["Spring divider", "Firm joint divider", "Trammel", "Hermaphrodite caliper"], ans: "Spring divider" },
+            { q: "What mechanism is used to adjust the legs of a spring divider?", opts: ["Knurled adjusting nut", "Friction joint", "Sliding head", "Set screw"], ans: "Knurled adjusting nut" },
+            { q: "Which type of divider lacks a spring and relies on friction at the pivot to hold the legs in position?", opts: ["Firm joint divider", "Spring divider", "Trammel", "Toolmakers' divider"], ans: "Firm joint divider" },
+            { q: "To set a divider accurately, where should one of the points be placed on the steel rule?", opts: ["On the 1-inch (or 10mm) mark", "On the edge of the rule", "On the 0 mark", "In the center groove of the rule"], ans: "On the 1-inch (or 10mm) mark" },
+            { q: "When setting a divider using a rule, if you place one point on the 1-inch mark and need a 2-inch radius, where should the other point be placed?", opts: ["On the 3-inch mark", "On the 2-inch mark", "On the 1-inch mark", "On the 4-inch mark"], ans: "On the 3-inch mark" },
+            { q: "Which of the following divider types features a circular spring at the top of its legs?", opts: ["Spring divider", "Firm joint divider", "Hermaphrodite caliper", "Trammel"], ans: "Spring divider" },
+            { q: "When scribing an arc with a divider, what is necessary to do first at the center point so the divider leg doesn't slip?", opts: ["Make an indentation with a prick punch", "Make an indentation with a center punch", "Draw a crosshair with a scriber", "Apply layout fluid heavily"], ans: "Make an indentation with a prick punch" },
+            { q: "Which part of a spring divider acts against the knurled adjusting nut to maintain the position of the legs?", opts: ["Spring tension", "Friction joint", "Sliding head", "Clamping screw"], ans: "Spring tension" },
+
+            // Trammels (26-32)
+            { q: "What tool is used for scribing arcs and circles that are too large for ordinary dividers?", opts: ["Trammel", "Hermaphrodite caliper", "Firm joint divider", "Surface gage"], ans: "Trammel" },
+            { q: "A trammel consists of two sliding heads called what?", opts: ["Trammels", "Beams", "Stocks", "Pivots"], ans: "Trammels" },
+            { q: "What is the long bar component of a trammel assembly called?", opts: ["Beam or trammel bar", "Blade", "Spindle", "Stock"], ans: "Beam or trammel bar" },
+            { q: "What secures the sliding heads (trammels) to the trammel bar?", opts: ["Clamping screws", "Friction joints", "Spring tension", "Knurled nuts"], ans: "Clamping screws" },
+            { q: "In addition to scriber points, what other attachment can be fitted to the sliding heads of a trammel?", opts: ["A pencil or chalk holder", "A center punch", "A try square blade", "A spirit level"], ans: "A pencil or chalk holder" },
+            { q: "Why are trammels preferred over dividers for very large circles?", opts: ["The long beam allows for a much larger radius than divider legs can open", "They are made of lighter materials", "They automatically find the center of the circle", "They use a spring tension system for better accuracy"], ans: "The long beam allows for a much larger radius than divider legs can open" },
+            { q: "When setting a trammel to a specific dimension, the sliding heads are moved along the:", opts: ["Beam", "Spindle", "Blade", "Rule"], ans: "Beam" },
+
+            // Hermaphrodite Caliper (33-40)
+            { q: "Which layout tool has one bent leg and one straight leg with a sharp point?", opts: ["Hermaphrodite caliper", "Divider", "Trammel", "Try square"], ans: "Hermaphrodite caliper" },
+            { q: "What is a primary use of a hermaphrodite caliper?", opts: ["Locating the center of cylindrical work", "Measuring the depth of holes", "Checking internal 90-degree angles", "Scribing circles on flat plates"], ans: "Locating the center of cylindrical work" },
+            { q: "Besides locating centers, what is the hermaphrodite caliper commonly used for?", opts: ["Drawing lines parallel to a given edge", "Drawing lines perpendicular to an edge", "Checking the flatness of a surface plate", "Magnifying layout lines"], ans: "Drawing lines parallel to a given edge" },
+            { q: "Like dividers, hermaphrodite calipers are available in two main joint types. What are they?", opts: ["Friction joint and spring type", "Sliding head and beam type", "Knurled and smooth type", "Fixed and adjustable type"], ans: "Friction joint and spring type" },
+            { q: "When locating the center of a cylindrical workpiece using a hermaphrodite caliper, where is the bent leg placed?", opts: ["Against the outside edge of the cylinder", "In the exact center of the cylinder", "Along the baseline/datum", "Inside a pre-drilled hole"], ans: "Against the outside edge of the cylinder" },
+            { q: "To find the center of a cylinder with a hermaphrodite caliper, you scribe four arcs from the edge. What do you do next?", opts: ["Locate the center of the resulting square/shape", "Drill directly into one of the arcs", "Use a combination square to measure the arcs", "Connect the arcs to form a perfect circle"], ans: "Locate the center of the resulting square/shape" },
+            { q: "When using a hermaphrodite caliper to scribe a line parallel to an edge, what maintains the distance from the edge?", opts: ["The bent leg riding along the edge", "The sharp point pressing into the edge", "A sliding trammel head", "A clamping screw locked against the edge"], ans: "The bent leg riding along the edge" },
+            { q: "The straight leg of the hermaphrodite caliper performs what function?", opts: ["Scribing the line on the metal", "Guiding the tool along the edge", "Holding the pencil", "Adjusting the tension"], ans: "Scribing the line on the metal" },
+
+            // Surface Gage (41-48)
+            { q: "What layout tool consists of a heavy base and an upright spindle to which a scriber is clamped?", opts: ["Surface gage", "Combination square", "Angle plate", "Trammel"], ans: "Surface gage" },
+            { q: "What is the primary function of a surface gage?", opts: ["Scribing lines parallel to a given datum surface", "Checking 90-degree angles", "Drawing large circles", "Measuring the thickness of a workpiece"], ans: "Scribing lines parallel to a given datum surface" },
+            { q: "To adjust the spindle of a surface gage to exact dimensions, what component is utilized?", opts: ["An adjusting screw", "A spring tension nut", "A knurled chuck", "A sliding trammel head"], ans: "An adjusting screw" },
+            { q: "When using a surface gage, what is typically used to set the scriber to the exact height required?", opts: ["A combination square or rule", "A try square", "A center punch", "An angle plate"], ans: "A combination square or rule" },
+            { q: "Besides scribing parallel lines, what else is a surface gage frequently used for on a machine?", opts: ["Setting up work parallel to the machine table", "Checking the spindle speed", "Measuring the internal diameter of a hole", "Providing a datum surface"], ans: "Setting up work parallel to the machine table" },
+            { q: "A surface gage can be used to find the center of cylindrical work. This makes it an alternative to what other tool?", opts: ["Hermaphrodite caliper", "Trammel", "Try square", "Prick punch"], ans: "Hermaphrodite caliper" },
+            { q: "What component connects the scriber to the spindle on a surface gage?", opts: ["A clamp/snug", "A friction joint", "A spring mechanism", "A knurled handle"], ans: "A clamp/snug" },
+            { q: "Why does the surface gage have a heavy base?", opts: ["To provide stability while sliding along a surface plate", "To act as a hammer if needed", "To magnetically attach to the workpiece", "To prevent the spindle from rotating"], ans: "To provide stability while sliding along a surface plate" },
+
+            // Center Punch & Prick Punch (49-62)
+            { q: "Which tool is used to make indentations in metal to prevent a drill from wandering?", opts: ["Center punch", "Prick punch", "Scriber", "Divider"], ans: "Center punch" },
+            { q: "What is the angle of the point on a center punch?", opts: ["90 degrees", "60 degrees", "30 degrees", "120 degrees"], ans: "90 degrees" },
+            { q: "Why is a center punch ground to a 90-degree angle?", opts: ["It provides a good starting point for a drill bit", "It produces the finest line for layout", "It easily pierces entirely through sheet metal", "It prevents the punch from getting dull"], ans: "It provides a good starting point for a drill bit" },
+            { q: "Which punch is used to bring out layout lines and make them more visible?", opts: ["Prick punch", "Center punch", "Drive punch", "Pin punch"], ans: "Prick punch" },
+            { q: "What is the angle of the point on a prick punch?", opts: ["30 to 60 degrees", "90 degrees", "15 to 25 degrees", "120 degrees"], ans: "30 to 60 degrees" },
+            { q: "Which punch produces a deeper and wider indentation?", opts: ["Center punch", "Prick punch", "They produce the same size indentation", "Scriber punch"], ans: "Center punch" },
+            { q: "Which punch is typically used first to lightly mark intersecting layout lines?", opts: ["Prick punch", "Center punch", "They are used simultaneously", "Neither, a scriber is used for indentations"], ans: "Prick punch" },
+            { q: "If you need to seat a divider leg for scribing a circle, which punch should you use to make the initial indentation?", opts: ["Prick punch", "Center punch", "Trammel punch", "Hollow punch"], ans: "Prick punch" },
+            { q: "If an indentation made by a prick punch is exactly where you want to drill a hole, what should you do next?", opts: ["Enlarge it with a center punch", "Drill immediately", "Erase the layout fluid", "Use a hermaphrodite caliper to check it"], ans: "Enlarge it with a center punch" },
+            { q: "What happens if a drill bit is used on a metal surface without first using a center punch?", opts: ["The drill will wander or 'walk' off the exact location", "The drill bit will break immediately", "The metal will shatter", "The drill will cut perfectly straight"], ans: "The drill will wander or 'walk' off the exact location" },
+            { q: "How should a center punch or prick punch be held when aligning it with intersecting layout lines?", opts: ["Tilted to see the point, then brought upright before striking", "Perfectly upright the entire time", "At a 45-degree angle when striking", "Held with a clamp to the workpiece"], ans: "Tilted to see the point, then brought upright before striking" },
+            { q: "The body of both the center punch and prick punch is usually textured for better grip. This texture is called:", opts: ["Knurling", "Fluting", "Serration", "Threading"], ans: "Knurling" },
+            { q: "A 30 to 60-degree point is characteristic of which tool?", opts: ["Prick punch", "Center punch", "Machinist's scriber", "Divider"], ans: "Prick punch" },
+            { q: "A 90-degree point is characteristic of which tool?", opts: ["Center punch", "Prick punch", "Pocket scriber", "Trammel point"], ans: "Center punch" },
+
+            // Try Square (63-68)
+            { q: "Which tool consists of a blade set at exactly 90 degrees to a heavier stock or beam?", opts: ["Try square", "Combination square", "Protractor head", "Angle plate"], ans: "Try square" },
+            { q: "What is the primary use of a try square in layout work?", opts: ["Checking the squareness of surfaces and scribing lines at 90 degrees", "Measuring lengths to the nearest millimeter", "Finding the center of a cylinder", "Scribing lines parallel to an edge"], ans: "Checking the squareness of surfaces and scribing lines at 90 degrees" },
+            { q: "Unlike a combination square, the try square lacks what feature?", opts: ["Adjustable or sliding parts", "A 90-degree angle", "A metal blade", "A beam/stock"], ans: "Adjustable or sliding parts" },
+            { q: "The heavier part of the try square that is held against the edge of the workpiece is called the:", opts: ["Stock or beam", "Blade", "Rule", "Spindle"], ans: "Stock or beam" },
+            { q: "The thin part of the try square that lies flat on the workpiece for scribing is called the:", opts: ["Blade", "Stock", "Beam", "Head"], ans: "Blade" },
+            { q: "Because a try square is fixed at 90 degrees, it is generally considered:", opts: ["More accurate than an adjustable square", "Less accurate than a combination square", "Only useful for woodworking", "Prone to losing its angle over time"], ans: "More accurate than an adjustable square" },
+
+            // Combination Square (69-80)
+            { q: "The combination square set consists of a steel rule and three interchangeable heads. Which of these is NOT one of those heads?", opts: ["Trammel head", "Square head", "Protractor head", "Center head"], ans: "Trammel head" },
+            { q: "Which head of the combination square is used to check or scribe angles of 90 and 45 degrees?", opts: ["Square head", "Protractor head", "Center head", "Rule head"], ans: "Square head" },
+            { q: "What additional features are typically built into the square head of a combination square?", opts: ["A small spirit level and a removable scriber", "A magnifying glass and a center punch", "A friction joint and a knurled nut", "A clamp and a trammel point"], ans: "A small spirit level and a removable scriber" },
+            { q: "Which head of the combination square is used to find the exact center of cylindrical objects?", opts: ["Center head", "Square head", "Protractor head", "Datum head"], ans: "Center head" },
+            { q: "When using the center head on a cylinder, what forms the 90-degree angle that the rule bisects?", opts: ["The two arms of the center head", "The base of the cylinder", "The protractor scale", "The square head"], ans: "The two arms of the center head" },
+            { q: "Which head of the combination square is used to lay out or check any angle from 0 to 180 degrees?", opts: ["Protractor head", "Square head", "Center head", "Level head"], ans: "Protractor head" },
+            { q: "The protractor head is typically equipped with what feature to ensure horizontal alignment?", opts: ["A spirit level", "A built-in scriber", "A center punch", "A magnet"], ans: "A spirit level" },
+            { q: "The steel rule in a combination square set serves what dual purpose?", opts: ["As a measuring device and as the blade for the interchangeable heads", "As a cutting tool and a scriber", "As a center punch and a trammel beam", "As a surface plate and a parallel"], ans: "As a measuring device and as the blade for the interchangeable heads" },
+            { q: "Which part of the combination square set would you use to scribe a line at exactly 45 degrees to an edge?", opts: ["Square head", "Center head", "Try square", "Surface gage"], ans: "Square head" },
+            { q: "If you need to mark an angle of 37 degrees on a workpiece, which tool from the combination set must you use?", opts: ["Protractor head", "Square head", "Center head", "Try square"], ans: "Protractor head" },
+            { q: "To find the center of a round bar, how many lines must you scribe using the center head and rule?", opts: ["At least two intersecting lines", "Only one line", "At least four parallel lines", "Three arcs"], ans: "At least two intersecting lines" },
+            { q: "The central groove along the length of the combination square rule allows for what?", opts: ["The heads to slide and be clamped at any position", "Ink to flow smoothly when marking", "Reduced weight of the rule", "Alignment with the center of a cylinder"], ans: "The heads to slide and be clamped at any position" },
+
+            // V-Blocks (81-85)
+            { q: "What tool is specifically designed to hold cylindrical workpieces securely during layout or machining?", opts: ["V-blocks", "Angle plates", "Parallels", "Surface plate"], ans: "V-blocks" },
+            { q: "The V-shaped groove in a standard V-block is typically machined to what angle?", opts: ["90 degrees", "60 degrees", "45 degrees", "120 degrees"], ans: "90 degrees" },
+            { q: "V-blocks are usually supplied with what accessory to hold the workpiece firmly in the groove?", opts: ["U-shaped clamps", "C-clamps", "Toolmakers' clamps", "Spring tension nuts"], ans: "U-shaped clamps" },
+            { q: "For accurate layout work, V-blocks are generally constructed from what material?", opts: ["Cast iron or hardened steel", "Aluminum", "Granite", "Brass"], ans: "Cast iron or hardened steel" },
+            { q: "V-blocks are usually used in pairs to support long cylindrical workpieces. True or False?", opts: ["True, they are often sold in matched pairs", "False, only one is ever used", "True, but they must be different sizes", "False, they are used to hold square workpieces"], ans: "True, they are often sold in matched pairs" },
+
+            // Surface Plate (86-93)
+            { q: "What provides the flat, accurate reference surface (datum) from which all layout measurements are made?", opts: ["Surface plate", "Angle plate", "Try square blade", "Trammel beam"], ans: "Surface plate" },
+            { q: "Surface plates are traditionally made of cast iron, but what material is predominantly used today?", opts: ["Granite", "Hardened steel", "Aluminum", "Glass"], ans: "Granite" },
+            { q: "Which of the following is NOT an advantage of a granite surface plate over a cast iron one?", opts: ["It is magnetic", "It will not rust", "It is practically immune to warping", "It does not burr when lightly struck"], ans: "It is magnetic" },
+            { q: "Why is the non-magnetic property of a granite surface plate considered an advantage?", opts: ["It prevents metal shavings and dust from sticking to the surface", "It allows magnetic clamps to hold stronger", "It conducts electricity better", "It prevents layout dye from adhering"], ans: "It prevents metal shavings and dust from sticking to the surface" },
+            { q: "If a heavy object drops on a granite surface plate, what happens instead of a burr forming?", opts: ["The stone chips, but the overall flatness is not affected", "A raised bump appears that must be filed down", "The entire plate cracks in half", "The granite bends permanently"], ans: "The stone chips, but the overall flatness is not affected" },
+            { q: "Why is it important to keep a surface plate clean and covered when not in use?", opts: ["To protect its highly accurate, flat surface from damage and debris", "To prevent the granite from oxidizing", "To stop it from losing its magnetic charge", "To keep the layout dye from drying out"], ans: "To protect its highly accurate, flat surface from damage and debris" },
+            { q: "Cast iron surface plates feature reinforcing ribs on the underside for what reason?", opts: ["To provide rigidity and prevent warping", "To reduce the weight for portability", "To allow clamps to attach easily", "To dissipate heat generated by friction"], ans: "To provide rigidity and prevent warping" },
+            { q: "Because the surface plate acts as the datum, resting a combination square on it ensures lines are scribed:", opts: ["Perpendicular to the surface plate", "Parallel to the surface plate", "At a 45-degree angle", "With exactly 1mm thickness"], ans: "Perpendicular to the surface plate" },
+
+            // Angle Plates & Parallels (94-100)
+            { q: "What tool consists of an L-shaped piece of cast iron or steel machined to exactly 90 degrees?", opts: ["Angle plate", "Try square", "V-block", "Parallel"], ans: "Angle plate" },
+            { q: "What is the primary function of an angle plate in layout work?", opts: ["Holding workpieces vertically, square to the surface plate", "Finding the center of cylinders", "Scribing arcs and circles", "Raising workpieces to a specific height"], ans: "Holding workpieces vertically, square to the surface plate" },
+            { q: "Angle plates typically feature slots or holes. What are these used for?", opts: ["To allow clamping of the workpiece to the plate", "To reduce the weight of the plate", "To allow layout fluid to drain", "To act as drill guides"], ans: "To allow clamping of the workpiece to the plate" },
+            { q: "What layout tools are square or rectangular blocks of hardened steel used to raise work to a specific height?", opts: ["Parallels", "V-blocks", "Angle plates", "Trammels"], ans: "Parallels" },
+            { q: "Parallels are always used in pairs and are machined so that their opposite sides are exactly:", opts: ["Parallel to each other", "Perpendicular to each other", "At a 45-degree angle", "Cylindrical"], ans: "Parallel to each other" },
+            { q: "By placing a workpiece on a set of parallels, the machinist ensures the bottom of the work is:", opts: ["Parallel to the surface plate", "Clamped securely to the angle plate", "Indented for drilling", "Coated in layout fluid"], ans: "Parallel to the surface plate" },
+            { q: "If a workpiece has a projection on its bottom, what tool is used to elevate it so it sits flat for layout?", opts: ["Parallels", "V-blocks", "Combination square", "C-clamp"], ans: "Parallels" },
+
+            // Clamps (101-105)
+            { q: "Which clamps feature two parallel jaws and two adjusting screws, making them ideal for holding small parts together?", opts: ["Toolmakers' clamps", "C-clamps", "U-shaped clamps", "G-clamps"], ans: "Toolmakers' clamps" },
+            { q: "What is the alternative name for a C-clamp, primarily used in countries outside the US?", opts: ["G-clamp", "F-clamp", "Bar clamp", "Toolmakers' clamp"], ans: "G-clamp" },
+            { q: "Why is the C-clamp named as such?", opts: ["Because of its C-shaped frame", "Because it was invented by a carpenter", "Because it exerts Centripetal force", "Because it is used for Cylindrical objects"], ans: "Because of its C-shaped frame" },
+            { q: "Before it was commonly called a C-clamp or G-clamp, what was this tool originally called?", opts: ["Carriage maker's clamp", "Blacksmith's clamp", "Machinist's clamp", "Shipwright's clamp"], ans: "Carriage maker's clamp" },
+            { q: "Which tool is commonly used to hold a workpiece against an angle plate during layout?", opts: ["C-clamp / G-clamp", "V-block clamp", "Hermaphrodite caliper", "Adjusting screw"], ans: "C-clamp / G-clamp" },
+
+            // Layout Solutions (106-110)
+            { q: "What is applied to the surface of metal to provide a background for sharp, clear-cut layout lines?", opts: ["Layout solution / Layout dye", "Cutting fluid", "Machine oil", "Mineral spirits"], ans: "Layout solution / Layout dye" },
+            { q: "What is the most commonly used layout solution?", opts: ["Layout dye or bluing (e.g., Dykem Steel Blue)", "White chalk", "Red layout fluid", "Clear lacquer"], ans: "Layout dye or bluing (e.g., Dykem Steel Blue)" },
+            { q: "Before applying layout solution, what must be done to the metal surface?", opts: ["It should be clean and free of grease", "It must be heated to 100 degrees Celsius", "It must be polished to a mirror finish", "It must be center-punched"], ans: "It should be clean and free of grease" },
+            { q: "How can layout dye be applied to the work surface?", opts: ["With a cloth, a brush, or sprayed on", "Only by dipping the entire part", "Only with a specialized airbrush", "By rubbing a solid stick over the metal"], ans: "With a cloth, a brush, or sprayed on" },
+            { q: "What happens when a sharp scriber is dragged across a surface coated in layout dye?", opts: ["It scratches off the dye, revealing the bright metal underneath for high contrast", "It causes the dye to permanently stain the metal", "It blends the dye into the metal surface", "It repels the dye, leaving a clear line"], ans: "It scratches off the dye, revealing the bright metal underneath for high contrast" }
+        ];
+
+        // Ensure we have exactly 100 questions. I've drafted 110. I will slice the shuffled array to 100.
+        
+        let questions = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+
+        // Fisher-Yates Shuffle
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function initQuiz() {
+            // Clone and Shuffle Data, then take exactly 100
+            let clonedData = JSON.parse(JSON.stringify(rawData));
+            questions = shuffle(clonedData).slice(0, 100);
+            
+            questions.forEach(q => {
+                q.opts = shuffle(q.opts);
+            });
+
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            
+            buildSidebar();
+            loadQuestion(0);
+        }
+
+        function buildSidebar() {
+            const grid = document.getElementById("nav-grid");
+            grid.innerHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                const btn = document.createElement("button");
+                btn.className = "nav-btn";
+                btn.innerText = i + 1;
+                btn.id = "nav-btn-" + i;
+                btn.onclick = () => {
+                    loadQuestion(i);
+                    toggleSidebar(); // Close sidebar on mobile after clicking
+                };
+                grid.appendChild(btn);
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function loadQuestion(index) {
+            currentQuestion = index;
+            const q = questions[currentQuestion];
+            
+            // Update Header
+            document.getElementById("question-tracker").innerText = `Question ${currentQuestion + 1} of 100`;
+            document.getElementById("score-tracker").innerText = `Score: ${score}`;
+            document.getElementById("question-text").innerText = q.q;
+
+            // Render Options
+            const container = document.getElementById("options-container");
+            container.innerHTML = '';
+
+            q.opts.forEach((opt) => {
+                const btn = document.createElement("button");
+                btn.className = "option";
+                btn.innerText = opt;
+                
+                // If already answered
+                if (userAnswers[currentQuestion] !== null) {
+                    btn.disabled = true;
+                    if (opt === q.ans) {
+                        btn.classList.add("correct");
+                    } else if (opt === userAnswers[currentQuestion]) {
+                        btn.classList.add("incorrect");
+                    }
+                } else {
+                    btn.onclick = () => selectOption(opt);
+                }
+                
+                container.appendChild(btn);
+            });
+
+            // Handle Next Button visibility
+            const nextBtn = document.getElementById("next-btn");
+            if (userAnswers[currentQuestion] !== null) {
+                nextBtn.style.display = "block";
+                nextBtn.innerText = (currentQuestion === questions.length - 1) ? "Finish Quiz ➔" : "Next Question ➔";
+            } else {
+                nextBtn.style.display = "none";
+            }
+
+            updateSidebarHighlight();
+        }
+
+        function selectOption(selectedOpt) {
+            const q = questions[currentQuestion];
+            userAnswers[currentQuestion] = selectedOpt;
+
+            if (selectedOpt === q.ans) {
+                score++;
+                document.getElementById(`nav-btn-${currentQuestion}`).classList.add("answered-correct");
+            } else {
+                document.getElementById(`nav-btn-${currentQuestion}`).classList.add("answered-incorrect");
+            }
+
+            // Re-render to show colors and disable buttons
+            loadQuestion(currentQuestion);
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                loadQuestion(currentQuestion + 1);
+            } else {
+                document.getElementById("quiz-screen").style.display = "none";
+                const results = document.getElementById("results-screen");
+                results.style.display = "block";
+                document.getElementById("final-score").innerText = `You scored ${score} out of 100.`;
+            }
+        }
+
+        function updateSidebarHighlight() {
+            document.querySelectorAll(".nav-btn").forEach((btn, idx) => {
+                btn.classList.remove("active");
+                if (idx === currentQuestion) {
+                    btn.classList.add("active");
+                }
+            });
+        }
+
+        window.onload = initQuiz;
+
+    </script>
+</body>
+</html>
