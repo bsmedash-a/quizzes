@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Measurement Tools Mastery Quiz</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #27ae60;
+            --accent-hover: #219a52;
+            --correct: #2980b9;
+            --incorrect: #e74c3c;
+            --text-main: #333;
+            --text-light: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Hamburger Menu Button */
+        #hamburger-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: 0.3s;
+        }
+
+        #hamburger-btn:hover {
+            background-color: var(--accent);
+        }
+
+        #hamburger-btn div {
+            width: 24px;
+            height: 3px;
+            background-color: var(--text-light);
+            border-radius: 2px;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: -350px;
+            width: 320px;
+            height: 100vh;
+            background-color: var(--primary);
+            color: var(--text-light);
+            transition: left 0.3s ease-in-out;
+            z-index: 999;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 30px 20px 20px 20px;
+            text-align: center;
+            background-color: var(--secondary);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 2px solid var(--accent);
+            margin-top: 50px;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .nav-btn {
+            background-color: var(--secondary);
+            color: var(--text-light);
+            border: 1px solid #4a6278;
+            border-radius: 4px;
+            padding: 10px 0;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .nav-btn:hover { background-color: var(--accent); border-color: var(--accent); }
+        .nav-btn.answered-correct { background-color: var(--correct); border-color: var(--correct); }
+        .nav-btn.answered-incorrect { background-color: var(--incorrect); border-color: var(--incorrect); }
+        .nav-btn.active { box-shadow: 0 0 0 3px #f1c40f; transform: scale(1.1); z-index: 2; }
+
+        /* Main Quiz Container */
+        .quiz-container {
+            background-color: #fff;
+            width: 92%;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 40px;
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background-color: #f8f9fa;
+            border: 2px solid #dcdde1;
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+
+        .option:hover:not(:disabled) {
+            background-color: #e2e8f0;
+            border-color: #b2bec3;
+        }
+
+        .option:disabled {
+            cursor: not-allowed;
+            opacity: 0.95;
+        }
+
+        .option.correct {
+            background-color: var(--correct) !important;
+            border-color: #219a52 !important;
+            color: var(--text-light) !important;
+        }
+
+        .option.incorrect {
+            background-color: var(--incorrect) !important;
+            border-color: #a93226 !important;
+            color: var(--text-light) !important;
+        }
+
+        .action-btn {
+            background-color: var(--accent);
+            color: var(--text-light);
+            border: none;
+            border-radius: 8px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 30px;
+            width: 100%;
+            transition: 0.2s;
+            display: none;
+        }
+
+        .action-btn:hover { background-color: var(--accent-hover); }
+
+        #results-screen {
+            display: none;
+            text-align: center;
+        }
+
+        #results-screen h1 { font-size: 2.8rem; color: var(--primary); margin-bottom: 15px; }
+        #results-screen p { font-size: 1.3rem; color: #7f8c8d; margin-bottom: 30px; }
+        
+        .restart-btn {
+            background-color: var(--correct);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .restart-btn:hover { background-color: #219a52; }
+
+    </style>
+</head>
+<body>
+
+    <button id="hamburger-btn" onclick="toggleSidebar()">
+        <div></div>
+        <div></div>
+        <div></div>
+    </button>
+
+    <div id="sidebar">
+        <div class="sidebar-header">Question Navigator</div>
+        <div class="nav-grid" id="nav-grid"></div>
+    </div>
+
+    <div class="quiz-container">
+        <div id="quiz-screen">
+            <div class="quiz-header">
+                <span id="question-tracker">Question 1 of 100</span>
+                <span id="score-tracker">Score: 0</span>
+            </div>
+            <div class="question-text" id="question-text">Loading question...</div>
+            <div class="options-container" id="options-container"></div>
+            <button class="action-btn" id="next-btn" onclick="nextQuestion()">Next Question ➔</button>
+        </div>
+
+        <div id="results-screen">
+            <h1>Quiz Completed!</h1>
+            <p id="final-score"></p>
+            <button class="restart-btn" onclick="location.reload()">Retake & Reshuffle</button>
+        </div>
+    </div>
+
+    <script>
+        const rawData = [
+            { q: "What are the two major systems of measurement widely used in the world today?", opts: ["English (Inch) and Metric (SI)", "Imperial and Customary", "Metric and Decimal", "Binary and Decimal"], ans: "English (Inch) and Metric (SI)" },
+            { q: "The inch system fractional measurement is based on what numerical base?", opts: ["Base 2 (binary)", "Base 10 (decimal)", "Base 16", "Base 12"], ans: "Base 2 (binary)" },
+            { q: "The inch system decimal-fraction measurement is based on what numerical base?", opts: ["Base 10", "Base 2", "Base 16", "Base 100"], ans: "Base 10" },
+            { q: "What is the equivalent of one inch in millimeters?", opts: ["25.4 mm", "2.54 mm", "254 mm", "10 mm"], ans: "25.4 mm" },
+            { q: "What is the most common measuring tool used in the machine shop?", opts: ["Steel Rule", "Micrometer", "Vernier Caliper", "Snap Gage"], ans: "Steel Rule" },
+            { q: "What are the most common lengths for a steel rule?", opts: ["6 in or 12 in", "3 in or 9 in", "12 in or 24 in", "18 in or 36 in"], ans: "6 in or 12 in" },
+            { q: "Which type of steel rule is the most commonly used for general shop work?", opts: ["Spring-tempered rule", "Flexible rule", "Narrow rule", "Hook rule"], ans: "Spring-tempered rule" },
+            { q: "Which type of steel rule is ideal for measuring curved surfaces?", opts: ["Flexible rule", "Spring-tempered rule", "Narrow rule", "Hook rule"], ans: "Flexible rule" },
+            { q: "Which type of steel rule is used for measuring the depth of small holes or slots?", opts: ["Narrow rule", "Flexible rule", "Spring-tempered rule", "Hook rule"], ans: "Narrow rule" },
+            { q: "Which type of steel rule is used for making measurements from blind edges or through holes?", opts: ["Hook rule", "Narrow rule", "Spring-tempered rule", "Flexible rule"], ans: "Hook rule" },
+            { q: "What measuring instrument is used in conjunction with a steel rule to measure distances between or over surfaces?", opts: ["Caliper", "Micrometer", "Feeler gage", "Radius gage"], ans: "Caliper" },
+            { q: "Which type of caliper is used to measure external dimensions?", opts: ["Outside caliper", "Inside caliper", "Hermaphrodite caliper", "Snap caliper"], ans: "Outside caliper" },
+            { q: "Which type of caliper is used to measure the diameter of holes or widths of keyways and slots?", opts: ["Inside caliper", "Outside caliper", "Hermaphrodite caliper", "Ring caliper"], ans: "Inside caliper" },
+            { q: "Which caliper has one sharp point and one bent leg, used for locating centers or scribing parallel lines?", opts: ["Hermaphrodite caliper", "Outside caliper", "Inside caliper", "Vernier caliper"], ans: "Hermaphrodite caliper" },
+            { q: "What are the two common types of joints found on calipers?", opts: ["Firm-joint and Spring-joint", "Fixed and Sliding", "Ball and Socket", "Ratchet and Friction"], ans: "Firm-joint and Spring-joint" },
+            { q: "Which joint type on a caliper utilizes a knurled nut for making fine adjustments?", opts: ["Spring-joint", "Firm-joint", "Fixed-joint", "Sliding-joint"], ans: "Spring-joint" },
+            { q: "What is the standard precision of an English/Inch micrometer caliper?", opts: ["0.001 inch", "0.01 inch", "0.0001 inch", "0.1 inch"], ans: "0.001 inch" },
+            { q: "What is the standard precision of a Metric micrometer caliper?", opts: ["0.01 mm", "0.1 mm", "0.001 mm", "1.0 mm"], ans: "0.01 mm" },
+            { q: "Which part of the micrometer holds the fixed measuring face?", opts: ["Anvil", "Spindle", "Sleeve", "Thimble"], ans: "Anvil" },
+            { q: "Which part of the micrometer provides the movable measuring face?", opts: ["Spindle", "Anvil", "Frame", "Ratchet stop"], ans: "Spindle" },
+            { q: "Which part of the micrometer contains the main scale?", opts: ["Sleeve (or barrel)", "Thimble", "Spindle", "Frame"], ans: "Sleeve (or barrel)" },
+            { q: "Which part of the micrometer contains the circular scale and rotates to advance the spindle?", opts: ["Thimble", "Sleeve", "Ratchet stop", "Anvil"], ans: "Thimble" },
+            { q: "Which part of the micrometer is used to ensure uniform measuring pressure?", opts: ["Ratchet stop (or friction thimble)", "Spindle lock", "Sleeve", "Anvil"], ans: "Ratchet stop (or friction thimble)" },
+            { q: "What is the shape of the frame on a standard micrometer caliper?", opts: ["U-shaped", "L-shaped", "C-shaped", "T-shaped"], ans: "U-shaped" },
+            { q: "How many threads per inch (TPI) does the screw in an inch micrometer have?", opts: ["40 TPI", "25 TPI", "50 TPI", "10 TPI"], ans: "40 TPI" },
+            { q: "In an inch micrometer, one complete revolution of the thimble advances the spindle by how much?", opts: ["0.025 in.", "0.001 in.", "0.100 in.", "0.050 in."], ans: "0.025 in." },
+            { q: "On the sleeve of an inch micrometer, the major numbered lines represent what distance?", opts: ["0.100 in.", "0.025 in.", "0.001 in.", "1.000 in."], ans: "0.100 in." },
+            { q: "On the sleeve of an inch micrometer, the smaller unnumbered lines between the numbers represent what distance?", opts: ["0.025 in.", "0.100 in.", "0.001 in.", "0.500 in."], ans: "0.025 in." },
+            { q: "How many equal divisions are there on the beveled edge of the thimble of an inch micrometer?", opts: ["25 divisions", "40 divisions", "50 divisions", "10 divisions"], ans: "25 divisions" },
+            { q: "Each division on the thimble of an inch micrometer represents what distance?", opts: ["0.001 in.", "0.025 in.", "0.100 in.", "0.010 in."], ans: "0.001 in." },
+            { q: "What is the pitch of the screw thread in a metric micrometer?", opts: ["0.5 mm", "1.0 mm", "0.01 mm", "0.1 mm"], ans: "0.5 mm" },
+            { q: "In a metric micrometer, one complete revolution of the thimble advances the spindle by how much?", opts: ["0.5 mm", "1.0 mm", "0.01 mm", "0.1 mm"], ans: "0.5 mm" },
+            { q: "On the sleeve of a metric micrometer, the upper set of lines represents what distance?", opts: ["1 mm", "0.5 mm", "0.01 mm", "10 mm"], ans: "1 mm" },
+            { q: "On the sleeve of a metric micrometer, the lower set of lines subdivides the upper lines into what distance?", opts: ["0.5 mm", "1 mm", "0.01 mm", "0.1 mm"], ans: "0.5 mm" },
+            { q: "How many equal divisions are there on the thimble of a metric micrometer?", opts: ["50 divisions", "25 divisions", "100 divisions", "10 divisions"], ans: "50 divisions" },
+            { q: "Each division on the thimble of a metric micrometer represents what distance?", opts: ["0.01 mm", "0.5 mm", "1.0 mm", "0.1 mm"], ans: "0.01 mm" },
+            { q: "Who invented the Vernier principle?", opts: ["Pierre Vernier", "Jean-Baptiste Vernier", "Isaac Newton", "Galileo Galilei"], ans: "Pierre Vernier" },
+            { q: "In what year was the Vernier principle invented?", opts: ["1631", "1531", "1731", "1831"], ans: "1631" },
+            { q: "What are the three types of measurements a standard Vernier caliper can take?", opts: ["Outside, inside, and depth", "Outside, internal thread, and pitch", "Depth, radius, and clearance", "Thickness, length, and angle"], ans: "Outside, inside, and depth" },
+            { q: "What is the precision of a standard English/Inch Vernier caliper?", opts: ["0.001 inch", "0.01 inch", "0.0001 inch", "0.1 inch"], ans: "0.001 inch" },
+            { q: "What is the precision of a standard Metric Vernier caliper?", opts: ["0.02 mm", "0.01 mm", "0.1 mm", "0.002 mm"], ans: "0.02 mm" },
+            { q: "What is the shape of the solid frame on a Vernier caliper that contains the main scale?", opts: ["L-shaped", "U-shaped", "C-shaped", "T-shaped"], ans: "L-shaped" },
+            { q: "On a Vernier caliper, which jaw is attached to the main scale frame?", opts: ["Fixed jaw", "Movable jaw", "Depth jaw", "Sliding jaw"], ans: "Fixed jaw" },
+            { q: "On a Vernier caliper, which part slides along the main scale and contains the vernier scale?", opts: ["Movable jaw", "Fixed jaw", "Anvil", "Thimble"], ans: "Movable jaw" },
+            { q: "In an inch Vernier caliper, each numbered division on the main scale represents what distance?", opts: ["0.100 inch", "1.000 inch", "0.025 inch", "0.001 inch"], ans: "0.100 inch" },
+            { q: "In an inch Vernier caliper, each small unnumbered subdivision on the main scale represents what distance?", opts: ["0.025 inch", "0.100 inch", "0.001 inch", "0.050 inch"], ans: "0.025 inch" },
+            { q: "In an inch Vernier caliper, how many divisions on the main scale occupy the same length as the 25 divisions on the vernier scale?", opts: ["24 divisions", "25 divisions", "26 divisions", "40 divisions"], ans: "24 divisions" },
+            { q: "In an inch Vernier caliper, what is the exact length of one division on the vernier scale?", opts: ["0.024 inch", "0.025 inch", "0.001 inch", "0.100 inch"], ans: "0.024 inch" },
+            { q: "The reading principle of an inch Vernier caliper is based on the difference between one main scale division (0.025\") and one vernier division (0.024\"). What is this difference?", opts: ["0.001 inch", "0.010 inch", "0.0001 inch", "0.100 inch"], ans: "0.001 inch" },
+            { q: "On a metric Vernier caliper, the main scale is graduated in what units?", opts: ["Millimeters (mm)", "Centimeters (cm)", "Decimeters (dm)", "Micrometers (µm)"], ans: "Millimeters (mm)" },
+            { q: "In a metric Vernier caliper, how many divisions on the vernier scale occupy the same length as 49 mm on the main scale?", opts: ["50 divisions", "49 divisions", "100 divisions", "25 divisions"], ans: "50 divisions" },
+            { q: "In a metric Vernier caliper, what is the exact length of one division on the vernier scale?", opts: ["0.98 mm", "1.00 mm", "0.02 mm", "0.50 mm"], ans: "0.98 mm" },
+            { q: "The reading principle of a metric Vernier caliper is based on the difference between one main scale division (1 mm) and one vernier division (0.98 mm). What is this difference?", opts: ["0.02 mm", "0.01 mm", "0.1 mm", "0.05 mm"], ans: "0.02 mm" },
+            { q: "Which measuring instruments are designed for a specific dimension and used extensively in mass production and inspection?", opts: ["Fixed gages", "Vernier calipers", "Micrometers", "Steel rules"], ans: "Fixed gages" },
+            { q: "What material are fixed gages typically made from to ensure durability and accuracy?", opts: ["Hardened steel", "Cast iron", "Aluminum alloy", "Brass"], ans: "Hardened steel" },
+            { q: "Fixed gages are typically manufactured to represent the maximum and minimum limits of a part. What are these two ends commonly called?", opts: ["'Go' and 'No-Go'", "'Max' and 'Min'", "'Pass' and 'Fail'", "'High' and 'Low'"], ans: " 'Go' and 'No-Go'" },
+            { q: "Which type of fixed gage is used to check the internal dimensions of holes?", opts: ["Cylindrical plug gage", "Plain ring gage", "Snap gage", "Feeler gage"], ans: "Cylindrical plug gage" },
+            { q: "On a cylindrical plug gage, how do the 'Go' and 'No-Go' ends differ visually?", opts: ["The 'Go' end is longer than the 'No-Go' end", "The 'No-Go' end is longer than the 'Go' end", "The 'Go' end is painted green", "The 'No-Go' end is threaded"], ans: "The 'Go' end is longer than the 'No-Go' end" },
+            { q: "When using a cylindrical plug gage, what is the condition for a hole to pass inspection?", opts: ["The 'Go' end must enter, and the 'No-Go' end must not enter", "Both ends must enter the hole", "Neither end should enter the hole", "The 'No-Go' end must enter, and the 'Go' end must not"], ans: "The 'Go' end must enter, and the 'No-Go' end must not enter" },
+            { q: "Which fixed gage is used to check external diameters of straight, un-tapered shafts?", opts: ["Plain ring gage", "Cylindrical plug gage", "Thread plug gage", "Radius gage"], ans: "Plain ring gage" },
+            { q: "How are the outside surfaces of plain ring gages typically finished to provide a good grip?", opts: ["Knurled", "Polished", "Threaded", "Rubber-coated"], ans: "Knurled" },
+            { q: "How can you easily identify the 'No-Go' plain ring gage from the 'Go' gage?", opts: ["It has a groove cut on the knurled outside surface", "It is painted red", "It is significantly heavier", "It has a square outside shape"], ans: "It has a groove cut on the knurled outside surface" },
+            { q: "Which fixed gage is C-shaped and used to check external dimensions?", opts: ["Snap gage", "Ring gage", "Plug gage", "Screw pitch gage"], ans: "Snap gage" },
+            { q: "Which fixed gage is used to check the accuracy of internal threads?", opts: ["Thread plug gage", "Thread ring gage", "Snap gage", "Screw pitch gage"], ans: "Thread plug gage" },
+            { q: "Which fixed gage is used to check the accuracy of external threads?", opts: ["Thread ring gage", "Thread plug gage", "Snap gage", "Feeler gage"], ans: "Thread ring gage" },
+            { q: "What category of gages is used to check the shape or profile of a machined part?", opts: ["Form gages", "Fixed gages", "Vernier gages", "Micrometer gages"], ans: "Form gages" },
+            { q: "Which form gage is used to check concave or convex profiles?", opts: ["Radius gage", "Feeler gage", "Screw pitch gage", "Snap gage"], ans: "Radius gage" },
+            { q: "Which form gage is used to check clearances or gaps between mating parts?", opts: ["Feeler (or Thickness) gage", "Radius gage", "Screw pitch gage", "Thread plug gage"], ans: "Feeler (or Thickness) gage" },
+            { q: "The blades or leaves of a feeler gage are marked with their thickness. In what units are these thicknesses typically given?", opts: ["Thousandths of an inch or hundredths of a millimeter", "Tenths of an inch or tenths of a millimeter", "Whole inches or whole millimeters", "Fractions of an inch only"], ans: "Thousandths of an inch or hundredths of a millimeter" },
+            { q: "Which form gage is used to quickly determine the pitch or number of threads per inch (TPI) of a threaded part?", opts: ["Screw pitch gage", "Thread plug gage", "Feeler gage", "Radius gage"], ans: "Screw pitch gage" },
+            { q: "According to the Metric Screw Pitch Gauge table, how many leaves are in the 0.35-6mm range set?", opts: ["22 leaves", "21 leaves", "30 leaves", "24 leaves"], ans: "22 leaves" },
+            { q: "According to the Metric Screw Pitch Gauge table, how many leaves are in the 0.4-7mm range set?", opts: ["21 leaves", "22 leaves", "30 leaves", "25 leaves"], ans: "21 leaves" },
+            { q: "According to the Unified Screw Pitch Gauge table, how many leaves are in the 4-42 TPI range set?", opts: ["30 leaves", "22 leaves", "21 leaves", "40 leaves"], ans: "30 leaves" },
+            { q: "According to the Metric Screw Pitch Gauge table, what is the thread angle?", opts: ["60 degrees", "55 degrees", "90 degrees", "45 degrees"], ans: "60 degrees" },
+            { q: "If you need to measure the thickness of a piece of paper exactly, which tool is best suited?", opts: ["Micrometer caliper", "Steel rule", "Hermaphrodite caliper", "Snap gage"], ans: "Micrometer caliper" },
+            { q: "If the reading on the main scale of an inch Vernier is 1.250\" and the 12th line on the vernier scale aligns perfectly, what is the total reading?", opts: ["1.262\"", "1.250\"", "1.212\"", "1.370\""], ans: "1.262\"" },
+            { q: "If a metric micrometer sleeve shows 5.5 mm and the thimble aligns at 0.15 mm, what is the measurement?", opts: ["5.65 mm", "5.15 mm", "5.50 mm", "6.15 mm"], ans: "5.65 mm" },
+            { q: "If an inch micrometer sleeve shows '2' and one minor line past it (0.225\"), and the thimble is on 0.010\", what is the measurement?", opts: ["0.235\"", "0.210\"", "2.110\"", "0.335\""], ans: "0.235\"" },
+            { q: "Which tool would a machinist use to check the gap of a spark plug?", opts: ["Feeler gage", "Radius gage", "Screw pitch gage", "Thread plug gage"], ans: "Feeler gage" },
+            { q: "To check the external threads on a bolt before it leaves the factory, a quality inspector would use a:", opts: ["Thread ring gage", "Thread plug gage", "Snap gage", "Screw pitch gage"], ans: "Thread ring gage" },
+            { q: "To check the internal threads of a newly tapped nut, the inspector would use a:", opts: ["Thread plug gage", "Thread ring gage", "Plain ring gage", "Cylindrical plug gage"], ans: "Thread plug gage" },
+            { q: "Which steel rule type is ideal for measuring the distance inside a narrow keyway?", opts: ["Narrow rule", "Hook rule", "Spring-tempered rule", "Flexible rule"], ans: "Narrow rule" },
+            { q: "What component is adjusted to change the tension on a Spring-joint caliper?", opts: ["Knurled nut", "Friction joint", "Ratchet stop", "Spindle lock"], ans: "Knurled nut" },
+            { q: "Which tool requires the user to transfer the measurement to a steel rule to get a numerical reading?", opts: ["Outside caliper", "Vernier caliper", "Micrometer", "Feeler gage"], ans: "Outside caliper" },
+            { q: "The English system of measurement is also commonly referred to as the:", opts: ["Inch system", "Metric system", "SI unit system", "Base 10 system"], ans: "Inch system" },
+            { q: "The SI unit of measurement is most widely used by countries in:", opts: ["Europe and Asia", "The United States exclusively", "Only North America", "Only Great Britain"], ans: "Europe and Asia" },
+            { q: "Basic measurements are distinguished from precision measurements primarily by:", opts: ["The tool used (e.g., a rule vs. a micrometer)", "The system of measurement (Metric vs. English)", "The material being measured", "The operator's skill level"], ans: "The tool used (e.g., a rule vs. a micrometer)" },
+            { q: "What is the primary function of the 'No-Go' limit on a fixed gage?", opts: ["To ensure the part is not machined too small or too large beyond the tolerance", "To polish the surface of the part", "To determine the exact numerical measurement of the part", "To hold the part in place during machining"], ans: "To ensure the part is not machined too small or too large beyond the tolerance" },
+            { q: "When using a thread ring gage, what should happen if the external thread is machined correctly?", opts: ["The 'Go' gage screws on smoothly, the 'No-Go' gage does not", "Both gages screw on smoothly", "Neither gage screws on", "The 'No-Go' gage screws on smoothly, the 'Go' gage does not"], ans: "The 'Go' gage screws on smoothly, the 'No-Go' gage does not" },
+            { q: "In the 0.4-7mm Metric Screw Pitch Gauge set, what is the largest pitch it can measure?", opts: ["7 mm", "6 mm", "0.4 mm", "21 mm"], ans: "7 mm" },
+            { q: "In the 4-42 TPI Unified Screw Pitch Gauge set, what is the smallest thread pitch (highest TPI) it can measure?", opts: ["42 TPI", "4 TPI", "30 TPI", "60 TPI"], ans: "42 TPI" },
+            { q: "On a micrometer, the friction thimble serves the exact same purpose as the:", opts: ["Ratchet stop", "Spindle lock", "Anvil", "Sleeve"], ans: "Ratchet stop" },
+            { q: "To lock a micrometer measurement in place before removing it from the workpiece, you use the:", opts: ["Spindle lock", "Ratchet stop", "Thimble", "Frame"], ans: "Spindle lock" },
+            { q: "The part of the vernier caliper that extends from the back and measures the depth of blind holes is called the:", opts: ["Depth probe/blade", "Fixed jaw", "Movable jaw", "Anvil"], ans: "Depth probe/blade" },
+            { q: "Which tool is best for locating the exact center of a round steel shaft?", opts: ["Hermaphrodite caliper", "Inside caliper", "Snap gage", "Feeler gage"], ans: "Hermaphrodite caliper" },
+            { q: "The fractional inch system relies on divisions of halves, quarters, eighths, etc., meaning it is based on:", opts: ["The binary system (base 2)", "The decimal system (base 10)", "The metric system (base 10)", "The hex system (base 16)"], ans: "The binary system (base 2)" },
+            { q: "A micrometer calibrated in ten-thousandths of an inch (0.0001\") features an additional scale on the sleeve called a:", opts: ["Vernier scale", "Main scale", "Thimble scale", "Metric scale"], ans: "Vernier scale" },
+            { q: "A part measured with a Go/No-Go gage is rejected if:", opts: ["The 'No-Go' gage fits the part", "The 'Go' gage fits the part", "The gage is made of hardened steel", "The part has a radius"], ans: "The 'No-Go' gage fits the part" },
+            { q: "When using a radius gage, a perfect match means:", opts: ["No light is visible between the gage and the workpiece profile", "The gage slides freely with a large gap", "The gage bends to fit the part", "The gage removes material from the part"], ans: "No light is visible between the gage and the workpiece profile" },
+            { q: "Why are measuring surfaces on micrometers and vernier calipers often tipped with carbide?", opts: ["To increase wear resistance and maintain accuracy", "To make the tool lighter", "To reduce the cost of the tool", "To make the tool rust-proof"], ans: "To increase wear resistance and maintain accuracy" },
+            { q: "Which of the following is NOT a component of a micrometer caliper?", opts: ["L-shaped solid frame", "Spindle", "Anvil", "Thimble"], ans: "L-shaped solid frame" }
+        ];
+
+        let questions = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+
+        // Fisher-Yates Shuffle
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function initQuiz() {
+            // Clone and Shuffle Data
+            let clonedData = JSON.parse(JSON.stringify(rawData));
+            questions = shuffle(clonedData);
+            
+            questions.forEach(q => {
+                q.opts = shuffle(q.opts);
+            });
+
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            
+            buildSidebar();
+            loadQuestion(0);
+        }
+
+        function buildSidebar() {
+            const grid = document.getElementById("nav-grid");
+            grid.innerHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                const btn = document.createElement("button");
+                btn.className = "nav-btn";
+                btn.innerText = i + 1;
+                btn.id = "nav-btn-" + i;
+                btn.onclick = () => {
+                    loadQuestion(i);
+                    toggleSidebar(); // Close sidebar on mobile after clicking
+                };
+                grid.appendChild(btn);
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function loadQuestion(index) {
+            currentQuestion = index;
+            const q = questions[currentQuestion];
+            
+            // Update Header
+            document.getElementById("question-tracker").innerText = `Question ${currentQuestion + 1} of 100`;
+            document.getElementById("score-tracker").innerText = `Score: ${score}`;
+            document.getElementById("question-text").innerText = q.q;
+
+            // Render Options
+            const container = document.getElementById("options-container");
+            container.innerHTML = '';
+
+            q.opts.forEach((opt) => {
+                const btn = document.createElement("button");
+                btn.className = "option";
+                btn.innerText = opt;
+                
+                // If already answered
+                if (userAnswers[currentQuestion] !== null) {
+                    btn.disabled = true;
+                    if (opt === q.ans) {
+                        btn.classList.add("correct");
+                    } else if (opt === userAnswers[currentQuestion]) {
+                        btn.classList.add("incorrect");
+                    }
+                } else {
+                    btn.onclick = () => selectOption(opt);
+                }
+                
+                container.appendChild(btn);
+            });
+
+            // Handle Next Button visibility
+            const nextBtn = document.getElementById("next-btn");
+            if (userAnswers[currentQuestion] !== null) {
+                nextBtn.style.display = "block";
+                nextBtn.innerText = (currentQuestion === questions.length - 1) ? "Finish Quiz ➔" : "Next Question ➔";
+            } else {
+                nextBtn.style.display = "none";
+            }
+
+            updateSidebarHighlight();
+        }
+
+        function selectOption(selectedOpt) {
+            const q = questions[currentQuestion];
+            userAnswers[currentQuestion] = selectedOpt;
+
+            if (selectedOpt === q.ans) {
+                score++;
+                document.getElementById(`nav-btn-${currentQuestion}`).classList.add("answered-correct");
+            } else {
+                document.getElementById(`nav-btn-${currentQuestion}`).classList.add("answered-incorrect");
+            }
+
+            // Re-render to show colors and disable buttons
+            loadQuestion(currentQuestion);
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                loadQuestion(currentQuestion + 1);
+            } else {
+                document.getElementById("quiz-screen").style.display = "none";
+                const results = document.getElementById("results-screen");
+                results.style.display = "block";
+                document.getElementById("final-score").innerText = `You scored ${score} out of 100.`;
+            }
+        }
+
+        function updateSidebarHighlight() {
+            document.querySelectorAll(".nav-btn").forEach((btn, idx) => {
+                btn.classList.remove("active");
+                if (idx === currentQuestion) {
+                    btn.classList.add("active");
+                }
+            });
+        }
+
+        window.onload = initQuiz;
+
+    </script>
+</body>
+</html>
