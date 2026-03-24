@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #00d2ff; --glass-bg: rgba(255, 255, 255, 0.1); --glass-border: rgba(255, 255, 255, 0.2); --text-light: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body {
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a2a6c, #11998e); background-size: 400% 400%; animation: gradientBG 15s ease infinite;
+            color: var(--text-light); min-height: 100vh; padding: 2rem; overflow-x: hidden;
+        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        
+        .back-btn {
+            display: inline-block; background: var(--glass-bg); border: 1px solid var(--glass-border); color: white; padding: 10px 20px;
+            border-radius: 30px; cursor: pointer; text-decoration: none; margin-bottom: 20px; transition: 0.3s; backdrop-filter: blur(10px);
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.2); transform: translateX(-5px); }
+
+        .container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+        .subject-header { font-size: 2rem; margin: 2rem 0 1.5rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary); color: #fff; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; }
+        
+        .category-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 15px; padding: 1.5rem; backdrop-filter: blur(12px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; }
+        .category-card h3 { font-size: 1.5rem; margin-bottom: 1rem; color: #00d2ff; }
+        .quiz-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        
+        .quiz-item a {
+            display: flex; justify-content: space-between; padding: 10px 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;
+            color: var(--text-light); text-decoration: none; font-size: 1rem; transition: all 0.3s ease; border: 1px solid transparent;
+        }
+        .quiz-item a:hover { background: rgba(0, 210, 255, 0.15); border-color: var(--primary); padding-left: 20px; color: #fff; }
+        .quiz-item a::after { content: '→'; opacity: 0; transform: translateX(-10px); transition: all 0.3s ease; }
+        .quiz-item a:hover::after { opacity: 1; transform: translateX(0); }
+        .new-badge { background: #ff4757; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; margin-left: 10px; font-weight: bold; }
+        @media (max-width: 768px) { body { padding: 1rem; } .subject-header { font-size: 1.5rem; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Back to Home</a>
+        
+        <h2 class="subject-header">Comprehensive Course 2</h2>
+        <div class="grid-container">
+            <div class="category-card">
+                <h3>Machine Shop</h3>
+                <ul class="quiz-list">
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/1" target="_blank">1. Hand Tools</a></li>
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/2" target="_blank">2. Layout Tools</a></li>
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/3" target="_blank">3. Measurement</a></li>
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/4" target="_blank">4. Safety</a></li>
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/5" target="_blank">5. Drilling</a></li>
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/6" target="_blank">6. Lathe</a></li>
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/7" target="_blank">7. Milling</a></li>
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/8" target="_blank">8. Shaper</a></li>
+                  <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-1" target="_blank">Elements (1-100)</a></li>
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-2" target="_blank">Elements (101-200)</a></li>
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-3" target="_blank">Elements (201-300)</a></li>
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-4" target="_blank">Elements (301-400)</a></li>
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-5" target="_blank">Elements (400+)</a></li>
+                </ul>
+            </div>
+
+            <div class="category-card">
+                <h3>Materials Science and Engineering</h3>
+                <ul class="quiz-list">
+                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials1" target="_blank">Quiz 1: Fundamentals</a></li>
+                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials2" target="_blank">Quiz 2: Properties</a></li>
+                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials3" target="_blank">Quiz 3: Testing</a></li>
+                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials4" target="_blank">Quiz 4: Processing</a></li>
+                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials5" target="_blank">Quiz 5: Selection</a></li>
+                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials6" target="_blank">Quiz 6: Advanced</a></li>
+                </ul>
+            </div>
+
+            <div class="category-card">
+                <h3>Machine Elements</h3>
+                <ul class="quiz-list">
+                    <li class="quiz-item"><a href="elements.html" target="_blank">Mechanisms & Kinematics <span class="new-badge">NEW</span></a></li>
+                </ul>
+            </div>
+        </div>
+
+        <h2 class="subject-header">Industrial Power Plant</h2>
+        <div class="grid-container">
+            <div class="category-card">
+                <h3>Industrial Topics</h3>
+                <ul class="quiz-list">
+                    <li class="quiz-item"><a href="https://regal-cheesecake-f9775f.netlify.app/air" target="_blank">Air Pollution</a></li>
+                    <li class="quiz-item"><a href="https://regal-cheesecake-f9775f.netlify.app/waterA" target="_blank">Waste Water (Set A)</a></li>
+                    <li class="quiz-item"><a href="https://regal-cheesecake-f9775f.netlify.app/waterB" target="_blank">Waste Water (Set B)</a></li>
+                    <li class="quiz-item"><a href="https://dreamy-gumption-fab1e9.netlify.app/pumps" target="_blank">Pumps & Compressors</a></li>
+                </ul>
+            </div>
+        </div>
+        <div style="height: 50px;"></div>
+    </div>
+</body>
+</html>
