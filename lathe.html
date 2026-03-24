@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lathe Machine Operation Mastery Quiz</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #d35400;
+            --accent-hover: #e67e22;
+            --correct: #27ae60;
+            --incorrect: #e74c3c;
+            --text-main: #333;
+            --text-light: #fff;
+            --explanation-bg: #eafaf1;
+            --explanation-border: #2ecc71;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Hamburger Menu Button */
+        #hamburger-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: 0.3s;
+        }
+
+        #hamburger-btn:hover { background-color: var(--accent); }
+        #hamburger-btn div { width: 24px; height: 3px; background-color: var(--text-light); border-radius: 2px; }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            position: fixed;
+            top: 0; left: -350px; width: 320px; height: 100vh;
+            background-color: var(--primary); color: var(--text-light);
+            transition: left 0.3s ease-in-out; z-index: 999;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column;
+        }
+
+        #sidebar.open { left: 0; }
+
+        .sidebar-header {
+            padding: 30px 20px 20px 20px; text-align: center;
+            background-color: var(--secondary); font-size: 1.2rem;
+            font-weight: bold; border-bottom: 2px solid var(--accent); margin-top: 50px;
+        }
+
+        .nav-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+            padding: 20px; overflow-y: auto; flex-grow: 1;
+        }
+
+        .nav-btn {
+            background-color: var(--secondary); color: var(--text-light);
+            border: 1px solid #4a6278; border-radius: 4px; padding: 8px 0;
+            font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+
+        .nav-btn:hover { background-color: var(--accent); border-color: var(--accent); }
+        .nav-btn.answered-correct { background-color: var(--correct); border-color: var(--correct); }
+        .nav-btn.answered-incorrect { background-color: var(--incorrect); border-color: var(--incorrect); }
+        .nav-btn.active { box-shadow: 0 0 0 3px #f1c40f; transform: scale(1.1); z-index: 2; }
+
+        /* Main Quiz Container */
+        .quiz-container {
+            background-color: #fff; width: 92%; max-width: 850px;
+            border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 40px; margin: 40px 0; position: relative;
+        }
+
+        .quiz-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #eee;
+            font-size: 1.1rem; font-weight: bold; color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.25rem; line-height: 1.6; margin-bottom: 25px;
+            color: var(--primary); font-weight: 600;
+        }
+
+        .options-container { display: flex; flex-direction: column; gap: 10px; }
+
+        .option {
+            background-color: #f8f9fa; border: 2px solid #dcdde1; border-radius: 8px;
+            padding: 15px 20px; font-size: 1.05rem; color: var(--text-main);
+            text-align: left; cursor: pointer; transition: 0.2s; font-weight: 500;
+        }
+
+        .option:hover:not(:disabled) { background-color: #e2e8f0; border-color: #b2bec3; }
+        .option:disabled { cursor: not-allowed; opacity: 0.95; }
+        .option.correct { background-color: var(--correct) !important; border-color: #219a52 !important; color: var(--text-light) !important; }
+        .option.incorrect { background-color: var(--incorrect) !important; border-color: #a93226 !important; color: var(--text-light) !important; }
+
+        /* Explanation Box */
+        .explanation-box {
+            display: none; margin-top: 20px; padding: 20px;
+            background-color: var(--explanation-bg); border-left: 5px solid var(--explanation-border);
+            border-radius: 0 8px 8px 0; font-size: 1rem; line-height: 1.5; color: #2c3e50;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        .explanation-box strong { color: var(--primary); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .action-btn {
+            background-color: var(--accent); color: var(--text-light);
+            border: none; border-radius: 8px; padding: 15px 30px;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            margin-top: 20px; width: 100%; transition: 0.2s; display: none;
+        }
+
+        .action-btn:hover { background-color: var(--accent-hover); }
+
+        #results-screen { display: none; text-align: center; }
+        #results-screen h1 { font-size: 2.8rem; color: var(--primary); margin-bottom: 15px; }
+        #results-screen p { font-size: 1.3rem; color: #7f8c8d; margin-bottom: 30px; }
+        .restart-btn { background-color: var(--correct); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .restart-btn:hover { background-color: #219a52; }
+    </style>
+</head>
+<body>
+
+    <button id="hamburger-btn" onclick="toggleSidebar()">
+        <div></div><div></div><div></div>
+    </button>
+
+    <div id="sidebar">
+        <div class="sidebar-header">Question Navigator</div>
+        <div class="nav-grid" id="nav-grid"></div>
+    </div>
+
+    <div class="quiz-container">
+        <div id="quiz-screen">
+            <div class="quiz-header">
+                <span id="question-tracker">Question 1 of 100</span>
+                <span id="score-tracker">Score: 0</span>
+            </div>
+            <div class="question-text" id="question-text">Loading question...</div>
+            <div class="options-container" id="options-container"></div>
+            
+            <div class="explanation-box" id="explanation-box"></div>
+            
+            <button class="action-btn" id="next-btn" onclick="nextQuestion()">Next Question ➔</button>
+        </div>
+
+        <div id="results-screen">
+            <h1>Quiz Completed!</h1>
+            <p id="final-score"></p>
+            <button class="restart-btn" onclick="location.reload()">Retake & Reshuffle</button>
+        </div>
+    </div>
+
+    <script>
+        const rawData = [
+            { q: "What is historically considered the forerunner of all machine tools?", opts: ["Lathe", "Milling machine", "Drill press", "Shaper"], ans: "Lathe", expl: "The document explicitly states 'Historically, the lathe is the forerunner of all machine tools.' The other machines are not mentioned as the historical forerunner." },
+            { q: "What was the first application of the lathe principle used in prehistoric times?", opts: ["The potter's wheel", "The water mill", "The printing press", "The weaving loom"], ans: "The potter's wheel", expl: "The text states 'The first application of the lathe principle was probably the potter's wheel used in prehistoric times.' It does not mention water mills, presses, or looms." },
+            { q: "Which type of lathe is small, mounted on a bench, and used for small work?", opts: ["Bench Lathe", "Engine Lathe", "Turret Lathe", "CNC Lathe"], ans: "Bench Lathe", expl: "The text states a Bench Lathe 'is a small lathe usually mounted on a bench and is used for small work.' Engine and Turret lathes are larger or for manufacturing." },
+            { q: "What is another name for an Engine Lathe?", opts: ["Plain lathe", "Turret lathe", "Bench lathe", "Potter's wheel"], ans: "Plain lathe", expl: "The document states 'Engine Lathe Is also known as a plain lathe...' The other terms refer to entirely different types of machines." },
+            { q: "Which lathe requires considerable mechanical skill to make and adjust tools in the head and cross slide, but little skill to operate once set?", opts: ["Turret Lathe", "Bench Lathe", "Engine Lathe", "Potter's wheel"], ans: "Turret Lathe", expl: "The text specifies 'Turret Lathe... Considerable mechanical skill is required to make and adjust the several cutting tools... but when the tools are once made... it requires little mechanical skill to operate.'" },
+            { q: "How is the size of a lathe designated?", opts: ["By the largest work diameter swung over lathe ways and maximum distance between centers", "By the horsepower of its motor and weight", "By the number of gears in the headstock", "By the length of its cross-slide"], ans: "By the largest work diameter swung over lathe ways and maximum distance between centers", expl: "The text explicitly states lathe size is 'Designated by largest work diameter that can be swung over lathe ways and generally the maximum distance between centers.'" },
+            { q: "What are the typical dimensions of a common engine lathe?", opts: ["13 in. swing, 6 ft long bed, 36 in. between centers", "20 in. swing, 10 ft long bed, 48 in. between centers", "9 in. swing, 3 ft long bed, 16 in. between centers", "30 in. swing, 12 ft long bed, 60 in. between centers"], ans: "13 in. swing, 6 ft long bed, 36 in. between centers", expl: "The document provides the standard example: 'Typical lathe: 13 in. swing, 6 ft long bed, 36 in.' between centers." },
+            { q: "What part of the lathe provides the solid foundation and support for other components?", opts: ["The Bed", "The Carriage", "The Headstock", "The Tailstock"], ans: "The Bed", expl: "The text states 'The bed is part of the lathe that provides support for the other components. It is the foundation on which all other parts are fitted.'" },
+            { q: "What material is the lathe bed usually made of?", opts: ["Heavily ribbed rigid cast iron", "Solid aluminum", "Hardened stainless steel", "High speed steel"], ans: "Heavily ribbed rigid cast iron", expl: "The text specifically states 'The bed is usually made from heavily ribbed rigid cast iron casting.' Other materials are not used for this foundation." },
+            { q: "What is the function of the headstock?", opts: ["Provides the means of holding and rotating the work accurately", "Supports the right hand end of the work", "Holds and moves the cutting tool", "Changes the speed of the feed shaft"], ans: "Provides the means of holding and rotating the work accurately", expl: "'The headstock is the lathe feature that provides the means of holding and rotating the work accurately.' The tailstock supports the right end, and the carriage moves the tool." },
+            { q: "Where is the headstock fixed on the lathe?", opts: ["Left hand end of the bed", "Right hand end of the bed", "On the saddle", "Inside the gear box"], ans: "Left hand end of the bed", expl: "The text mentions the headstock consists of a 'housing fixed to the left hand end of the lathe bed.'" },
+            { q: "What part of the lathe is mainly used to support the right hand end of the work?", opts: ["Tailstock", "Headstock", "Carriage", "Apron"], ans: "Tailstock", expl: "The text states 'The tailstock is used mainly to support the right hand end of the work.'" },
+            { q: "To what standard is the left hand end of the tailstock spindle bored out?", opts: ["Morse standard taper", "Acme taper", "Unified standard taper", "Brown & Sharpe taper"], ans: "Morse standard taper", expl: "The text specifies that the 'left hand end of the spindle is bored out to a Morse standard taper to take the tailstock center...'" },
+            { q: "What lathe feature provides the method of holding and moving the cutting tool accurately?", opts: ["Carriage", "Headstock", "Tailstock", "Gear box"], ans: "Carriage", expl: "The text explicitly states 'The carriage is a lathe feature that provides the method of holding and moving the cutting tool accurately.'" },
+            { q: "What are the two major parts of the Carriage?", opts: ["Apron and Saddle", "Headstock and Tailstock", "Lead screw and Feed rod", "Cross-slide and Compound rest"], ans: "Apron and Saddle", expl: "The text states the carriage 'consist of two major parts: The Apron and the Saddle.'" },
+            { q: "What carriage part is bolted to the front of the saddle and contains the mechanism for moving it?", opts: ["Apron", "Compound rest", "Tool post", "Top slide"], ans: "Apron", expl: "The text says 'The apron is bolted to the front of the saddle. It contains the mechanism for moving and controlling the carriage.'" },
+            { q: "Which part of the carriage fits across and moves along the bed between the head and tailstock?", opts: ["Saddle", "Apron", "Cross-slide", "Toolholder"], ans: "Saddle", expl: "The text states 'The saddle is part of the carriage that fits across and moves along the bed, between the head and tailstock.'" },
+            { q: "What slide is mounted on top of the saddle and moves at right angles to the bed?", opts: ["Cross slide", "Top slide", "Compound rest", "Apron"], ans: "Cross slide", expl: "The text says 'The cross slide is mounted on top of the saddle and provide a cross movement for the cutting tool. The slide is at right angles to the bed...'" },
+            { q: "Which part of the saddle can be swiveled horizontally through 360 degrees?", opts: ["Compound rest", "Cross slide", "Top slide", "Tool post"], ans: "Compound rest", expl: "The text specifically notes 'The compound rest may be swiveled horizontally through 360°.'" },
+            { q: "What is fitted on top of the compound rest and supports the tool post?", opts: ["Top slide", "Apron", "Cross slide", "Saddle lock"], ans: "Top slide", expl: "The text states 'The top slide is fitted on top of the compound rest. It provides a means of supporting the tool post...'" },
+            { q: "Where is the variable speed gear box located on the lathe bed?", opts: ["Left hand", "Right hand", "On the saddle", "In the tailstock"], ans: "Left hand", expl: "The text states 'Located at the left hand of the lathe bed is a variable speed gear box.'" },
+            { q: "What safety rule applies to setting speeds on a lathe?", opts: ["NEVER change speeds when lathe is running", "Always change speeds when the chuck is revolving", "Set the speed only when the cutting tool is engaged", "Change the speed using the handwheel"], ans: "NEVER change speeds when lathe is running", expl: "The text includes a warning: 'Safety Note!! NEVER change speeds when lathe is running.'" },
+            { q: "What are shear pins in the lathe made of?", opts: ["Brass", "Cast iron", "High-speed steel", "Ceramic"], ans: "Brass", expl: "The text states shear pins are 'Made of brass' to prevent damage to the gear train from overloads." },
+            { q: "Where are spring-loaded slip clutches found on the lathe?", opts: ["Only on feed rods", "On lead screws", "On the end gear train", "Inside the headstock spindle"], ans: "Only on feed rods", expl: "The text specifies: 'Spring-loaded slip clutches Found only on feed rods'. Shear pins are found on the feed rod, lead screw, and end gear train." },
+            { q: "Which chuck is most commonly used to grasp work quickly and accurately and has three jaws that move simultaneously?", opts: ["Three-jaw Universal Chuck", "Four-Jaw Independent Chuck", "Collet Chuck", "Cam-lock Chuck"], ans: "Three-jaw Universal Chuck", expl: "The text explains the 'Three-jaw universal... Grasps work quickly and accurate... Three jaws move simultaneously when adjusted by chuck wrench'." },
+            { q: "What component causes the three jaws of a universal chuck to move simultaneously?", opts: ["Scroll plate", "Lead screw", "Cam-lock", "T-wrench"], ans: "Scroll plate", expl: "The text states the simultaneous movement is 'Caused by scroll plate into which all three jaws fit'." },
+            { q: "Which chuck has four jaws that can each be adjusted independently?", opts: ["Four-Jaw Independent Chuck", "Three-jaw Universal Chuck", "Collet Chuck", "Magnetic Chuck"], ans: "Four-Jaw Independent Chuck", expl: "The text describes the 'Four-Jaw Independent Chuck... Has four jaws Each can be adjusted independently by chuck wrench'." },
+            { q: "Which type of chuck is considered the most accurate and is used for high-precision work?", opts: ["Collet Chuck", "Three-jaw Universal Chuck", "Four-Jaw Independent Chuck", "Drill Chuck"], ans: "Collet Chuck", expl: "The text lists under 'Collet Chuck' that it is the 'Most accurate chuck' and 'Used for high-precision work'." },
+            { q: "What is the range of a spring collet over or under the size stamped on it?", opts: ["Only a few thousandths of an inch", "Half an inch", "One inch", "Several centimeters"], ans: "Only a few thousandths of an inch", expl: "The text specifies 'Each collet has range of only few thousandths of an inch over or under size stamped on collet'." },
+            { q: "Which type of lathe dog is most commonly used for round workpieces?", opts: ["Standard bent-tail lathe dog", "Straight-tail lathe dog", "Clamp lathe dog", "Safety clamp lathe dog"], ans: "Standard bent-tail lathe dog", expl: "The text states the 'Standard bent-tail lathe dog' is 'Most commonly used for round workpieces'." },
+            { q: "Which lathe dog is driven by a stud in the driveplate and is used in precision turning?", opts: ["Straight-tail lathe dog", "Standard bent-tail lathe dog", "Clamp lathe dog", "Safety clamp lathe dog"], ans: "Straight-tail lathe dog", expl: "The text notes the 'Straight-tail lathe dog' is 'Driven by stud in driveplate Used in precision turning'." },
+            { q: "Which toolholder is offset to the right, designed for machining work close to the chuck and cutting right to left?", opts: ["Left-Hand Offset Toolholder", "Right-Hand Offset Toolholder", "Straight Toolholder", "Threading Toolholder"], ans: "Left-Hand Offset Toolholder", expl: "The text defines 'Left-Hand Offset Toolholder' as being 'Offset to the right', 'Designed for machining work close to chuck', and 'cutting right to left'." },
+            { q: "Which toolholder is offset to the left and designated by the letter R?", opts: ["Right-Hand Offset Toolholder", "Left-Hand Offset Toolholder", "Straight Toolholder", "Cutting-Off Toolholder"], ans: "Right-Hand Offset Toolholder", expl: "The 'Right-Hand Offset Toolholder' is 'Offset to the left' and 'Designated by letter R'." },
+            { q: "Which toolholder is designated by the letter S and used for taking cuts in either direction?", opts: ["Straight Toolholder", "Left-Hand Offset Toolholder", "Right-Hand Offset Toolholder", "Parting Toolholder"], ans: "Straight Toolholder", expl: "The 'Straight Toolholder' is a 'General-purpose type' that is 'Used for taking cuts in either direction' and 'Designated by letter S'." },
+            { q: "What kind of tools are used when work must be grooved or parted off?", opts: ["Cutting-Off (Parting) Tools", "Threading Toolholder", "Boring bars", "Straight Toolholder"], ans: "Cutting-Off (Parting) Tools", expl: "The text states 'Cutting-Off (Parting) Tools' are 'Used when work must be grooved or parted off'." },
+            { q: "What is the definition of Cutting Speed on a lathe?", opts: ["Rate at which a point on work circumference travels past cutting tool", "Distance cutting tool advances along length of work per revolution", "The depth of chip taken by cutting tool", "Revolutions per minute of the spindle"], ans: "Rate at which a point on work circumference travels past cutting tool", expl: "The text defines Cutting Speed as the 'Rate at which point on work circumference travels past cutting tool'." },
+            { q: "What happens if the cutting speed is too high?", opts: ["Cutting-tool breaks down rapidly", "Time is lost", "Production rates are low", "The lathe stops automatically"], ans: "Cutting-tool breaks down rapidly", expl: "The text warns: 'Too high: cutting-tool breaks down rapidly'. Too low results in time lost and low production." },
+            { q: "According to the chart, what is the rough cut speed for Aluminum using a High-Speed Steel Toolbit?", opts: ["200 ft/min", "90 ft/min", "70 ft/min", "60 ft/min"], ans: "200 ft/min", expl: "The chart lists 'Aluminum' under 'Rough Cut' with a value of '200 ft/min'." },
+            { q: "According to the chart, what is the rough cut speed for Cast iron?", opts: ["60 ft/min", "100 ft/min", "90 ft/min", "200 ft/min"], ans: "60 ft/min", expl: "The chart lists 'Cast iron' under 'Rough Cut' with a value of '60 ft/min'." },
+            { q: "What is the inch formula used to calculate Lathe Spindle Speed (r/min)?", opts: ["(CS x 4) / D", "(CS x 320) / D", "(CS x D) / 4", "(CS x 12) / D"], ans: "(CS x 4) / D", expl: "The text provides the formula: 'r/min = (CS x 12) / (pi x D) = (CS x 4) / D'." },
+            { q: "What is the metric formula to calculate r/min for a lathe?", opts: ["(CS x 320) / D", "(CS x 4) / D", "(CS x D) / 320", "(CS x 100) / D"], ans: "(CS x 320) / D", expl: "The text provides the 'Metric Formula r/min = (CS x 320) / D'." },
+            { q: "How is Lathe Feed defined?", opts: ["Distance cutting tool advances along length of work for every revolution of the spindle", "Rate at which point on work circumference travels past cutting tool", "Depth of chip taken by cutting tool", "Amount of material removed from the diameter"], ans: "Distance cutting tool advances along length of work for every revolution of the spindle", expl: "The text defines Lathe Feed as the 'Distance cutting tool advances along length of work for every revolution of the spindle'." },
+            { q: "What is the purpose of a roughing cut?", opts: ["To remove excess material quickly", "To bring diameter exactly to size", "To produce a good surface finish", "To polish the workpiece"], ans: "To remove excess material quickly", expl: "The text states the 'Roughing cut Purpose to remove excess material quickly'." },
+            { q: "What feed rate is recommended for a finishing cut to produce a good finish?", opts: [".003 to .005 in.", ".010 to .015 in.", ".020 to .030 in.", "1.0 to 1.5 in."], ans: ".003 to .005 in.", expl: "The text says 'Finishing cut... Fine feed: Produce good finish • .003- to .005-in'." },
+            { q: "How is 'Depth of Cut' defined on a lathe?", opts: ["Depth of chip taken by cutting tool and one-half total amount removed from workpiece in one cut", "Total amount of material removed from the diameter", "Distance cutting tool advances per revolution", "Speed of the tool"], ans: "Depth of chip taken by cutting tool and one-half total amount removed from workpiece in one cut", expl: "The text states 'Depth of Cut • Depth of chip taken by cutting tool and one-half total amount removed from workpiece in one cut'." },
+            { q: "On a machine where the workpiece revolves, if you want to reduce the diameter by .020 in, how much should the cutting tool be set in?", opts: [".010 in", ".020 in", ".040 in", ".005 in"], ans: ".010 in", expl: "The text states 'the cutting tool should be set in for only half the amount to be removed from the diameter.' Half of .020 is .010 in." },
+            { q: "If the workpiece does NOT revolve, how much should the tool be set in to remove .010 in?", opts: [".010 in", ".005 in", ".020 in", ".015 in"], ans: ".010 in", expl: "The text notes 'On machines where the workpiece does not revolve, the cutting tool should be set in for the amount of material to be removed.' So setting it to .010 removes .010." },
+            { q: "What should you do if the graduated collar is turned past the desired setting?", opts: ["Turn it backward a half-turn and feed into proper setting to remove backlash", "Just turn it back to the exact mark", "Disengage the split-nut lever", "Hit the emergency stop"], ans: "Turn it backward a half-turn and feed into proper setting to remove backlash", expl: "The text instructs: 'If graduated collar turned past desired setting, must be turned backward half-turn and fed into proper setting to remove backlash'." },
+            { q: "For shoulder turning, to what angle should the compound rest be set to the cross-slide?", opts: ["90 degrees", "30 degrees", "84 degrees 16 minutes", "45 degrees"], ans: "90 degrees", expl: "The text specifies under Shoulder turning: 'Compound rest set at 90° to cross-slide'." },
+            { q: "For facing operations, the compound rest is swung to what angle so that the amount removed is half the feed on the collar?", opts: ["30 degrees", "90 degrees", "84 degrees 16 minutes", "60 degrees"], ans: "30 degrees", expl: "The text states 'Facing Compound rest swung to 30°, amount removed from length of work = 1/2 amount of feed on collar'." },
+            { q: "What is the compound rest set to for making very fine settings (where .001 in movement = .0001 in infeed)?", opts: ["84 degrees 16 minutes", "90 degrees", "30 degrees", "45 degrees"], ans: "84 degrees 16 minutes", expl: "The text explains 'Machining accurate diameters • Set compound rest to 84°16' to the cross-slide' for fine .0001 in. adjustments." },
+            { q: "Which of the following is a key safety precaution regarding clothing when operating a lathe?", opts: ["Roll up sleeves, remove tie, and tuck in loose clothing", "Wear a watch to time the operations", "Wear long sleeves for protection from chips", "Leave safety guards removed for better visibility"], ans: "Roll up sleeves, remove tie, and tuck in loose clothing", expl: "The Safety Precautions section explicitly states 'Rollup sleeves, remove tie and tuck in loose clothing' and 'Never wear ring or watch'." },
+            { q: "Why should you NEVER use a rag to clean the work or machine when in operation?", opts: ["The rag can get caught and drag in your hand", "The rag will leave lint on the finished piece", "It ruins the cutting fluid", "It dulls the cutting tool"], ans: "The rag can get caught and drag in your hand", expl: "The text warns: 'Do not use rag to clean work or machine when in operation. Rag can get caught and drag in hand'." },
+            { q: "Why must you always remove the chuck wrench after use?", opts: ["It can fly out and injure someone or become jammed", "It blocks the cross-slide movement", "It affects the precision of the cut", "It prevents the tailstock from moving"], ans: "It can fly out and injure someone or become jammed", expl: "The text warns: 'Always remove chuck wrench after use. Fly out and injure someone. Become jammed, damaging wrench or lathe'." },
+            { q: "Why is it recommended to remove chips with a brush instead of hands or cloths?", opts: ["Chips can cause cuts if hands are used and become embedded in cloths", "Brushes apply cutting fluid while cleaning", "Hands will rust the lathe bed", "Cloths will catch fire"], ans: "Chips can cause cuts if hands are used and become embedded in cloths", expl: "The text explains: 'Always remove chips with brush - Chips can cause cuts if use hands - Chips become embedded if use cloths'." },
+            { q: "What is the fastest and most accurate method to align lathe centers?", opts: ["Using parallel test bar and dial indicator", "Aligning centerlines on back of tailstock", "Trial-cut method", "Measuring with a steel rule"], ans: "Using parallel test bar and dial indicator", expl: "The text lists 'Using parallel test bar and dial indicator' and specifically states it is the 'Fastest and most accurate method'." },
+            { q: "In the trial-cut method for aligning centers, what instrument is used to measure the diameters of the two cuts?", opts: ["Micrometer", "Dial indicator", "Steel rule", "Caliper"], ans: "Micrometer", expl: "The text under 'Using the trial-cut method' states 'diameters measured with a micrometer'." },
+            { q: "Which lathe cutting tool material is most commonly used in schools and can withstand shocks?", opts: ["High Speed Steel Toolbits", "Cast Alloy Toolbits", "Cemented Carbide Toolbits", "Ceramic Toolbits"], ans: "High Speed Steel Toolbits", expl: "The text states 'High Speed Steel Toolbits Probably the toolbit most commonly used in schools... capable of taking heavy cuts, withstanding shocks'." },
+            { q: "Which toolbit material contains 25 to 35 percent chromium, is weaker/more brittle than high speed steel, but can operate at twice its speed?", opts: ["Cast Alloy Toolbits", "Cemented Carbide Toolbits", "High Speed Steel Toolbits", "Diamond Toolbits"], ans: "Cast Alloy Toolbits", expl: "The text says 'Cast Alloy Toolbits usually contain 25 to 35 percent chromium... weaker and more brittle than the high speed toolbits. They may be operated about to two time the speed'." },
+            { q: "Which toolbits have low toughness but high hardness, and operate at speeds three to four times greater than high-speed steel?", opts: ["Cemented Carbide Toolbits", "Cast Alloy Toolbits", "Ceramic Toolbits", "Carbon Steel Toolbits"], ans: "Cemented Carbide Toolbits", expl: "The text describes 'Cemented Carbide Toolbits... low toughness but high hardness... capable of speeds three to four times greater than the high-speed steel toolbits'." },
+            { q: "What part of the cutting tool is defined as the bottom surface of the tool shank?", opts: ["Base", "Face", "Flank", "Cutting edge"], ans: "Base", expl: "The text states: 'The base is the bottom surface of the tool shank.'" },
+            { q: "Which part of the tool is the leading edge that does the cutting?", opts: ["Cutting edge", "Face", "Flank", "Nose"], ans: "Cutting edge", expl: "The text states: 'The cutting edge is the leading edge of the toolbit that does the cutting.'" },
+            { q: "What is the surface against which the chip bears as it is separated from the work?", opts: ["Face", "Flank", "Point", "Base"], ans: "Face", expl: "The text states: 'The face is the surface against which the chip bears as it is separated from the work.'" },
+            { q: "What is the flank of a cutting tool?", opts: ["The surface adjacent to and below the cutting edge", "The bottom surface of the tool shank", "The tip of the cutting tool", "The backward slope of the tool"], ans: "The surface adjacent to and below the cutting edge", expl: "The text defines it as: 'The flank is the surface of the tool which is adjacent to and below the cutting edge.'" },
+            { q: "What angle forms between the cutting edge and the side of the tool shank (generally 10 to 20 degrees)?", opts: ["Side Cutting Edge Angle", "End Cutting Edge Angle", "Side Relief Angle", "Back Rake Angle"], ans: "Side Cutting Edge Angle", expl: "The text states: 'Side Cutting Edge Angle : The angle which the cutting edge forms with the side of the tool shank... may be from 10 to 20°.'" },
+            { q: "What happens if the side cutting edge angle is over 30 degrees?", opts: ["The tool will tend to chatter", "The tool will break immediately", "The cut will be perfectly smooth", "The spindle speed will increase"], ans: "The tool will tend to chatter", expl: "The text explicitly warns: 'Over 30°, the tool will tend to chatter.'" },
+            { q: "Which angle permits the cutting tool to advance lengthwise into the rotating work without the flank rubbing (generally 6 to 10 degrees)?", opts: ["Side Relief (Clearance) Angle", "End Relief (Clearance) Angle", "Side Rake Angle", "Top Rake Angle"], ans: "Side Relief (Clearance) Angle", expl: "The text states: 'Side Relief (Clearance) Angle... generally 6 to 10°... permits the cutting tool to advance lengthwise... and prevents the flank from rubbing'." },
+            { q: "Which angle permits the cutting tool to be fed into the work and is ground below the nose (generally 10 to 15 degrees)?", opts: ["End Relief (Clearance) Angle", "Side Relief Angle", "Side Rake Angle", "End Cutting Edge Angle"], ans: "End Relief (Clearance) Angle", expl: "The text states: 'End Relief (Clearance) Angle : The angle ground below the nose of the toolbit which permits the cutting tool to be fed into the work. It is generally 10 to 15°'." },
+            { q: "Which angle allows chips to flow away quickly and creates a keener cutting edge (generally 14 degrees)?", opts: ["Side Rake Angle", "Back Rake Angle", "End Relief Angle", "Side Clearance Angle"], ans: "Side Rake Angle", expl: "The text states: 'Side Rake Angle... generally 14°... creates a keener cutting edge and allows the chips to flow away quickly.'" },
+            { q: "When grinding a general-purpose toolbit, what angle should the top of the toolbit be held to the axis of the wheel to grind the side rake?", opts: ["45 degrees", "14 degrees", "10 degrees", "90 degrees"], ans: "45 degrees", expl: "The text instructs to 'Hold top of toolbit approximately 45° to axis of wheel and grind side rake to approximately 14°'." },
+            { q: "Why must you move the toolbit back and forth across the face of the wheel while grinding?", opts: ["To prevent grooving the wheel", "To heat the toolbit faster", "To polish the cutting edge", "To avoid touching the toolrest"], ans: "To prevent grooving the wheel", expl: "The text states: 'While grinding, move toolbit back and forth across face of wheel. Prevents grooving wheel'." },
+            { q: "What should you NEVER do with stellite or cemented-carbide tools during grinding?", opts: ["Quench them", "Cool them frequently", "Grind them with diamond", "Move them back and forth"], ans: "Quench them", expl: "The text warns: 'Never quench stellite or cemented-carbide tools'." },
+            { q: "What is the correct point angle to grind on a general-purpose lathe toolbit?", opts: ["70° to 80°", "90° to 100°", "45° to 50°", "10° to 15°"], ans: "70° to 80°", expl: "The visual diagram provided in the text specifically shows a '70° to 80° Point Angle' for a general-purpose toolbit." },
+            { q: "How far should the toolbit extend beyond the toolholder when setting it up?", opts: [".500 in. and never more than twice its thickness", "1.000 in.", "Half its width", "2 inches"], ans: ".500 in. and never more than twice its thickness", expl: "The instructions say 'having tool extend .500 in. beyond toolholder and never more than twice its thickness'." },
+            { q: "At what height should the cutting-tool point be set?", opts: ["To center height (checked against lathe center point)", "Above the center point", "Below the center point", "Parallel to the toolrest"], ans: "To center height (checked against lathe center point)", expl: "The setup instructions say 'Set cutting-tool point to center height • Check it against lathe center point'." },
+            { q: "When taking a heavy cut, how should the toolholder be positioned relative to the work?", opts: ["At right angles to the work", "Angled toward the tailstock", "Angled toward the headstock", "Parallel to the ways"], ans: "At right angles to the work", expl: "The text explicitly states: 'Heavy Cuts: Set toolholder at right angles to work'." },
+            { q: "What is the purpose of a trial cut?", opts: ["To set the cutting-tool point and crossfeed micrometer collar to an accurate diameter", "To remove maximum material quickly", "To polish the work", "To part off the material"], ans: "To set the cutting-tool point and crossfeed micrometer collar to an accurate diameter", expl: "The text lists 'Purposes of a Trial Cut... Produce accurate turned diameter... Set cutting-tool point to the diameter • Set crossfeed micrometer collar to the diameter'." },
+            { q: "In rough turning, what feed range is recommended?", opts: [".020 to .030 in.", ".003 to .005 in.", ".001 to .002 in.", ".050 to .060 in."], ans: ".020 to .030 in.", expl: "The text under Rough Turning says '.020- to .030-in. feed recommended'." },
+            { q: "Rough turning brings the work to within what size of the finished size when removing up to .500 in. diameter?", opts: ["Within .030 in.", "Within .060 in.", "Within .010 in.", "Within .100 in."], ans: "Within .030 in.", expl: "The text states 'Work rough-turned to – Within .030 in. of finished size when removing up to .500 in. diameter'." },
+            { q: "Which hand should you use to file on a lathe to keep arms clear of the revolving chuck?", opts: ["Left hand", "Right hand", "Both hands equally", "Neither, filing is prohibited"], ans: "Left hand", expl: "The text notes 'For safety, file with left hand so arms and hands kept clear of revolving chuck'." },
+            { q: "At what speed should the lathe spindle be set for filing?", opts: ["Twice that for turning", "Half that for turning", "The same speed as rough turning", "One-quarter speed"], ans: "Twice that for turning", expl: "The 'Procedure to File in a Lathe' starts with: '1. Set spindle speed to twice that for turning'." },
+            { q: "When polishing ferrous metals in a lathe, which abrasive cloth should be used?", opts: ["Aluminum oxide abrasive cloth", "Silicon carbide abrasive cloth", "Diamond grit cloth", "Emery paper"], ans: "Aluminum oxide abrasive cloth", expl: "The text advises 'Use aluminum oxide abrasive cloth for ferrous metals'." },
+            { q: "Which abrasive cloth is used for polishing nonferrous metals?", opts: ["Silicon carbide abrasive cloth", "Aluminum oxide abrasive cloth", "Sandpaper", "Steel wool"], ans: "Silicon carbide abrasive cloth", expl: "The text states 'Use silicon carbide abrasive cloth should be used for nonferrous metals'." },
+            { q: "What is a shoulder in lathe work?", opts: ["The change in diameters, or step, when turning more than one diameter on a piece", "The part of the carriage that supports the toolpost", "The mechanism inside the apron", "The point where the chuck attaches to the spindle"], ans: "The change in diameters, or step, when turning more than one diameter on a piece", expl: "The text defines it: 'Shoulder: the change in diameters, or step, when turning more than one diameter on a piece of work'." },
+            { q: "What are the three common types of shoulders?", opts: ["Square, filleted, angular or tapered", "Round, straight, offset", "Coarse, medium, fine", "Internal, external, neutral"], ans: "Square, filleted, angular or tapered", expl: "The text lists 'Three common types of shoulders – Square – Filleted – Angular or Tapered'." },
+            { q: "What is the process of impressing a diamond-shaped or straight-line pattern into the surface?", opts: ["Knurling", "Grooving", "Threading", "Parting"], ans: "Knurling", expl: "The text defines Knurling as the 'Process if impressing a diamond-shaped or straight-line patter into the surface'." },
+            { q: "What is the recommended carriage feed when setting up to knurl in a lathe?", opts: [".015 to .030 in.", ".003 to .005 in.", ".001 to .002 in.", ".100 to .150 in."], ans: ".015 to .030 in.", expl: "The 'Procedure to Knurl' instructs to 'Set carriage feed to .015 to .030 in.'" },
+            { q: "Why should you NOT disengage the feed until the full length has been knurled?", opts: ["Rings will be formed on the knurled pattern", "The lathe will jam", "The toolbit will break", "The part will be parted off"], ans: "Rings will be formed on the knurled pattern", expl: "The text warns: 'Do not disengage feed until full length has been knurled; otherwise, rings will be formed on knurled pattern'." },
+            { q: "Grooving is also known as what?", opts: ["Recessing, undercutting, or necking", "Knurling, parting, or facing", "Chamfering, filleting, or boring", "Turning, threading, or finishing"], ans: "Recessing, undercutting, or necking", expl: "Under the Grooving section, it is 'Also called recessing, undercutting, or necking'." },
+            { q: "For grooving on a lathe, what speed should the lathe be set to?", opts: ["Half the speed for turning", "Twice the speed for turning", "The same speed as turning", "One-quarter the speed for turning"], ans: "Half the speed for turning", expl: "The 'Procedure to Cut a Groove' says '3. Set lathe to half the speed for turning'." },
+            { q: "What is the largest diameter of an external or internal thread called?", opts: ["Major diameter", "Minor diameter", "Pitch diameter", "Root diameter"], ans: "Major diameter", expl: "The text defines 'Major diameter – Largest diameter of external or internal thread'." },
+            { q: "What is Pitch Diameter?", opts: ["Diameter of imaginary cylinder where groove and thread widths are equal", "Smallest diameter of thread", "Largest diameter of thread", "Distance from point on one thread to next thread"], ans: "Diameter of imaginary cylinder where groove and thread widths are equal", expl: "The text defines Pitch diameter as the 'Diameter of imaginary cylinder that passes through thread at point where groove and thread widths are equal'." },
+            { q: "How is Pitch defined?", opts: ["Distance from point on one thread to corresponding point on next thread, measured parallel to axis", "Number of crests per inch", "Largest diameter minus smallest diameter", "The top surface joining two sides of a thread"], ans: "Distance from point on one thread to corresponding point on next thread, measured parallel to axis", expl: "The text defines Pitch as the 'Distance from point on one thread to corresponding point on next thread, measured parallel to axis'." },
+            { q: "What is the bottom surface joining sides of two adjacent threads called?", opts: ["Root", "Crest", "Flank", "Pitch"], ans: "Root", expl: "The text defines Root as the 'Bottom surface joining sides of two adjacent threads'." },
+            { q: "The American National Standard Thread has what thread angle?", opts: ["60 degrees", "29 degrees", "45 degrees", "90 degrees"], ans: "60 degrees", expl: "The text describes the American National Standard Thread as having a '60º angle with root and crest truncated'." },
+            { q: "Which thread type is replacing the square thread because of the difficulty in cutting it?", opts: ["Acme Thread", "Unified Thread", "Brown & Sharpe Worm Thread", "ISO Metric Thread"], ans: "Acme Thread", expl: "The text states 'American National Acme Thread • Replacing square thread in many cases' and under Square Thread: 'Being replaced by Acme thread because of difficulty in cutting it'." },
+            { q: "What is Allowance in thread fits?", opts: ["Permissible difference between largest external thread and smallest internal thread", "Variation permitted in part size", "Largest diameter of the thread", "The number of threads per inch"], ans: "Permissible difference between largest external thread and smallest internal thread", expl: "The text defines Allowance as the 'Permissible difference between largest external thread and smallest internal thread'." },
+            { q: "Which classes of Unified Thread Fits are used for most commercial fasteners (medium or free fit)?", opts: ["Classes 2A and 2B", "Classes 1A and 1B", "Classes 3A and 3B", "Classes 4A and 4B"], ans: "Classes 2A and 2B", expl: "The text lists 'Classes 2A and 2B – Used for most commercial fasteners – Medium or free fit'." },
+            { q: "What is the purpose of the thread-chasing dial attached to the carriage?", opts: ["Ensures lathe spindle and lead screw are in same relative position for each cut", "Controls the speed of the carriage", "Adjusts the depth of the cut automatically", "Measures the pitch of the thread"], ans: "Ensures lathe spindle and lead screw are in same relative position for each cut", expl: "The text states 'Lathe spindle and lead screw must be in same relative position for each cut – Thread-chasing dial attached to carriage for this purpose'." },
+            { q: "When cutting a 60-degree thread, to what angle should the compound rest be set?", opts: ["29 degrees to the right", "60 degrees to the right", "30 degrees to the right", "90 degrees to the cross-slide"], ans: "29 degrees to the right", expl: "The procedure instructions say 'Set compound rest at 29º to right; set to left for left-hand thread'." }
+        ];
+
+        let questions = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function initQuiz() {
+            let clonedData = JSON.parse(JSON.stringify(rawData));
+            questions = shuffle(clonedData);
+            
+            questions.forEach(q => {
+                q.opts = shuffle(q.opts);
+            });
+
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            
+            buildSidebar();
+            loadQuestion(0);
+        }
+
+        function buildSidebar() {
+            const grid = document.getElementById("nav-grid");
+            grid.innerHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                const btn = document.createElement("button");
+                btn.className = "nav-btn";
+                btn.innerText = i + 1;
+                btn.id = "nav-btn-" + i;
+                btn.onclick = () => {
+                    loadQuestion(i);
+                    toggleSidebar();
+                };
+                grid.appendChild(btn);
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function loadQuestion(index) {
+            currentQuestion = index;
+            const q = questions[currentQuestion];
+            
+            document.getElementById("question-tracker").innerText = `Question ${currentQuestion + 1} of 100`;
+            document.getElementById("score-tracker").innerText = `Score: ${score}`;
+            document.getElementById("question-text").innerText = q.q;
+
+            const container = document.getElementById("options-container");
+            container.innerHTML = '';
+            document.getElementById("explanation-box").style.display = "none";
+
+            q.opts.forEach((opt) => {
+                const btn = document.createElement("button");
+                btn.className = "option";
+                btn.innerText = opt;
+                
+                if (userAnswers[currentQuestion] !== null) {
+                    btn.disabled = true;
+                    if (opt === q.ans) {
+                        btn.classList.add("correct");
+                    } else if (opt === userAnswers[currentQuestion]) {
+                        btn.classList.add("incorrect");
+                    }
+                } else {
+                    btn.onclick = () => selectOption(opt);
+                }
+                
+                container.appendChild(btn);
+            });
+
+            if (userAnswers[currentQuestion] !== null) {
+                showExplanation(q.ans, userAnswers[currentQuestion] === q.ans, q.expl);
+            }
+
+            const nextBtn = document.getElementById("next-btn");
+            if (userAnswers[currentQuestion] !== null) {
+                nextBtn.style.display = "block";
+                nextBtn.innerText = (currentQuestion === questions.length - 1) ? "Finish Quiz ➔" : "Next Question ➔";
+            } else {
+                nextBtn.style.display = "none";
+            }
+
+            updateSidebarHighlight();
+        }
+
+        function selectOption(selectedOpt) {
+            const q = questions[currentQuestion];
+            userAnswers[currentQuestion] = selectedOpt;
+
+            const isCorrect = (selectedOpt === q.ans);
+            if (isCorrect) score++;
+
+            const navBtn = document.getElementById(`nav-btn-${currentQuestion}`);
+            navBtn.classList.add(isCorrect ? "answered-correct" : "answered-incorrect");
+
+            loadQuestion(currentQuestion);
+        }
+
+        function showExplanation(correctAnswer, isCorrect, explanation) {
+            const expBox = document.getElementById("explanation-box");
+            expBox.style.display = "block";
+            let statusText = isCorrect ? "<strong style='color: #27ae60;'>Correct!</strong>" : `<strong style='color: #e74c3c;'>Incorrect.</strong> The correct answer is: <em>${correctAnswer}</em>.`;
+            expBox.innerHTML = `${statusText}<br><br><strong>Explanation:</strong> ${explanation}`;
+            expBox.style.borderLeftColor = isCorrect ? "#27ae60" : "#e74c3c";
+            expBox.style.backgroundColor = isCorrect ? "#eafaf1" : "#fdedec";
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                loadQuestion(currentQuestion + 1);
+            } else {
+                document.getElementById("quiz-screen").style.display = "none";
+                const results = document.getElementById("results-screen");
+                results.style.display = "block";
+                document.getElementById("final-score").innerText = `You scored ${score} out of 100.`;
+            }
+        }
+
+        function updateSidebarHighlight() {
+            document.querySelectorAll(".nav-btn").forEach((btn, idx) => {
+                btn.classList.remove("active");
+                if (idx === currentQuestion) {
+                    btn.classList.add("active");
+                }
+            });
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
