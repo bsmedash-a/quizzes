@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shaper, Planer, and Slotter Mastery Quiz</title>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --primary: #1a365d;
+            --secondary: #2b6cb0;
+            --accent: #ed8936;
+            --accent-hover: #dd6b20;
+            --correct: #48bb78;
+            --incorrect: #f56565;
+            --text-main: #2d3748;
+            --text-light: #ffffff;
+            --explanation-bg: #e6fffa;
+            --explanation-border: #38b2ac;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        /* Hamburger Menu Button */
+        #hamburger-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 10px;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: background-color 0.3s;
+        }
+
+        #hamburger-btn:hover { background-color: var(--accent); }
+        #hamburger-btn div { width: 26px; height: 3px; background-color: var(--text-light); border-radius: 2px; }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            position: fixed;
+            top: 0; left: -350px; width: 320px; height: 100vh;
+            background-color: var(--primary); color: var(--text-light);
+            transition: left 0.3s ease-in-out; z-index: 999;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column;
+        }
+
+        #sidebar.open { left: 0; }
+
+        .sidebar-header {
+            padding: 35px 20px 20px 20px; text-align: center;
+            background-color: var(--secondary); font-size: 1.3rem;
+            font-weight: bold; border-bottom: 3px solid var(--accent); margin-top: 50px;
+        }
+
+        .nav-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+            padding: 20px; overflow-y: auto; flex-grow: 1;
+        }
+
+        .nav-btn {
+            background-color: var(--secondary); color: var(--text-light);
+            border: 1px solid #4a5568; border-radius: 4px; padding: 10px 0;
+            font-size: 0.85rem; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+
+        .nav-btn:hover { background-color: var(--accent); border-color: var(--accent); }
+        .nav-btn.answered-correct { background-color: var(--correct); border-color: var(--correct); }
+        .nav-btn.answered-incorrect { background-color: var(--incorrect); border-color: var(--incorrect); }
+        .nav-btn.active { box-shadow: 0 0 0 3px #ecc94b; transform: scale(1.1); z-index: 2; }
+
+        /* Main Quiz Container */
+        .quiz-container {
+            background-color: #fff; width: 100%; max-width: 850px;
+            border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 40px; margin: 40px 0; position: relative;
+        }
+
+        .quiz-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0;
+            font-size: 1.15rem; font-weight: bold; color: #718096;
+        }
+
+        .question-text {
+            font-size: 1.3rem; line-height: 1.6; margin-bottom: 25px;
+            color: var(--primary); font-weight: 600;
+        }
+
+        .options-container { display: flex; flex-direction: column; gap: 12px; }
+
+        .option {
+            background-color: #f7fafc; border: 2px solid #cbd5e0; border-radius: 10px;
+            padding: 16px 20px; font-size: 1.05rem; color: var(--text-main);
+            text-align: left; cursor: pointer; transition: all 0.2s ease; font-weight: 500;
+        }
+
+        .option:hover:not(:disabled) { background-color: #e2e8f0; border-color: #a0aec0; }
+        .option:disabled { cursor: not-allowed; opacity: 0.9; }
+        .option.correct { background-color: var(--correct) !important; border-color: #38a169 !important; color: var(--text-light) !important; }
+        .option.incorrect { background-color: var(--incorrect) !important; border-color: #e53e3e !important; color: var(--text-light) !important; }
+
+        /* Explanation Box */
+        .explanation-box {
+            display: none; margin-top: 25px; padding: 20px;
+            background-color: var(--explanation-bg); border-left: 6px solid var(--explanation-border);
+            border-radius: 0 8px 8px 0; font-size: 1.05rem; line-height: 1.5; color: #2c3e50;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        .explanation-box strong { color: var(--primary); font-size: 1.1rem; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .action-btn {
+            background-color: var(--accent); color: var(--text-light);
+            border: none; border-radius: 10px; padding: 16px 30px;
+            font-size: 1.15rem; font-weight: bold; cursor: pointer;
+            margin-top: 25px; width: 100%; transition: background-color 0.2s; display: none;
+        }
+
+        .action-btn:hover { background-color: var(--accent-hover); }
+
+        #results-screen { display: none; text-align: center; }
+        #results-screen h1 { font-size: 3rem; color: var(--primary); margin-bottom: 15px; }
+        #results-screen p { font-size: 1.4rem; color: #718096; margin-bottom: 30px; }
+        .restart-btn { background-color: var(--correct); color: white; border: none; padding: 16px 45px; font-size: 1.25rem; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .restart-btn:hover { background-color: #38a169; }
+
+        @media (max-width: 600px) {
+            .quiz-container { padding: 25px; }
+            .question-text { font-size: 1.15rem; }
+            .option { font-size: 1rem; padding: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <button id="hamburger-btn" onclick="toggleSidebar()">
+        <div></div><div></div><div></div>
+    </button>
+
+    <div id="sidebar">
+        <div class="sidebar-header">Quiz Navigator</div>
+        <div class="nav-grid" id="nav-grid"></div>
+    </div>
+
+    <div class="quiz-container">
+        <div id="quiz-screen">
+            <div class="quiz-header">
+                <span id="question-tracker">Question 1 of 100</span>
+                <span id="score-tracker">Score: 0</span>
+            </div>
+            <div class="question-text" id="question-text">Loading question...</div>
+            <div class="options-container" id="options-container"></div>
+            
+            <div class="explanation-box" id="explanation-box"></div>
+            
+            <button class="action-btn" id="next-btn" onclick="nextQuestion()">Next Question ➔</button>
+        </div>
+
+        <div id="results-screen">
+            <h1>Quiz Completed!</h1>
+            <p id="final-score"></p>
+            <button class="restart-btn" onclick="location.reload()">Retake & Reshuffle</button>
+        </div>
+    </div>
+
+    <script>
+        const rawData = [
+            { q: "What type of machine tool is a shaper?", opts: ["Reciprocating type", "Rotary type", "Oscillating type", "Continuous type"], ans: "Reciprocating type", expl: "The text explicitly states the shaper is a 'reciprocating type of machine tool used for producing flat surfaces.' Other motions do not describe a shaper." },
+            { q: "What is the primary use of a shaper machine?", opts: ["Producing flat surfaces", "Drilling deep holes", "Creating spherical objects", "Cutting internal threads"], ans: "Producing flat surfaces", expl: "The introduction clearly notes the shaper is 'used for producing flat surfaces.' It is not primarily for drilling, threading, or spherical objects." },
+            { q: "What orientations can the surfaces produced by a shaper have?", opts: ["Horizontal, vertical, or inclined", "Only horizontal", "Only vertical", "Only circular"], ans: "Horizontal, vertical, or inclined", expl: "The text states 'Surfaces may be horizontal, vertical or inclined.' It is not restricted to just one orientation." },
+            { q: "Besides flat surfaces, what can modern shapers produce?", opts: ["Contoured surfaces", "Only straight lines", "Hollow spheres", "Worm gears exclusively"], ans: "Contoured surfaces", expl: "The document notes 'Modern shapers can produce contoured surfaces.' The other options are incorrect." },
+            { q: "What type of motion does the tool use in a shaper?", opts: ["Reciprocating straight line motion", "Continuous circular motion", "Random oscillating motion", "Stationary rotation"], ans: "Reciprocating straight line motion", expl: "The text states it 'uses reciprocating straight line motion of the tool.' It does not use circular or stationary rotation." },
+            { q: "On a shaper, the feed of the job or tool is in what direction relative to the tool motion?", opts: ["Perpendicular", "Parallel", "Diagonal", "Opposite"], ans: "Perpendicular", expl: "The text says it uses a 'perpendicular feed of the job or the tool.' Parallel or diagonal feeds are incorrect." },
+            { q: "In a general shaper, during which stroke does the cutting usually take place?", opts: ["Forward stroke", "Backward stroke", "Both strokes", "Idle stroke"], ans: "Forward stroke", expl: "The text explains: 'The tool cuts in the forward stroke generally...'. Cutting in both or idle strokes is incorrect." },
+            { q: "In a draw-cut shaper, during which stroke does the tool cut?", opts: ["Backward stroke", "Forward stroke", "Upward stroke", "Downward stroke"], ans: "Backward stroke", expl: "The text explicitly states: 'only in case of a draw-cut shaper the tool cuts in backward stroke of the ram.'" },
+            { q: "What happens during the idle stroke of a shaper?", opts: ["No cutting action takes place", "The tool cuts twice as fast", "The job is rotated 90 degrees", "The ram detaches from the tool"], ans: "No cutting action takes place", expl: "The text states: 'The other stroke in both the cases remains idle as there is no cutting action in that stroke.'" },
+            { q: "On a shaper, what part supports the job?", opts: ["Work table", "Ram", "Column", "Toolhead"], ans: "Work table", expl: "The text notes 'job is fixed on the work table (i.e. job remains stationary).' The ram holds the tool." },
+            { q: "Which statement best describes the operation of a shaper?", opts: ["The job remains stationary and the tool reciprocates over it", "The tool remains stationary and the job reciprocates under it", "Both the tool and the job rotate continuously", "The job moves vertically while the tool rotates"], ans: "The job remains stationary and the tool reciprocates over it", expl: "The text says 'On a shaper, job is fixed on the work table... and the tool cuts while reciprocating over the job.' The reverse describes a planer." },
+            { q: "What material is the shaper base typically made of?", opts: ["Cast iron", "Aluminum", "High-speed steel", "Brass"], ans: "Cast iron", expl: "The text describes the Base as 'a heavy structure of cast iron.' Other materials are not mentioned for the base." },
+            { q: "What is the main function of the shaper base?", opts: ["It supports other parts and resists vibration and high compressive loads", "It houses the reciprocating ram", "It holds the cutting tool", "It generates the cutting speed"], ans: "It supports other parts and resists vibration and high compressive loads", expl: "The text states the base 'acts as a support... resists vibration and high compressive loads being of cast iron.'" },
+            { q: "How is the shaper base secured to the shop floor?", opts: ["Through foundation bolts", "Using heavy-duty clamps", "Welded directly to the floor", "It relies solely on its weight"], ans: "Through foundation bolts", expl: "The text explicitly notes: 'Base is bolted down to the shop floor through foundation bolts.'" },
+            { q: "Which shaper part is a box structure of cast iron that houses the operating mechanisms?", opts: ["Column", "Ram", "Saddle", "Cross-rail"], ans: "Column", expl: "The text defines the Column as 'a box structure of cast iron and houses the operating mechanisms of the machine.'" },
+            { q: "Which part provides support for the ram and cross-rail?", opts: ["Column", "Base", "Table", "Tool post"], ans: "Column", expl: "The text says the Column 'provides support for other parts of the machine, such as ram, cross-rail, etc.'" },
+            { q: "Where is the cross-rail block mounted?", opts: ["On the front two vertical guide ways of the column", "On top of the ram", "Underneath the base", "On the tool head"], ans: "On the front two vertical guide ways of the column", expl: "The text states 'The cross-rail block is mounted on the front two vertical guide ways of the column.'" },
+            { q: "In which plane are the horizontal guide ways of the cross-rail located?", opts: ["Vertical plane, perpendicular to the axis of ram", "Horizontal plane, parallel to the ram", "Inclined plane at 45 degrees", "Circular plane around the column"], ans: "Vertical plane, perpendicular to the axis of ram", expl: "The text states the cross-rail has 'horizontal guide ways(K) in the vertical plane and perpendicular to the axis of ram.'" },
+            { q: "Which shaper part moves on the cross-rail block and carries the table?", opts: ["Saddle", "Ram", "Clapper box", "Tool post"], ans: "Saddle", expl: "The text explicitly says 'The saddle moves on the cross-rail block and carries the table (or work table) on it'." },
+            { q: "How is the crosswise movement of the saddle achieved?", opts: ["By rotating the cross feed screw by hand or by power", "By moving the ram back and forth", "By loosening the foundation bolts", "By swiveling the tool head"], ans: "By rotating the cross feed screw by hand or by power", expl: "The text states 'crosswise movement of the saddle by rotating the cross feed screw by hand or by power makes the table to move sideways.'" },
+            { q: "What is the table firmly connected to on a shaper?", opts: ["Saddle", "Ram", "Tool head", "Cross-rail elevating screw"], ans: "Saddle", expl: "The text states: 'The table is firmly connected on to the saddle.'" },
+            { q: "From which part does the table get its vertical movement?", opts: ["Cross-rail", "Ram", "Saddle", "Base"], ans: "Cross-rail", expl: "The text notes the table gets 'vertical movements from the saddle and cross-rail, respectively.' The cross-rail goes up and down the column." },
+            { q: "What features are provided on the top and sides of the shaper table for clamping the job?", opts: ["T-slots", "V-grooves", "Magnetic plates", "Threaded holes"], ans: "T-slots", expl: "The text describes the table as 'having T-slots both on top and sides for clamping the job.'" },
+            { q: "Which part of the shaper is the reciprocating member?", opts: ["Ram", "Column", "Saddle", "Table"], ans: "Ram", expl: "The text states the Ram 'is the reciprocating member with tool head mounted on its front face.'" },
+            { q: "What is the shape of the shaper ram?", opts: ["Semi-cylindrical in form with rigid structure heavily ribbed inside", "Perfectly spherical", "A flat rectangular plate", "A hollow square tube"], ans: "Semi-cylindrical in form with rigid structure heavily ribbed inside", expl: "The text describes the ram as 'semi-cylindrical in form with rigid structure heavily ribbed inside.'" },
+            { q: "On what type of guide ways does the shaper ram slide?", opts: ["Dovetail type", "T-slot type", "V-groove type", "Cylindrical type"], ans: "Dovetail type", expl: "The text states the ram 'slides on two accurately machined guide ways (dovetail type) made on the top of column walls.'" },
+            { q: "Where is the tool head mounted on the shaper?", opts: ["At the front end of ram", "On the saddle", "On the cross-rail", "Under the work table"], ans: "At the front end of ram", expl: "The text says 'It is mounted at the front end of ram...'" },
+            { q: "What is the purpose of swiveling the tool head on a shaper?", opts: ["For shaping angular surfaces", "To increase the cutting speed", "To reduce vibration", "To change the cutting tool quickly"], ans: "For shaping angular surfaces", expl: "The text states the tool head 'has the provision of being swiveled in any direction for shaping angular surfaces.'" },
+            { q: "What holds the tool in the tool head?", opts: ["Tool post", "Clapper box", "Slide bolt", "Feed screw"], ans: "Tool post", expl: "The text explicitly states 'The tool is held in tool post.'" },
+            { q: "Which mechanism is used to reduce the idle return time in shapers?", opts: ["Quick return mechanism", "Variable speed motor", "Rack and pinion", "Dovetail slide"], ans: "Quick return mechanism", expl: "The text explains the cutting mechanism allows the ram to move faster on return, and 'This mechanism is known as quick return mechanism.'" },
+            { q: "In the quick return mechanism, which stroke moves at a comparatively slower speed?", opts: ["Forward cutting stroke", "Return stroke", "Idle stroke", "Vertical feed stroke"], ans: "Forward cutting stroke", expl: "The text states 'it moves at a comparatively slower speed during forward cutting stroke...'" },
+            { q: "Which of the following is a shaper classification according to the reciprocating mechanism?", opts: ["Crank type, Gear type, Hydraulic type", "Push type, Draw type", "Horizontal, Vertical", "Standard, Universal"], ans: "Crank type, Gear type, Hydraulic type", expl: "The text categorizes shaper mechanisms into: 'a) Crank type b) Gear type c) Hydraulic type'." },
+            { q: "Which of the following is a classification of shaper according to the type of ram?", opts: ["Horizontal, Vertical, Travelling head type", "Crank type, Gear type", "Standard shaper, Universal shaper", "Push type, Draw type"], ans: "Horizontal, Vertical, Travelling head type", expl: "Under 'According to type of ram', the text lists: 'a) Horizontal b) Vertical c) Travelling head type'." },
+            { q: "Which of the following is a classification of shaper according to table design?", opts: ["Standard shaper, Universal shaper", "Push type, Draw type", "Horizontal, Vertical", "Crank type, Gear type"], ans: "Standard shaper, Universal shaper", expl: "Under 'According to the design of table', the text lists: 'a) Standard shaper b) Universal shaper'." },
+            { q: "Which of the following is a classification of shaper according to the cutting stroke?", opts: ["Push type, Draw type", "Standard, Universal", "Horizontal, Vertical", "Crank, Gear, Hydraulic"], ans: "Push type, Draw type", expl: "Under 'According to the cutting stroke', the text lists: 'a) Push type b) Draw type'." },
+            { q: "Which reciprocating mechanism is typically associated with the shaper?", opts: ["Lever rocker arm mechanism", "Rack and pinion mechanism", "Slider crank mechanism", "Variable speed reversible motor"], ans: "Lever rocker arm mechanism", expl: "The text lists 'Lever rocker arm mechanism (shaper).' Rack and pinion is for planer, slider crank for slotter." },
+            { q: "Which reciprocating mechanism is typically associated with the slotter?", opts: ["Slider crank mechanism", "Lever rocker arm mechanism", "Rack and pinion mechanism", "Gear type mechanism"], ans: "Slider crank mechanism", expl: "The text lists 'Slider crank mechanism (slotter).' The lever rocker arm is for the shaper." },
+            { q: "Which quick return mechanism can be used in both shapers and slotters?", opts: ["With worth (Whitworth) quick return mechanism", "Rack and pinion mechanism", "Slider crank mechanism", "Lever rocker arm mechanism"], ans: "With worth (Whitworth) quick return mechanism", expl: "The text lists 'With worth quick return mechanism (shaper and slotter).' (Note: spelled 'With worth' in text)." },
+            { q: "Which mechanism can be used in shapers, slotters, and planers?", opts: ["Hydraulic system", "Lever rocker arm", "Rack and pinion", "Variable speed motor"], ans: "Hydraulic system", expl: "The text lists 'Hydraulic system (all the 3 types).' The others are specific to one or two machines." },
+            { q: "Which mechanism is used in slotters and planers but not typically listed for shapers?", opts: ["Variable speed reversible motor", "Lever rocker arm", "Slider crank", "Hydraulic system"], ans: "Variable speed reversible motor", expl: "The text lists 'Variable speed reversible motor (slotter and planer).' This excludes shapers." },
+            { q: "Which mechanism is specific to planers for reciprocating motion?", opts: ["Rack and pinion mechanism", "Lever rocker arm", "Slider crank", "With worth quick return"], ans: "Rack and pinion mechanism", expl: "The text specifically lists 'Rack and pinion mechanism (planer).' It is only assigned to the planer." },
+            { q: "Which of the following operations can be performed on a shaper?", opts: ["Cutting a dovetail bearing", "Boring deep cylindrical holes", "Turning a round shaft", "Milling a complex 3D contour automatically"], ans: "Cutting a dovetail bearing", expl: "The 'Operations performed on shaper' slide explicitly lists 'Cutting a dovetail bearing on a shaper.' The others are lathe or milling operations." },
+            { q: "Can a shaper be used to cut a keyway that does not extend the entire length of the shaft?", opts: ["Yes, this is an operation performed on a shaper", "No, shapers can only cut full length keyways", "No, only a lathe can do this", "No, shapers cannot cut keyways"], ans: "Yes, this is an operation performed on a shaper", expl: "The text explicitly lists: 'Cutting a keyway on a shaper when the keyway does not extend the entire length of the shaft.'" },
+            { q: "What type of cutting tools are used in shapers?", opts: ["Single point cutting tools", "Multi-point rotary tools", "Abrasive wheels", "Broaching tools"], ans: "Single point cutting tools", expl: "The text states 'The single point cutting tools used in shapers are inexpensive...' Shapers do not use rotary or abrasive tools." },
+            { q: "Why are shaper cutting tools considered advantageous?", opts: ["They are inexpensive and easily grounded to any desirable shape", "They have multiple cutting edges", "They never need to be sharpened", "They cut continuously without idle strokes"], ans: "They are inexpensive and easily grounded to any desirable shape", expl: "The text explicitly states 'tools used in shapers are inexpensive, these tools can be easily grounded to any desirable shape.'" },
+            { q: "Why is it convenient to machine thin or fragile jobs on a shaper?", opts: ["Because of lower cutting forces", "Because the shaper has no cutting forces", "Because the table is magnetic", "Because the ram moves extremely slowly"], ans: "Because of lower cutting forces", expl: "The text notes: 'Thin or fragile jobs can be conviniently machined on shapers because of lower cutting forces.'" },
+            { q: "What is a major limitation of a shaper regarding the number of pieces?", opts: ["Can shape only one piece of stock at a time", "Can shape multiple pieces simultaneously", "It requires 3 people to operate", "It can only shape plastic"], ans: "Can shape only one piece of stock at a time", expl: "Under LIMITATIONS, the text lists: 'Shape only one piece of stock at a time.'" },
+            { q: "Why is a shaper not suitable for large parts?", opts: ["Stroke length is limited and overhanging of the ram", "The motor is too weak", "Large parts break the single point tool", "The table cannot support heavy weight"], ans: "Stroke length is limited and overhanging of the ram", expl: "The text states it is 'Not suitable for large parts as stroke length is limited and overhanging of the ram.'" },
+            { q: "According to the text, a shaper shapes stock only if it is longer than what length?", opts: ["25 cm (10 in)", "10 cm (4 in)", "50 cm (20 in)", "100 cm (40 in)"], ans: "25 cm (10 in)", expl: "Under LIMITATIONS, the text explicitly states: 'Shape stock only if longer than 25 cm (10 in).'" },
+            { q: "In a shaper, which component moves back and forth across the work?", opts: ["The tool on the ram", "The workpiece on the table", "The cross-rail", "The entire machine base"], ans: "The tool on the ram", expl: "The comparison table states for the Shaper: 'The work is held stationary and the tool on the ram is moved back and forth across the work.'" },
+            { q: "In a planer, which component travels back and forth under the tool?", opts: ["The workpiece on the table", "The tool on the ram", "The cross-rail", "The housing"], ans: "The workpiece on the table", expl: "The comparison table states for the Planer: 'The tool is stationary and the workpiece on the table travels back and forth under the tool.'" },
+            { q: "In a slotter, which component moves across the work?", opts: ["The tool on the ram moves up and down", "The workpiece moves up and down", "The table rotates continuously", "The tool moves back and forth horizontally"], ans: "The tool on the ram moves up and down", expl: "The comparison table states for the Slotter: 'The work is held stationary and the tool on the ram is moved up and down across the work.'" },
+            { q: "What sizes of jobs are planers meant for?", opts: ["Jobs as large as 6 metre wide and twice as long", "Smaller jobs than shapers", "Only jobs longer than 25 cm", "Jobs requiring only light cuts"], ans: "Jobs as large as 6 metre wide and twice as long", expl: "The comparison table notes Planers are 'Meant for much larger jobs. Jobs as large as 6 metre wide and twice as long can be machined.'" },
+            { q: "Between a shaper and a planer, which is considered a heavy duty machine?", opts: ["Planer", "Shaper", "Both are light duty", "Both are heavy duty"], ans: "Planer", expl: "The comparison table explicitly calls the Shaper a 'light machine' and the Planer a 'heavy duty machine.'" },
+            { q: "What type of cuts and feeds can a planer employ?", opts: ["Heavier cuts and coarse feed", "Light cuts and finer feed", "No cuts, only polishing", "Extremely light cuts and rapid feed"], ans: "Heavier cuts and coarse feed", expl: "The comparison table says the Planer 'Can employ heavier cuts and coarse feed.' Shapers and slotters employ light cuts/finer feed." },
+            { q: "How many cutting tools does a shaper typically use at a time?", opts: ["One cutting tool at a time", "Several tools simultaneously", "Two tools", "Three tools"], ans: "One cutting tool at a time", expl: "The comparison table states the Shaper 'Uses one cutting tool at a time.'" },
+            { q: "How many cutting tools can a planer use simultaneously?", opts: ["Several tools can cut simultaneously", "Only one tool", "Only two tools", "None, it uses a grinding wheel"], ans: "Several tools can cut simultaneously", expl: "The comparison table states for the Planer: 'Several tools can cut simultaneously.'" },
+            { q: "Which machine offers better rigidity to give more accuracy on machined surfaces?", opts: ["Planer", "Shaper", "Slotter", "Drill press"], ans: "Planer", expl: "The comparison table notes the Planer has 'Better rigidity that give more accuracy on machined surfaces' compared to the less rigid shaper/slotter." },
+            { q: "How is the drive on the planer table powered?", opts: ["Either by gears or by hydraulic means", "By a quick-return link mechanism", "By a hand crank only", "By a slotted disc mechanism"], ans: "Either by gears or by hydraulic means", expl: "The comparison table states: 'The drive on the planer table is either by gears or by hydraulic means.'" },
+            { q: "How are the rams of a slotter driven?", opts: ["Either crank-driven or hydraulically driven", "By rack and pinion only", "By gears and pulleys", "By hand power only"], ans: "Either crank-driven or hydraulically driven", expl: "The comparison table states for the Slotter: 'The rams are either crank-driven or hydraulically driven.'" },
+            { q: "How many principal parts does a planer have according to the text?", opts: ["Five", "Three", "Ten", "Seven"], ans: "Five", expl: "The text explicitly states: 'There are five principal parts of lathe:- 1. Bed 2. Table 3. Housing 4. Cross Rail 5. Tool head' (Note: the text mistakenly says 'lathe' but it refers to the Planer based on the heading)." },
+            { q: "Which of the following is NOT a principal part of a planer?", opts: ["Ram", "Bed", "Table", "Housing"], ans: "Ram", expl: "The ram is a principal part of the shaper and slotter. The planer's principal parts listed are Bed, Table, Housing, Cross Rail, and Tool head." },
+            { q: "What does the bed of a very large planer consist of?", opts: ["Two or more castings, carefully machined and bolted together", "A single solid piece of aluminum", "A wooden frame", "A hydraulic tank"], ans: "Two or more castings, carefully machined and bolted together", expl: "The text states: 'Very large beds consists of two or more castings, carefully machined and bolted together.'" },
+            { q: "In a planer, which part reciprocates along the ways of the beds?", opts: ["Table", "Housing", "Tool head", "Cross Rail"], ans: "Table", expl: "The text states the Table 'reciprocates along the ways of beds'." },
+            { q: "What powers the table in a planer?", opts: ["Variable speed motor or hydraulic drives", "Hand crank", "Pneumatic cylinder", "Steam engine"], ans: "Variable speed motor or hydraulic drives", expl: "The text states the table is 'Powered from variable speed motor' and 'Other drives can be hydraulic'." },
+            { q: "In a planer, what are the rigid and upright column-like castings called?", opts: ["Housing", "Cross Rail", "Bed", "Saddle"], ans: "Housing", expl: "The text defines HOUSING as 'rigid & upright column like casting.'" },
+            { q: "Where are the housings located on a planer?", opts: ["Near the centre on each side of the base", "At the very front of the machine", "Only on the left side", "Suspended from the ceiling"], ans: "Near the centre on each side of the base", expl: "The text states they are 'Located near the centre on each side of the base.'" },
+            { q: "What is the horizontal member supported on machined ways of the upright column in a planer?", opts: ["Cross Rail", "Table", "Bed", "Tool head"], ans: "Cross Rail", expl: "The text defines CROSS RAIL as the 'horizontal member supported on machined ways of upright column.'" },
+            { q: "What does the vertical movement of the cross rail in a planer allow?", opts: ["Accommodation of work pieces of different heights", "Faster cutting speeds", "Horizontal reciprocation", "The tool to retract automatically"], ans: "Accommodation of work pieces of different heights", expl: "The text states 'Vertical movement of cross rail allows to accommodate work piece of different heights.'" },
+            { q: "Which of the following is a type of planer listed in the text?", opts: ["Double Housing", "Rotary Table", "Horizontal Ram", "Traveling Head"], ans: "Double Housing", expl: "The text lists '1. Double Housing 2. Open slide 3. Pit Type Planer 4. Plate Planer' and later 'Planer Miller or Grinder'." },
+            { q: "Which is the most commonly used planer machine?", opts: ["Double Housing Planer", "Open Side Planer", "Pit Type Planer", "Plate Planer"], ans: "Double Housing Planer", expl: "The text explicitly states the Double Housing Planer is the 'Most commonly used planer machine.'" },
+            { q: "What is the main drawback of the Double Housing Planer?", opts: ["Limits the width of the workpiece due to the two housings", "It cannot cut hard metals", "It is too small for most jobs", "It uses only one tool head"], ans: "Limits the width of the workpiece due to the two housings", expl: "The text notes: 'One drawback-Limits the width of work piece due to presence of two housing on each side of bed.'" },
+            { q: "What is the maximum number of tool heads on an Open Side Planer?", opts: ["3", "1", "5", "10"], ans: "3", expl: "The text states 'Maximum number of tool heads is 3' for the Open Side Planer." },
+            { q: "What is the primary advantage of an Open Side Planer?", opts: ["Accommodates jobs which are too wide to fit between columns of a double housing planer", "It has a higher cutting speed", "It operates silently", "It uses less electricity"], ans: "Accommodates jobs which are too wide to fit between columns of a double housing planer", expl: "The text lists the advantage: 'Accommodate Jobs which are two wide to fit between columns of double housing planer.'" },
+            { q: "Is the Open Side Planer as strong and rigid as the Double Housing Planer?", opts: ["No, it is not", "Yes, it is exactly the same", "It is stronger", "The text does not compare their strength"], ans: "No, it is not", expl: "The text explicitly states: 'Not strong and rigid as Double Housing Planer.'" },
+            { q: "What is unique about the Planer Miller or Grinder?", opts: ["It has a milling cutter or grinding head in place of conventional tool heads", "It uses water instead of cutting fluid", "It shapes wood instead of metal", "It has no cross rail"], ans: "It has a milling cutter or grinding head in place of conventional tool heads", expl: "The text states: 'It has milling cutter or a grinding head in place of one or more conventional tool heads on cross rails.'" },
+            { q: "Which type of planer is used when the work becomes extremely heavy?", opts: ["Pit type Planer", "Plate Planer", "Open Side Planer", "Double Housing Planer"], ans: "Pit type Planer", expl: "The text states the Pit type Planer is 'Used when work becomes extremely heavy.'" },
+            { q: "In a Pit type Planer, what is stationary and what reciprocates?", opts: ["Table is stationary and tool reciprocates", "Tool is stationary and table reciprocates", "Both table and tool reciprocate", "Neither moves; it relies on a rotating cutter"], ans: "Table is stationary and tool reciprocates", expl: "The text explicitly states: 'Table is kept stationary and tool reciprocates.'" },
+            { q: "Why is the Pit type Planer design used?", opts: ["It is convenient and economical to move the machine rather than the work piece", "It provides a better surface finish", "It is the only way to cut aluminum", "It uses smaller tool heads"], ans: "It is convenient and economical to move the machine rather than the work piece", expl: "The text notes: 'It is convenient and economical to move machine than work piece' because the work is extremely heavy." },
+            { q: "What is a Plate Planer specially designed for?", opts: ["Squaring or leveling edges of heavy steel plates", "Milling complex internal gears", "Cutting V-grooves in small blocks", "Drilling holes in wooden boards"], ans: "Squaring or leveling edges of heavy steel plates", expl: "The text defines the Plate planer as a 'Special purpose machine tool designed specially for squaring or leveling edges of heavy steel plates.'" },
+            { q: "In a Plate Planer, what moves back and forth along the work?", opts: ["The tool and operator", "The table and workpiece", "The cross rail", "The entire machine bed"], ans: "The tool and operator", expl: "The text states: 'Job/table is stationary while tool and operator move bark and forth along the work for feed and cut.'" },
+            { q: "How are tool heads fed in a planer?", opts: ["Crosswise or vertical direction", "Circularly", "Only horizontally", "Diagonally"], ans: "Crosswise or vertical direction", expl: "The text states: 'Tool Heads maybe fed in crosswise or vertical direction.'" },
+            { q: "Where is the motor drive usually located in a planer?", opts: ["At one side of the planar & drive mechanism is located under the table", "On top of the cross rail", "Attached directly to the tool head", "Suspended above the machine"], ans: "At one side of the planar & drive mechanism is located under the table", expl: "The text notes: 'Motor drive is usually at one side of planar & drive mechanism is located under the table.'" },
+            { q: "In the planer cutting speed formula V=LN(1+K)/1000, what does 'L' stand for?", opts: ["Length of ram stroke", "Level of table", "Load capacity", "Limit of feed"], ans: "Length of ram stroke", expl: "The formula explicitly defines 'L = length of ram stroke'." },
+            { q: "In the planer cutting speed formula V=LN(1+K)/1000, what does 'N' stand for?", opts: ["Number of full stroke", "Newtons of force", "Number of tools", "Nominal speed"], ans: "Number of full stroke", expl: "The formula explicitly defines 'N = no. of full stroke'." },
+            { q: "In the planer cutting speed formula V=LN(1+K)/1000, what does 'K' stand for?", opts: ["Ratio of return time to cutting time", "Kinetic energy", "Constant of friction", "Kilowatts required"], ans: "Ratio of return time to cutting time", expl: "The formula explicitly defines 'K = ratio of return time to cutting time'." },
+            { q: "Which work holding device is most commonly used for most jobs done on a planer?", opts: ["T-Bolts & Clamps", "Stop Pins", "Toe Dogs", "Fixtures"], ans: "T-Bolts & Clamps", expl: "The text lists 'T-Bolts & Clamps (most jobs done by bolts & clamps)'." },
+            { q: "Which work holding device is used to support the workpiece on a planer?", opts: ["Stop Pins", "Toe Dogs", "Vises", "Fixtures"], ans: "Stop Pins", expl: "The text lists 'Stop Pins (supports the work piece)'." },
+            { q: "Which work holding device is used for holding thick workpieces on a planer?", opts: ["Toe Dogs", "Stop Pins", "T-Bolts", "Fixtures"], ans: "Toe Dogs", expl: "The text lists 'Toe Dogs (holding thick work piece)'." },
+            { q: "Which planer drive has the advantage that the speed of the motor can be varied according to the field current supplied?", opts: ["Reversible DC Motor Drive", "Hydraulic Drive", "Pneumatic Drive", "Slotted Link Drive"], ans: "Reversible DC Motor Drive", expl: "The text states for the Reversible DC Motor Drive: 'this drive has advantage that speed of motor can be varied according to the field current supplied'." },
+            { q: "How is the hydraulic drive of a planer similar to that used for a horizontal shaper?", opts: ["More than one hydraulic cylinder may be used to give a wide range of speeds", "It uses water instead of oil", "It is powered by a hand pump", "It has a fixed, unchangeable speed"], ans: "More than one hydraulic cylinder may be used to give a wide range of speeds", expl: "The text notes: 'it is similar to that used for horizontal shaper. More than one hydraulic cylinder may be used to give wide range of speeds'." },
+            { q: "What is a slotter machine basically defined as?", opts: ["A vertical axis shaper", "A horizontal milling machine", "A heavy duty planer", "A high-speed drill"], ans: "A vertical axis shaper", expl: "The text explicitly states: 'Basically slotting machine is a vertical axis shaper'." },
+            { q: "In a slotting machine, the tool moves in which direction?", opts: ["Vertically", "Horizontally", "Diagonally", "Circularly"], ans: "Vertically", expl: "The text states: 'The tool moves vertically rather than in a horizontal direction'." },
+            { q: "Does a slotting machine have a rotary table?", opts: ["Yes, a hand or power operated rotary table", "No, it has a fixed square table", "No, it has no table", "Yes, but it is strictly magnetic"], ans: "Yes, a hand or power operated rotary table", expl: "The text states it has 'a hand or power operated rotary table'." },
+            { q: "How does the stroke of a slotting machine compare to a shaper?", opts: ["The stroke of ram is smaller in slotting machines than in shapers", "The stroke is exactly the same", "The stroke is twice as long", "The stroke is infinitely long"], ans: "The stroke of ram is smaller in slotting machines than in shapers", expl: "The text explicitly notes: 'The stroke of ram is smaller in slotting machines than in shapers'." },
+            { q: "Which part of a slotter acts as a support for the column, driving mechanism, and table?", opts: ["Base", "Ram", "Tool holder", "Cross rail"], ans: "Base", expl: "The text states the Base (or bed) 'acts as a support for the column, the driving mechanism of ram, table and other fittings'." },
+            { q: "Which part of a slotter acts as a housing for the complete driving mechanism?", opts: ["Column", "Base", "Table", "Ram"], ans: "Column", expl: "The text states the Column 'acts as a housing for the complete driving mechanism'." },
+            { q: "What shape is the table of a slotter usually?", opts: ["Circular", "Square", "Triangular", "Hexagonal"], ans: "Circular", expl: "The text notes: 'usually a circular table is provided in slotter.'" },
+            { q: "Which part of the slotter moves in the vertical direction between guideways in front of the column?", opts: ["Ram", "Base", "Table", "Tool holder"], ans: "Ram", expl: "The text states the Ram 'moves in vertical direction between the vertical guideways provided in front of the column'." },
+            { q: "During which movement of the slotter ram does the cutting action take place?", opts: ["Downward movement", "Upward movement", "Horizontal movement", "Circular movement"], ans: "Downward movement", expl: "The text explicitly states: 'the cutting action takes place during the downward movement of the ram'." },
+            { q: "According to the 300 mm stroke slotter specification, what is the maximum diameter accommodated when machining at the centre?", opts: ["900 mm", "300 mm", "450 mm", "500 mm"], ans: "900 mm", expl: "The specifications slide states 'Maximum diameter accommodated when machining at centre = 900 mm'." },
+            { q: "What is the H.P required for the typical 300 mm stroke slotter?", opts: ["2 H.P", "10 H.P", "5 H.P", "1 H.P"], ans: "2 H.P", expl: "The specifications slide lists 'H.P required = 2 H.P'." },
+            { q: "Which of the following is listed as a slotter drive mechanism?", opts: ["Slotted disc mechanisms", "Rack and pinion", "Double housing", "Draw type mechanism"], ans: "Slotted disc mechanisms", expl: "The text lists 'Slotted disc mechanisms' under 'Slotter drive mechanisms'." },
+            { q: "Which of the following operations can be performed on the slotter?", opts: ["Cutting of internal grooves or key ways", "Turning a cylindrical shaft", "Milling a flat horizontal surface rapidly", "Drilling deep holes"], ans: "Cutting of internal grooves or key ways", expl: "The operations list includes 'Cutting of internal grooves or key ways'." },
+            { q: "Can a slotter cut internal gears?", opts: ["Yes, cutting internal gears is a slotter operation", "No, only shapers can cut internal gears", "No, it is strictly for external flat surfaces", "No, it can only cut keyways"], ans: "Yes, cutting internal gears is a slotter operation", expl: "The operations list explicitly includes 'Cutting of internal gears'." }
+        ];
+
+        let questions = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function initQuiz() {
+            let clonedData = JSON.parse(JSON.stringify(rawData));
+            questions = shuffle(clonedData);
+            
+            questions.forEach(q => {
+                q.opts = shuffle(q.opts);
+            });
+
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            
+            buildSidebar();
+            loadQuestion(0);
+        }
+
+        function buildSidebar() {
+            const grid = document.getElementById("nav-grid");
+            grid.innerHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                const btn = document.createElement("button");
+                btn.className = "nav-btn";
+                btn.innerText = i + 1;
+                btn.id = "nav-btn-" + i;
+                btn.onclick = () => {
+                    loadQuestion(i);
+                    toggleSidebar();
+                };
+                grid.appendChild(btn);
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function loadQuestion(index) {
+            currentQuestion = index;
+            const q = questions[currentQuestion];
+            
+            document.getElementById("question-tracker").innerText = `Question ${currentQuestion + 1} of 100`;
+            document.getElementById("score-tracker").innerText = `Score: ${score}`;
+            document.getElementById("question-text").innerText = q.q;
+
+            const container = document.getElementById("options-container");
+            container.innerHTML = '';
+            document.getElementById("explanation-box").style.display = "none";
+
+            q.opts.forEach((opt) => {
+                const btn = document.createElement("button");
+                btn.className = "option";
+                btn.innerText = opt;
+                
+                if (userAnswers[currentQuestion] !== null) {
+                    btn.disabled = true;
+                    if (opt === q.ans) {
+                        btn.classList.add("correct");
+                    } else if (opt === userAnswers[currentQuestion]) {
+                        btn.classList.add("incorrect");
+                    }
+                } else {
+                    btn.onclick = () => selectOption(opt);
+                }
+                
+                container.appendChild(btn);
+            });
+
+            if (userAnswers[currentQuestion] !== null) {
+                showExplanation(q.ans, userAnswers[currentQuestion] === q.ans, q.expl);
+            }
+
+            const nextBtn = document.getElementById("next-btn");
+            if (userAnswers[currentQuestion] !== null) {
+                nextBtn.style.display = "block";
+                nextBtn.innerText = (currentQuestion === questions.length - 1) ? "Finish Quiz ➔" : "Next Question ➔";
+            } else {
+                nextBtn.style.display = "none";
+            }
+
+            updateSidebarHighlight();
+        }
+
+        function selectOption(selectedOpt) {
+            const q = questions[currentQuestion];
+            userAnswers[currentQuestion] = selectedOpt;
+
+            const isCorrect = (selectedOpt === q.ans);
+            if (isCorrect) score++;
+
+            const navBtn = document.getElementById(`nav-btn-${currentQuestion}`);
+            navBtn.classList.add(isCorrect ? "answered-correct" : "answered-incorrect");
+
+            loadQuestion(currentQuestion);
+        }
+
+        function showExplanation(correctAnswer, isCorrect, explanation) {
+            const expBox = document.getElementById("explanation-box");
+            expBox.style.display = "block";
+            let statusText = isCorrect ? "<strong style='color: #48bb78;'>Correct!</strong>" : `<strong style='color: #f56565;'>Incorrect.</strong> The correct answer is: <em>${correctAnswer}</em>.`;
+            expBox.innerHTML = `${statusText}<br><br><strong>Explanation:</strong> ${explanation}`;
+            expBox.style.borderLeftColor = isCorrect ? "#48bb78" : "#f56565";
+            expBox.style.backgroundColor = isCorrect ? "#e6fffa" : "#fff5f5";
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                loadQuestion(currentQuestion + 1);
+            } else {
+                document.getElementById("quiz-screen").style.display = "none";
+                const results = document.getElementById("results-screen");
+                results.style.display = "block";
+                document.getElementById("final-score").innerText = `You scored ${score} out of 100.`;
+            }
+        }
+
+        function updateSidebarHighlight() {
+            document.querySelectorAll(".nav-btn").forEach((btn, idx) => {
+                btn.classList.remove("active");
+                if (idx === currentQuestion) {
+                    btn.classList.add("active");
+                }
+            });
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
