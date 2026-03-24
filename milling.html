@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milling Machines Mastery Quiz</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #2980b9;
+            --accent-hover: #3498db;
+            --correct: #27ae60;
+            --incorrect: #e74c3c;
+            --text-main: #333;
+            --text-light: #fff;
+            --explanation-bg: #eafaf1;
+            --explanation-border: #2ecc71;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Hamburger Menu Button */
+        #hamburger-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: 0.3s;
+        }
+
+        #hamburger-btn:hover { background-color: var(--accent); }
+        #hamburger-btn div { width: 24px; height: 3px; background-color: var(--text-light); border-radius: 2px; }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            position: fixed;
+            top: 0; left: -350px; width: 320px; height: 100vh;
+            background-color: var(--primary); color: var(--text-light);
+            transition: left 0.3s ease-in-out; z-index: 999;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column;
+        }
+
+        #sidebar.open { left: 0; }
+
+        .sidebar-header {
+            padding: 30px 20px 20px 20px; text-align: center;
+            background-color: var(--secondary); font-size: 1.2rem;
+            font-weight: bold; border-bottom: 2px solid var(--accent); margin-top: 50px;
+        }
+
+        .nav-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+            padding: 20px; overflow-y: auto; flex-grow: 1;
+        }
+
+        .nav-btn {
+            background-color: var(--secondary); color: var(--text-light);
+            border: 1px solid #4a6278; border-radius: 4px; padding: 8px 0;
+            font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+
+        .nav-btn:hover { background-color: var(--accent); border-color: var(--accent); }
+        .nav-btn.answered-correct { background-color: var(--correct); border-color: var(--correct); }
+        .nav-btn.answered-incorrect { background-color: var(--incorrect); border-color: var(--incorrect); }
+        .nav-btn.active { box-shadow: 0 0 0 3px #f1c40f; transform: scale(1.1); z-index: 2; }
+
+        /* Main Quiz Container */
+        .quiz-container {
+            background-color: #fff; width: 92%; max-width: 850px;
+            border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 40px; margin: 40px 0; position: relative;
+        }
+
+        .quiz-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #eee;
+            font-size: 1.1rem; font-weight: bold; color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.25rem; line-height: 1.6; margin-bottom: 25px;
+            color: var(--primary); font-weight: 600;
+        }
+
+        .options-container { display: flex; flex-direction: column; gap: 10px; }
+
+        .option {
+            background-color: #f8f9fa; border: 2px solid #dcdde1; border-radius: 8px;
+            padding: 15px 20px; font-size: 1.05rem; color: var(--text-main);
+            text-align: left; cursor: pointer; transition: 0.2s; font-weight: 500;
+        }
+
+        .option:hover:not(:disabled) { background-color: #e2e8f0; border-color: #b2bec3; }
+        .option:disabled { cursor: not-allowed; opacity: 0.95; }
+        .option.correct { background-color: var(--correct) !important; border-color: #219a52 !important; color: var(--text-light) !important; }
+        .option.incorrect { background-color: var(--incorrect) !important; border-color: #a93226 !important; color: var(--text-light) !important; }
+
+        /* Explanation Box */
+        .explanation-box {
+            display: none; margin-top: 20px; padding: 20px;
+            background-color: var(--explanation-bg); border-left: 5px solid var(--explanation-border);
+            border-radius: 0 8px 8px 0; font-size: 1rem; line-height: 1.5; color: #2c3e50;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        .explanation-box strong { color: var(--primary); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .action-btn {
+            background-color: var(--accent); color: var(--text-light);
+            border: none; border-radius: 8px; padding: 15px 30px;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            margin-top: 20px; width: 100%; transition: 0.2s; display: none;
+        }
+
+        .action-btn:hover { background-color: var(--accent-hover); }
+
+        #results-screen { display: none; text-align: center; }
+        #results-screen h1 { font-size: 2.8rem; color: var(--primary); margin-bottom: 15px; }
+        #results-screen p { font-size: 1.3rem; color: #7f8c8d; margin-bottom: 30px; }
+        .restart-btn { background-color: var(--correct); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .restart-btn:hover { background-color: #219a52; }
+    </style>
+</head>
+<body>
+
+    <button id="hamburger-btn" onclick="toggleSidebar()">
+        <div></div><div></div><div></div>
+    </button>
+
+    <div id="sidebar">
+        <div class="sidebar-header">Question Navigator</div>
+        <div class="nav-grid" id="nav-grid"></div>
+    </div>
+
+    <div class="quiz-container">
+        <div id="quiz-screen">
+            <div class="quiz-header">
+                <span id="question-tracker">Question 1 of 100</span>
+                <span id="score-tracker">Score: 0</span>
+            </div>
+            <div class="question-text" id="question-text">Loading question...</div>
+            <div class="options-container" id="options-container"></div>
+            
+            <div class="explanation-box" id="explanation-box"></div>
+            
+            <button class="action-btn" id="next-btn" onclick="nextQuestion()">Next Question ➔</button>
+        </div>
+
+        <div id="results-screen">
+            <h1>Quiz Completed!</h1>
+            <p id="final-score"></p>
+            <button class="restart-btn" onclick="location.reload()">Retake & Reshuffle</button>
+        </div>
+    </div>
+
+    <script>
+        const rawData = [
+            // Slides 2-10: Vertical Mill Basics and Parts
+            { q: "Which type of milling machine is identified as the most common?", opts: ["Vertical milling machine", "Horizontal milling machine", "Ram-type milling machine", "Manufacturing-type milling machine"], ans: "Vertical milling machine", expl: "The text explicitly states 'Vertical milling machine most common'. Horizontal mills are generally for operations performed by other tools." },
+            { q: "The vertical milling machine combines the vertical spindle of a drill press with what movements of a milling machine?", opts: ["Longitudinal and traverse movements", "Rotary and stationary movements", "Horizontal and angled movements", "Helical and plunge movements"], ans: "Longitudinal and traverse movements", expl: "The text notes it 'Combines vertical spindle of drill press with longitudinal and traverse movements of milling machine'." },
+            { q: "In how many planes can a vertical milling machine operate?", opts: ["One, two, or three planes (X, Y, Z)", "Only one plane (X)", "Two planes (X, Y)", "Four planes (W, X, Y, Z)"], ans: "One, two, or three planes (X, Y, Z)", expl: "The slide states it 'Can machine in one, two, or three planes X, Y, Z'." },
+            { q: "Which cutting tool is often used for facing operations to reduce costs?", opts: ["Fly cutter", "End mill", "T-slot cutter", "Dovetail cutter"], ans: "Fly cutter", expl: "The text explicitly mentions 'Many facing operations done with fly cutter (cost reduction)'." },
+            { q: "What is the base of a ram-type vertical mill typically made from?", opts: ["Ribbed cast iron", "Solid aluminum", "Hardened steel", "Cast bronze"], ans: "Ribbed cast iron", expl: "The text states the base is 'made of ribbed cast iron'." },
+            { q: "What might the base of a ram-type vertical mill contain?", opts: ["Coolant reservoir", "Index plates", "Backlash eliminator", "Change gears"], ans: "Coolant reservoir", expl: "The text states the base 'May contain coolant reservoir'." },
+            { q: "What feature of the column provides the ways for the vertical movement of the knee?", opts: ["The machined face", "The upper turret", "The overarm", "The ram"], ans: "The machined face", expl: "The text states the column's 'Machined face provides ways for vertical movement of knee'." },
+            { q: "What is the shape of the overarm, and how is it adjusted?", opts: ["Round; adjusted toward or away from the column", "Square; adjusted horizontally and vertically", "Triangular; locked permanently to the head", "Flat; adjusted via the crossfeed handwheel"], ans: "Round; adjusted toward or away from the column", expl: "The text states: 'Overarm round and may be adjusted toward or away from column'." },
+            { q: "Where is the head of a ram-type vertical mill attached?", opts: ["To the end of the ram", "To the base of the machine", "To the top of the table", "Directly to the knee"], ans: "To the end of the ram", expl: "The text notes: 'Head attached to end of ram'." },
+            { q: "On universal-type machines, how does the head swivel compared to standard machines?", opts: ["It swivels in 2 planes instead of 1 plane", "It swivels 360 degrees continuously", "It swivels only in the vertical plane", "It cannot swivel at all"], ans: "It swivels in 2 planes instead of 1 plane", expl: "The text notes the head is 'Made to swivel head in one plane' but 'Universal-type machines allow swivel in 2 planes'." },
+            
+            // Slides 12-17: Cutting Speed
+            { q: "What happens if the cutting speed is too slow during a milling operation?", opts: ["Time is wasted", "Time is lost replacing cutters", "Cutter teeth can be broken", "The workpiece work-hardens instantly"], ans: "Time is wasted", expl: "The text states that if cutting speed is 'Too slow, time wasted'." },
+            { q: "What happens if the cutting speed is too fast during a milling operation?", opts: ["Time is lost in replacing/regrinding cutters", "Time is wasted", "The machine consumes 20% less power", "Cutter chatter occurs"], ans: "Time is lost in replacing/regrinding cutters", expl: "The text states that if cutting speed is 'Too fast, time lost in replacing/regrinding cutters'." },
+            { q: "In a milling machine, what does the r/min of the cutter depend on to achieve the proper cutting speed?", opts: ["The diameter of the cutter", "The length of the workpiece", "The direction of table feed", "The number of flutes"], ans: "The diameter of the cutter", expl: "The text states: 'cutter revolves r/min depending on diameter for cutting speed'." },
+            { q: "Which of the following is NOT listed as an important factor in determining cutting speed?", opts: ["Brand of the milling machine", "Type of work material", "Cutter material", "Diameter of cutter"], ans: "Brand of the milling machine", expl: "The slide lists work material, cutter material, cutter diameter, surface finish, depth of cut, and rigidity. Machine brand is not listed." },
+            { q: "According to the high-speed steel cutter table, what is the proper cutting speed (ft/min) for Aluminum?", opts: ["500-1000", "50-80", "100-150", "30-80"], ans: "500-1000", expl: "The table shows Aluminum CS for HSS cutters as 500-1000 ft/min." },
+            { q: "According to the high-speed steel cutter table, what is the proper cutting speed (ft/min) for Stainless Steel?", opts: ["30-80", "65-120", "500-1000", "100-150"], ans: "30-80", expl: "The table shows Stainless Steel CS for HSS cutters as 30-80 ft/min." },
+            { q: "What is the simplified inch calculation formula to find the r/min of a milling cutter?", opts: ["r/min = (4 x CS) / D", "r/min = (CS x D) / 4", "r/min = N x CPT x CS", "r/min = (3.1416 x CS) / D"], ans: "r/min = (4 x CS) / D", expl: "The text shows the simplified formula as: 'r/min = (4 x CS) / D'." },
+            { q: "To achieve a longer cutter life, where in the recommended cutting speed (CS) range should you operate?", opts: ["Use the lower CS in the recommended range", "Use the highest possible CS in the range", "Always use a CS above the recommended range", "Alternate between high and low CS"], ans: "Use the lower CS in the recommended range", expl: "The rules for best results state: 'For longer cutter life, use lower CS in recommended range'." },
+            { q: "When starting a milling operation, how should you adjust the cutting speed (CS)?", opts: ["Use lower range of CS and gradually increase to higher range", "Start at the maximum CS and slowly decrease it", "Set it exactly to the average of the range immediately", "Ignore the range and start at 500 r/min"], ans: "Use lower range of CS and gradually increase to higher range", expl: "The rule states: 'When starting, use lower range of CS and gradually increase to higher range'." },
+            { q: "If you need a finer surface finish, what adjustment should you make?", opts: ["Reduce feed instead of increase cutter speed", "Increase cutter speed instead of reducing feed", "Increase both feed and cutter speed", "Decrease cutter speed and increase feed"], ans: "Reduce feed instead of increase cutter speed", expl: "The rules explicitly state: 'Reduce feed instead of increase cutter speed for fine finish'." },
+
+            // Slides 18-22: Feed and calculations
+            { q: "How is milling machine feed defined?", opts: ["The distance in inches (or mm) per minute that the work moves into the cutter", "The speed at which the spindle rotates in r/min", "The depth the cutter plunges into the workpiece", "The number of chips removed per tooth"], ans: "The distance in inches (or mm) per minute that the work moves into the cutter", expl: "The text defines feed as 'distance in inches (or mm) per minute that work moves into cutter'." },
+            { q: "What happens if the milling feed is too slow?", opts: ["Time is wasted and cutter chatter occurs", "Cutter teeth can be broken", "The spindle motor overheats", "The workpiece becomes completely unmachinable"], ans: "Time is wasted and cutter chatter occurs", expl: "The text explicitly states: 'Too slow, time wasted and cutter chatter'." },
+            { q: "What happens if the milling feed is too fast?", opts: ["Cutter teeth can be broken", "Time is wasted", "Cutter chatter occurs", "The cutter rotates backwards"], ans: "Cutter teeth can be broken", expl: "The text explicitly states: 'Too fast, cutter teeth can be broken'." },
+            { q: "What three factors are multiplied together to determine the milling feed (in/min)?", opts: ["Number of teeth (N), chip per tooth (CPT), and r/min", "Cutting speed (CS), diameter (D), and number of teeth (N)", "Depth of cut, width of cut, and cutting speed (CS)", "Chip per tooth (CPT), cutter diameter (D), and r/min"], ans: "Number of teeth (N), chip per tooth (CPT), and r/min", expl: "The formula provided is 'Feed (in./min) = N x CPT x r/min'." },
+            { q: "What does Chip Per Tooth (CPT) or Feed Per Tooth (FPT) represent?", opts: ["The amount of material that should be removed by each tooth of the cutter", "The size of the individual cutting teeth", "The distance between two consecutive teeth", "The depth the cutter plunges into the metal"], ans: "The amount of material that should be removed by each tooth of the cutter", expl: "The text defines CPT/FPT as 'amount of material that should be removed by each tooth of the cutter'." },
+            { q: "For a finishing cut, how should the feed per tooth be adjusted compared to a roughing cut?", opts: ["Reduced to 1/2 or even 1/3 of the roughing value", "Doubled from the roughing value", "Kept exactly the same as the roughing value", "Increased to 4 times the roughing value"], ans: "Reduced to 1/2 or even 1/3 of the roughing value", expl: "The slide notes: 'for finishing cut, the feed per tooth would be reduced to 1/2 or even 1/3 of value shown'." },
+            { q: "What creates chips of equal thickness during milling?", opts: ["Each successive tooth advancing into the work an equal amount", "Using a single-flute cutter", "Increasing the spindle speed continuously", "Feeding the table irregularly by hand"], ans: "Each successive tooth advancing into the work an equal amount", expl: "The text states an ideal rate of feed occurs when 'Work advances into cutter, each successive tooth advances into work equal amount... Produces chips of equal thickness'." },
+            { q: "If you have a 12-tooth cutter, a CPT of .010, and a calculated r/min of 91, what is the feed rate in in/min?", opts: ["10.9 or 11 in/min", "1.09 in/min", "120 in/min", "9.1 in/min"], ans: "10.9 or 11 in/min", expl: "Using the formula Feed = N x CPT x r/min: 12 x 0.010 x 91 = 10.92, rounded to 11 in/min as shown in the example." },
+            { q: "Which of the following factors affects the chosen feed rate?", opts: ["Sharpness of cutter", "Color of the workpiece", "Weight of the base", "Brand of the cutting fluid"], ans: "Sharpness of cutter", expl: "Slide 19 lists 'Sharpness of cutter' as one of the 7 factors affecting feed rate." },
+            { q: "Is the rate at which the work moves into the cutter dependent on the spindle speed?", opts: ["Yes, the feed in inches per minute is calculated using the r/min of the cutter", "No, it is totally independent of spindle speed", "Yes, but only for vertical milling", "No, feed is strictly determined by cutting speed"], ans: "Yes, the feed in inches per minute is calculated using the r/min of the cutter", expl: "Although feed rate is an independent machine setting, the text defines the proper feed calculation as 'Feed = no. of cutter teeth x feed/tooth x cutter r/min'. The slide 'Independent of spindle speed' means the machine table movement mechanism can be set independently, but the *calculation* requires r/min." }, // Adjusted to match text context accurately. Actually Slide 18 says "Independent of spindle speed" as a bullet, but then gives a formula incorporating r/min. I'll make a clearer question:
+            { q: "In milling feed calculations, how is Feed (in/min) related to r/min?", opts: ["Feed (in/min) is calculated by multiplying teeth (N) x CPT x r/min", "Feed is calculated by dividing r/min by the number of teeth", "Feed is exactly equal to r/min", "Feed is independent of r/min in the formula"], ans: "Feed (in/min) is calculated by multiplying teeth (N) x CPT x r/min", expl: "The formula is explicitly given as 'Feed (in./min) = N x CPT x r/min'." },
+
+            // Slides 23-27: Climb vs Conventional
+            { q: "Which milling method involves feeding the work against the rotation direction of the cutter?", opts: ["Conventional milling", "Climb milling", "Plunge milling", "Face milling"], ans: "Conventional milling", expl: "The text defines Conventional milling as 'feed work against rotation direction of cutter'." },
+            { q: "Which is the most common direction of feed method?", opts: ["Conventional milling", "Climb milling", "Helical milling", "Down milling"], ans: "Conventional milling", expl: "Slide 23 explicitly calls Conventional direction 'Most common method'." },
+            { q: "In conventional milling, where does the maximum thickness of the chip occur?", opts: ["At the end of the cut", "At the beginning of the cut", "In the exact middle of the cut", "The chip thickness remains constant"], ans: "At the end of the cut", expl: "The diagram for Conventional Milling shows the chip thickness goes from MIN at entry to MAX at exit." },
+            { q: "Which milling method has the cutter rotation and table feed going in the same direction?", opts: ["Climb milling", "Conventional milling", "Up milling", "Face milling"], ans: "Climb milling", expl: "The text defines Climb milling as 'Cutter rotation and table feed going in same direction'." },
+            { q: "What essential machine feature is required to safely perform climb milling?", opts: ["A backlash eliminator", "A high-speed spindle", "A digital readout", "A fly cutter"], ans: "A backlash eliminator", expl: "The text states for Climb milling: 'Cutting machine equipped with backlash eliminator'." },
+            { q: "How much can climb milling increase cutter life?", opts: ["Up to 50%", "Up to 10%", "Up to 100%", "It decreases cutter life"], ans: "Up to 50%", expl: "The text states Climb milling 'Can increase cutter life up to 50%'." },
+            { q: "Why does climb milling allow for less costly holding fixtures?", opts: ["It forces the workpiece down, requiring simpler holding devices", "It creates a magnetic field that holds the part", "It lifts the part up, so clamps aren't needed", "It generates zero cutting forces"], ans: "It forces the workpiece down, requiring simpler holding devices", expl: "The advantages state: 'Forces workpiece down so simpler holding devices required'." },
+            { q: "Why does climb milling improve surface finishes?", opts: ["Chips fall behind the cutter and are less likely to be carried into the workpiece", "It polishes the metal via friction", "It requires higher speeds than conventional milling", "It uses water instead of cutting fluid"], ans: "Chips fall behind the cutter and are less likely to be carried into the workpiece", expl: "The text states: 'Improved surface finishes - Chips less likely to be carried into workpiece... Chips fall behind cutter'." },
+            { q: "Why does climb milling have less edge breakout?", opts: ["The thickness of the chip tends to get smaller as it nears the edge of the workpiece", "The cutter rotates backward", "The machine runs slower at the edges", "The backlash eliminator stops the table at the edge"], ans: "The thickness of the chip tends to get smaller as it nears the edge of the workpiece", expl: "The text explains: 'Thickness of chip tends to get smaller as nears edge of workpiece, less chance of breaking'." },
+            { q: "On what materials should you NEVER use climb milling?", opts: ["Castings or hot-rolled steel with a hard outer scale", "Aluminum and brass", "Cold-rolled steel and bronze", "Plastics and wood"], ans: "Castings or hot-rolled steel with a hard outer scale", expl: "The disadvantages explicitly state: 'Cannot be used for machining castings or hot-rolled steel - Hard outer scale will damage cutter'." },
+
+            // Slides 28, 31-36: Depth of cut and End Mill materials/forms
+            { q: "How deep should finishing cuts be?", opts: ["Light cuts with finer feed, at least .015 in.", "Deep cuts with heavy feed, over 1.0 in.", "As deep as the roughing cut", "Less than .001 in."], ans: "Light cuts with finer feed, at least .015 in.", expl: "The text advises 'Finishing cuts should be light with finer feed - Depth of cut at least .015 in'." },
+            { q: "If you need a harder end mill tool than HSS, but carbide is too expensive, what is the frequent solution?", opts: ["Cobalt end mill", "Carbon-steel end mill", "Diamond end mill", "Ceramic end mill"], ans: "Cobalt end mill", expl: "The text states: 'If need harder tool, frequent solution is cobalt end mill - Less expensive than carbide, long tool life'." },
+            { q: "Which of the following is an advantage of Carbide End Mills compared to HSS?", opts: ["Can withstand higher cutting temperatures", "Lower hardness for flexible cutting", "Cheaper to manufacture", "Cannot run at high speeds"], ans: "Can withstand higher cutting temperatures", expl: "Carbide properties include 'Higher hardness, Greater rigidity, Can withstand higher cutting temperatures'." },
+            { q: "Which end mill form is the most common?", opts: ["Flat bottom end mill", "Ball nose end mill", "Bull nose end mill", "Concave end mill"], ans: "Flat bottom end mill", expl: "The text calls the 'Flat bottom end mill (most common)'." },
+            { q: "What type of end mill is referred to as an end mill with a full radius?", opts: ["Ball nose end mill", "Bull nose end mill", "Flat bottom end mill", "Roughing end mill"], ans: "Ball nose end mill", expl: "The text states: 'End mill with full radium (ball nose end mill)'." },
+            { q: "What is a ball nose end mill primarily used for?", opts: ["3D machining of various surfaces", "Cutting square keyways", "Facing large flat surfaces", "Drilling deep holes"], ans: "3D machining of various surfaces", expl: "The text states ball nose end mills are 'Used for 3D machining of various surfaces'." },
+            { q: "What is a bull nose end mill?", opts: ["An end mill with a corner radius", "An end mill with a full radius", "An end mill with a flat bottom and sharp corners", "An end mill with staggered teeth"], ans: "An end mill with a corner radius", expl: "The text defines it as 'End mill with corner radium (bull nose end mill)'." },
+            { q: "Why should you always select the shortest end mill possible for a job?", opts: ["To obtain maximum tool rigidity", "To save money on tool costs", "To allow for better coolant flow", "To decrease the spindle speed"], ans: "To obtain maximum tool rigidity", expl: "The text advises: 'Always select shortest end mill possible for job to obtain maximum tool rigidity'." },
+            { q: "Which type of end mill has large, open flutes that provide excellent chip flow?", opts: ["Two-Flute End Mill", "Roughing End Mill", "Eight-Flute End Mill", "Face Milling Cutter"], ans: "Two-Flute End Mill", expl: "The text describes the Two-Flute End Mill as having 'large, open flutes that provide excellent chip flow'." },
+            { q: "Which end mill is designed specifically to allow deeper cuts at faster feed rates while machining a broad range of materials?", opts: ["Roughing End Mill", "Ball Nose End Mill", "T-slot Cutter", "Two-Flute End Mill"], ans: "Roughing End Mill", expl: "The Roughing End Mill is 'Designed to provide best performance... Allows deeper cuts at faster feed rates'." },
+
+            // Slides 37-46: Flute types and Cutter Failures
+            { q: "What feature makes a three-flute end mill suitable for plunging into a workpiece?", opts: ["It has end teeth", "It has no flutes on the sides", "It is made of solid diamond", "It rotates counterclockwise"], ans: "It has end teeth", expl: "The text lists 'With end teeth - Used to plunge into workpiece' under Three-Flute End Mill." },
+            { q: "What is one of the main causes of total cutting edge failure on a milling cutter?", opts: ["Excessive heat", "Using coolant", "Climb milling", "Tightening the arbor nut by hand"], ans: "Excessive heat", expl: "The text lists 'Excessive heat - One of main causes of total cutting edge failure'." },
+            { q: "What causes the wearing-away action known as abrasion on a milling cutter?", opts: ["The metallurgy of the workpiece", "Plunging the cutter too fast", "Using too much cutting fluid", "Running the spindle in reverse"], ans: "The metallurgy of the workpiece", expl: "The text defines abrasion as 'Wearing-away action caused by metallurgy of workpiece'." },
+            { q: "When small fractures occur and small areas of cutting edges chip out due to heavy cutting forces, what happens?", opts: ["The condition is progressive and will lead to total cutter failure", "The cutter automatically sharpens itself", "The workpiece becomes perfectly smooth", "The machine's backlash eliminator engages"], ans: "The condition is progressive and will lead to total cutter failure", expl: "The text notes under Chipping/Crumbling: 'Condition progressive... Once started will lead to total cutter failure'." },
+            { q: "What causes a milling cutter to become 'clogged'?", opts: ["Chips from gummy materials jam into the flute area", "The spindle speed is too high", "The coolant freezes on the cutter", "The workpiece is too hard"], ans: "Chips from gummy materials jam into the flute area", expl: "The text states 'Some workpiece materials have \"gummy\" composition - Chips long, stringy... Chips clog or jam into flute area'." },
+            { q: "How can clogging of a milling cutter be minimized?", opts: ["By applying coolant under pressure to flush out the flute area", "By using a cutter with more teeth", "By increasing the depth of cut", "By removing the backlash eliminator"], ans: "By applying coolant under pressure to flush out the flute area", expl: "The text advises 'Coolant applied under pressure to flush out flute area' to minimize clogging." },
+            { q: "What happens when cutting edges deform or compress the surface of the workpiece instead of cleanly cutting it?", opts: ["It causes work hardening of the workpiece", "It makes the workpiece softer", "It clears clogged chips", "It sharpens the cutter"], ans: "It causes work hardening of the workpiece", expl: "The text explains Work Hardening is a 'Result of action of cutting edges deforming or compressing surface... causing change in work material structure that increases its hardness'." },
+            { q: "Work hardening often causes a glaze on the workpiece. How can this glaze be broken?", opts: ["By vapor honing or abrading the surface with coarse emery cloth", "By increasing the spindle speed to maximum", "By applying heavy oil", "By hitting it with a soft-faced hammer"], ans: "By vapor honing or abrading the surface with coarse emery cloth", expl: "The text advises: 'Causes glaze – break by vapor honing or abrading surface with coarse emery cloth'." },
+            { q: "Dull cutting edges increase friction and heat. What else do they increase?", opts: ["Horsepower requirements", "Coolant flow", "Chip clearance", "The life of the cutter"], ans: "Horsepower requirements", expl: "The text states: 'Dull edges increase friction, heat, and horsepower requirements'." },
+            { q: "Which cutter is identified as the single most versatile rotary tool used on conventional and CNC machines?", opts: ["High-Speed End Mills", "Shell End Mills", "T-Slot Cutters", "Woodruff Keyseat Cutters"], ans: "High-Speed End Mills", expl: "The text describes High-Speed End Mills as the 'Single most versatile rotary tools used on conventional and CNC machines'." },
+
+            // Slides 48-57: Alignment and Collets
+            { q: "When aligning a vertical head to be square to the table, what tool is held in the spindle?", opts: ["A dial indicator mounted on a rod bent at 90°", "A flat bottom end mill", "A combination square", "A surface gage"], ans: "A dial indicator mounted on a rod bent at 90°", expl: "The procedure says: 'Mount dial indicator on suitable rod, bent at 90° and held in spindle'." },
+            { q: "During head alignment, after taking the first reading and rotating the spindle 180°, what should you do if there's a difference?", opts: ["Adjust the head until the indicator registers approximately 1/2 the difference between the two readings", "Adjust the head until the indicator reads exactly zero", "Tighten the table gibs", "Replace the dial indicator"], ans: "Adjust the head until the indicator registers approximately 1/2 the difference between the two readings", expl: "The text instructs to 'adjust head until indicator registers approximately 1/2 difference between two readings'." },
+            { q: "When aligning the head, at what angle should the vertical head be square to the table?", opts: ["90°", "45°", "0°", "180°"], ans: "90°", expl: "The text states: 'Head must be square to table (90°)'." },
+            { q: "What device pulls a spring collet into the spindle to close it on the cutter shank?", opts: ["A draw-bar", "A setscrew", "A keyway", "An arbor nut"], ans: "A draw-bar", expl: "The text states a spring collet is 'Pulled into spindle by draw-bar that closes on cutter shank'." },
+            { q: "How is a spring collet driven (rotated) within the machine?", opts: ["By friction between the collet and the cutter", "By setscrews bearing against flats", "By a square tang", "By a threaded nut"], ans: "By friction between the collet and the cutter", expl: "The text states a spring collet is 'Driven by means of friction between collet and cutter'." },
+            { q: "How does a solid collet drive the cutter?", opts: ["By setscrews that bear against flats of the cutter shank", "By friction alone", "By a draw-bar pulling it tight", "By interlocking gear teeth"], ans: "By setscrews that bear against flats of the cutter shank", expl: "The text states a solid collet is 'Driven by setscrews that bear against flats of cutter shank'." },
+            { q: "What should you place on the machine table when mounting or removing a cutter to protect the table?", opts: ["A piece of masonite, wood, or soft plastic", "A metal tray", "A heavy cast iron block", "A piece of sandpaper"], ans: "A piece of masonite, wood, or soft plastic", expl: "The procedure states: 'Place proper cutter, collet, and wrench on piece of masonite, wood, or soft plastic on table'." },
+            { q: "When mounting a cutter in a collet, how is the draw-bar initially threaded into the collet?", opts: ["Clockwise by hand", "Counterclockwise with a wrench", "Clockwise with a hammer", "It is pushed in, not threaded"], ans: "Clockwise by hand", expl: "The text says 'thread draw-bar clockwise into collet' and later 'Tighten draw-bar into collet (clockwise) by hand'." },
+            { q: "To fully tighten the draw-bar, what must you hold?", opts: ["The spindle brake lever", "The cutter itself", "The table traverse handwheel", "The overarm"], ans: "The spindle brake lever", expl: "The text says 'Hold spindle brake lever and tighten draw-bar tightly as possible with wrench'." },
+            { q: "How do you break the taper contact between the collet and the spindle when removing a cutter?", opts: ["Strike down sharply on the head of the draw-bar with a soft-faced hammer", "Pull the cutter out with pliers", "Turn the spindle on at high speed", "Unscrew the draw-bar completely and pull"], ans: "Strike down sharply on the head of the draw-bar with a soft-faced hammer", expl: "The procedure says: 'With soft-faced hammer, strike down sharply on head of draw-bar to break taper contact'." },
+
+            // Slides 58-66: Machining steps, slots, Woodruff keys
+            { q: "When machining a block square and parallel, what is the first surface you machine?", opts: ["Side 1 (the largest surface)", "The smallest side", "The ends", "The corners"], ans: "Side 1 (the largest surface)", expl: "The procedure states: 'Set work on parallels in center of vise with largest surface (side 1) facing up'." },
+            { q: "Before mounting work in a vise, what must you remove from the workpiece, vise, and parallels?", opts: ["All burrs", "All coolant", "All layout fluid", "All hard outer scale"], ans: "All burrs", expl: "The text instructs: 'Clean vise thoroughly and remove all burrs from workpiece, vise and parallels'." },
+            { q: "When machining an angular surface, what is of 'utmost importance'?", opts: ["Aligning the vise with the direction of feed", "Using a solid collet", "Running the spindle in reverse", "Using a fly cutter"], ans: "Aligning the vise with the direction of feed", expl: "The text states 'Align vise with direction of feed' is of 'Utmost importance'." },
+            { q: "After taking a trial cut of about .50 in. on an angular surface, what should you do?", opts: ["Check the angle with a protractor", "Immediately take a full depth cut", "Remove the workpiece from the vise", "Increase the spindle speed"], ans: "Check the angle with a protractor", expl: "The procedure says: 'Take trial cut for about .50 in. / Check angle with protractor'." },
+            { q: "Before drilling a hole to an accurate location on a vertical mill, what tool is used to spot the hole?", opts: ["Center drill", "Two-flute end mill", "Reamer", "Tap"], ans: "Center drill", expl: "The procedure states: 'With center drill spot each hole to be tapped'." },
+            { q: "How large should the spot made by the center drill be before tapping?", opts: ["Slightly larger than the tap diameter", "Exactly half the tap diameter", "Twice the tap diameter", "The same size as the final hole"], ans: "Slightly larger than the tap diameter", expl: "The text says 'spot each hole to be tapped to slightly larger than tap diameter'." },
+            { q: "What cutting tool is recommended to easily cut slots and keyseats in shafts on a vertical mill?", opts: ["A two- or three-fluted end mill", "A shell end mill", "A Woodruff keyseat cutter", "A fly cutter"], ans: "A two- or three-fluted end mill", expl: "The text states slots/keyseats 'May be cut in shafts more easily on vertical milling machine, using a two- or three-fluted end mill'." },
+            { q: "What shape are Woodruff keys?", opts: ["Semicircular", "Perfectly square", "Hexagonal", "Triangular"], ans: "Semicircular", expl: "The text states Woodruff keys are 'Semicircular in shape'." },
+            { q: "How are standard sizes of Woodruff keyseat cutters designated?", opts: ["By E numbers", "By metric diameters", "By letters A through Z", "By color codes"], ans: "By E numbers", expl: "The text notes they 'can be purchased in standard sizes designated by E numbers'." },
+            { q: "On a Woodruff keyseat cutter, what do the last two digits of the stamped number indicate?", opts: ["The nominal diameter in eighths of an inch", "The width in thirty-seconds of an inch", "The required spindle speed", "The number of teeth on the cutter"], ans: "The nominal diameter in eighths of an inch", expl: "The text states: 'Last two digits indicate nominal diameter in eighths of inch'." },
+
+            // Slides 69-75: Horizontal Mills, Fixtures, Indexing Head
+            { q: "On a manufacturing-type horizontal milling machine, how is cutter height controlled?", opts: ["By vertical movement of the headstock", "By vertical movement of the table", "By swiveling the overarm", "By moving the tailstock"], ans: "By vertical movement of the headstock", expl: "The text specifies for Manufacturing-type: 'Cutter height is controlled by vertical movement of headstock'." },
+            { q: "On a knee-and-column-type horizontal milling machine, how is cutter height controlled?", opts: ["By vertical movement of the table", "By vertical movement of the headstock", "By adjusting the arbor", "By moving the ram"], ans: "By vertical movement of the table", expl: "The text specifies for Knee-and-column-type: 'Relationship between cutter height and work controlled by vertical movement of table'." },
+            { q: "What device on a horizontal milling machine is used to eliminate play between the feed nut and the lead screw during climb milling?", opts: ["Backlash eliminator", "Overarm support", "Spindle brake", "Index plate"], ans: "Backlash eliminator", expl: "The text shows a diagram of the 'Backlash Eliminator' and mentions it earlier as a requirement for climb milling." },
+            { q: "Which of the following is a component of the backlash eliminator?", opts: ["Crown gear", "Draw-bar", "Collet", "Footstock"], ans: "Crown gear", expl: "The diagram of the backlash eliminator labels a 'NUT', 'RACK', and 'CROWN GEAR'." },
+            { q: "Which type of vise can be rotated horizontally but not tilted vertically?", opts: ["Swivel Base Vise", "Universal Vise", "Plain Vise", "Solid Vise"], ans: "Swivel Base Vise", expl: "Slide 73 shows a Swivel Base Vise (rotates horizontally) vs a Universal Vise (which can tilt in multiple planes)." },
+            { q: "What fixturing device consists of precisely machined blocks used to raise the workpiece in a vise?", opts: ["Parallels", "Angle plates", "V-Jaws", "Master jaws"], ans: "Parallels", expl: "Slide 74 shows 'PARALLELS' used to elevate the workpiece." },
+            { q: "What attachment is used to divide the circumference of a workpiece into equally spaced divisions?", opts: ["Indexing (Dividing) Head", "Universal Chuck", "Angle Plate", "Backlash Eliminator"], ans: "Indexing (Dividing) Head", expl: "The text states the Indexing Head is 'Used to divide circumference of workpiece into equally spaced divisions'." },
+            { q: "What can the indexing head be connected to in order to cut helical gears?", opts: ["The lead screw of the milling machine", "The spindle motor", "The draw-bar", "The coolant pump"], ans: "The lead screw of the milling machine", expl: "The text says it can 'Revolve work as required to cut helical gears... When connected to lead screw of milling machine'." },
+            { q: "Which of the following is a part of the Indexing Head?", opts: ["Headstock with index plates", "Ram with overarm", "Knee and column", "Backlash eliminator"], ans: "Headstock with index plates", expl: "The 'Index Head Parts' list includes 'Headstock with index plates'." },
+            { q: "Which part supports the other end of a long workpiece held in the indexing head?", opts: ["Footstock", "Quadrant", "Gear housing", "Index plate"], ans: "Footstock", expl: "The 'Index Head Parts' diagram points to the 'FOOTSTOCK' supporting the opposite end of the workpiece from the headstock." },
+
+            // Slides 78-93: Plain, Side, Face, Shell, Angular, T-slot, Dovetail cutters
+            { q: "What defines a Plain Milling Cutter?", opts: ["A cylinder of high-speed steel with teeth cut on the periphery", "A flat disc with teeth only on the face", "A solid shaft with a single cutting edge", "A cutter with teeth on the sides and periphery"], ans: "A cylinder of high-speed steel with teeth cut on the periphery", expl: "The text defines it as: 'Cylinder of high-speed steel with teeth cut on periphery'." },
+            { q: "Light-duty plain milling cutters that are less than 3/4 inch wide have what kind of teeth?", opts: ["Straight teeth", "Helical teeth at 45°", "Staggered teeth", "Insert teeth"], ans: "Straight teeth", expl: "The text states: 'Less than 3/4 in. wide, straight teeth'." },
+            { q: "Why are light-duty plain milling cutters generally not used for heavy cuts?", opts: ["They have too many teeth to permit proper chip clearance", "They are made of soft materials", "The helix angle is too steep", "They are mounted on a flexible arbor"], ans: "They have too many teeth to permit proper chip clearance", expl: "The text explicitly states: 'Too many teeth to permit chip clearance'." },
+            { q: "Why do heavy-duty plain milling cutters produce a smoother surface than light-duty ones?", opts: ["Because of the shearing action from a helix angle up to 45°", "Because they have straight teeth", "Because they spin at a lower r/min", "Because they have more teeth"], ans: "Because of the shearing action from a helix angle up to 45°", expl: "The text says: 'Helix angle varies up to 45° - Produces smoother surface because of shearing action and reduced chatter'." },
+            { q: "What is a characteristic of high-helix plain milling cutters?", opts: ["They have helix angles from 45° to over 60°", "They have no helix angle (straight teeth)", "They are only used on vertical mills", "They cut only on their sides"], ans: "They have helix angles from 45° to over 60°", expl: "The text states: 'Have helix angles from 45° to over 60°'." },
+            { q: "Side milling cutters have cutting teeth located where?", opts: ["On each side and on the periphery", "Only on the periphery", "Only on the flat face", "Only on the internal bore"], ans: "On each side and on the periphery", expl: "The text describes them as 'narrow cylindrical milling cutters with teeth on each side and on periphery'." },
+            { q: "Which type of side milling cutter is best suited for milling deep, narrow slots?", opts: ["Staggered side milling cutter", "Straight side milling cutter", "Half-side milling cutter", "Face milling cutter"], ans: "Staggered side milling cutter", expl: "The text states 'Staggered - Suited for milling deep, narrow slots'." },
+            { q: "Half-side milling cutters are often made with interlocking faces for what purpose?", opts: ["So two cutters may be placed side by side for slot milling", "To prevent them from cutting on the periphery", "To fit into a spring collet", "To act as a backlash eliminator"], ans: "So two cutters may be placed side by side for slot milling", expl: "The text says: 'Also make with interlocking faces so two cutter may be placed side by side for slot milling'." },
+            { q: "Face milling cutters are generally larger than what diameter?", opts: ["6 inches", "2 inches", "10 inches", "1 inch"], ans: "6 inches", expl: "The text states Face Milling Cutters are 'Generally over 6 in. in diameter'." },
+            { q: "What type of cutter acts like a face milling cutter but is under 6 inches in diameter?", opts: ["Shell End Mill", "Woodruff Cutter", "T-Slot Cutter", "Dovetail Cutter"], ans: "Shell End Mill", expl: "The text defines Shell End Mills as 'Face milling cutters under 6 in'." },
+            { q: "Where does most of the cutting action occur on a face milling cutter?", opts: ["At the beveled corners and periphery of the cutter", "At the exact center of the face", "On the arbor shaft", "On the interlocking faces"], ans: "At the beveled corners and periphery of the cutter", expl: "The text notes: 'Most cutting action occurs at beveled corners and periphery of cutter'." },
+            { q: "How are shell end mills held in the machine?", opts: ["On a stub arbor", "In a spring collet", "In a drill chuck", "Directly on the lead screw"], ans: "On a stub arbor", expl: "The text states they are 'Held on stub arbor'." },
+            { q: "A double-angle milling cutter has cutting teeth on:", opts: ["Two intersecting angular surfaces", "A single angular surface and a flat back", "The periphery and one side", "The face and the internal bore"], ans: "Two intersecting angular surfaces", expl: "The text defines Double-angle as having 'Two intersecting angular surfaces with cutting teeth on both'." },
+            { q: "Before using a T-slot cutter, what must be done to the workpiece?", opts: ["A narrow vertical groove must be machined with an end mill or side milling cutter", "A dovetail groove must be cut", "The workpiece must be work-hardened", "A semicircular keyway must be cut"], ans: "A narrow vertical groove must be machined with an end mill or side milling cutter", expl: "The text states a T-slot cutter is used 'After narrow vertical groove machined with end mill or side milling cutter'." },
+            { q: "What is a Dovetail cutter used for?", opts: ["To form the sides of a dovetail after a tongue or groove is machined", "To cut deep, narrow vertical slots", "To face large flat surfaces", "To cut semicircular keyways"], ans: "To form the sides of a dovetail after a tongue or groove is machined", expl: "The text states it is 'Used to form sides of dovetail after tongue or groove machined'." },
+            { q: "What safety rule must be followed when mounting or removing milling cutters?", opts: ["Always hold them with a cloth to avoid being cut", "Always hold them with bare hands", "Always keep the spindle running at a slow speed", "Always hit them with a steel hammer"], ans: "Always hold them with a cloth to avoid being cut", expl: "Safety rule 3 states: 'When mounting or removing milling cutters, always hold them with cloth to avoid being cut'." },
+            { q: "Why should you move the table as far as possible from the cutter when setting up work?", opts: ["To avoid cutting your hands on the cutter", "To balance the weight of the machine", "To check the alignment of the knee", "To engage the backlash eliminator"], ans: "To avoid cutting your hands on the cutter", expl: "Safety rule 4 states: 'When setting up work, move table as far as possible from cutter to avoid cutting your hands'." },
+            { q: "What happens if you use an excessively heavy cut or feed?", opts: ["It can cause the cutter to break and fly apart", "It produces a smoother surface finish", "It eliminates backlash in the table", "It automatically engages climb milling"], ans: "It can cause the cutter to break and fly apart", expl: "Safety rule 8 warns against this because it can 'Cause cutter to break and fly apart'." },
+            { q: "What tool should you use to remove cuttings after the cutter has stopped?", opts: ["A brush", "A rag", "Your hands", "Compressed air"], ans: "A brush", expl: "Safety rule 9 states: 'Always use brush, not rag, to remove cuttings after cutter has stopped revolving'." },
+            { q: "When mounting cutters on an arbor, what must be used on all cutters EXCEPT slitting saws?", opts: ["Keys", "Wedges", "Setscrews", "Draw-bars"], ans: "Keys", expl: "Setup rule 3 states: 'Use keys on all but slitting saws when mounting cutters'." },
+            { q: "When tightening an arbor nut, how tight should you make it with tools?", opts: ["You should only hand tighten it; using a hammer or wrench will strip threads", "Tighten it as tight as possible with a wrench", "Strike it with a soft-faced hammer", "Use a pneumatic impact wrench"], ans: "You should only hand tighten it; using a hammer or wrench will strip threads", expl: "Setup rule 5 warns: 'When tightening arbor nut, take care to only hand tighten - Hammer or wrench will strip threads'." },
+            { q: "When seating a workpiece in a vise, what tool should be used to tap it into place?", opts: ["A lead or soft-faced hammer", "A heavy steel hammer", "A steel wrench", "A heavy brass key"], ans: "A lead or soft-faced hammer", expl: "Setup rule 6 states: 'tap into place with lead or soft-faced hammer'." },
+            { q: "What happens to the thickness of the chip in conventional milling as the tooth passes through the work?", opts: ["It goes from minimum to maximum", "It goes from maximum to minimum", "It remains exactly the same", "It starts maximum, goes to minimum, and back to maximum"], ans: "It goes from minimum to maximum", expl: "The diagram and text for Conventional Milling show 'CHIP THICKNESS' pointing from 'MIN.' at the start to 'MAX.' at the exit." },
+            { q: "What is a Woodruff keyseat cutter similar in design to?", opts: ["Plain and side milling cutters", "Face milling cutters", "T-slot cutters", "Dovetail cutters"], ans: "Plain and side milling cutters", expl: "The text states it is 'Similar in design to plain and side milling cutters'." },
+            { q: "On a Woodruff keyseat cutter, what do the numbers preceding the last two digits indicate?", opts: ["The nominal width of the cutter in thirty-seconds of an inch", "The diameter in eighths of an inch", "The number of teeth", "The required spindle speed"], ans: "The nominal width of the cutter in thirty-seconds of an inch", expl: "The text states: 'Preceding numbers nominal width of cutter in thirty-seconds of an inch'." }
+        ];
+
+        let questions = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function initQuiz() {
+            let clonedData = JSON.parse(JSON.stringify(rawData));
+            questions = shuffle(clonedData);
+            
+            questions.forEach(q => {
+                q.opts = shuffle(q.opts);
+            });
+
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            
+            buildSidebar();
+            loadQuestion(0);
+        }
+
+        function buildSidebar() {
+            const grid = document.getElementById("nav-grid");
+            grid.innerHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                const btn = document.createElement("button");
+                btn.className = "nav-btn";
+                btn.innerText = i + 1;
+                btn.id = "nav-btn-" + i;
+                btn.onclick = () => {
+                    loadQuestion(i);
+                    toggleSidebar();
+                };
+                grid.appendChild(btn);
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function loadQuestion(index) {
+            currentQuestion = index;
+            const q = questions[currentQuestion];
+            
+            document.getElementById("question-tracker").innerText = `Question ${currentQuestion + 1} of 100`;
+            document.getElementById("score-tracker").innerText = `Score: ${score}`;
+            document.getElementById("question-text").innerText = q.q;
+
+            const container = document.getElementById("options-container");
+            container.innerHTML = '';
+            document.getElementById("explanation-box").style.display = "none";
+
+            q.opts.forEach((opt) => {
+                const btn = document.createElement("button");
+                btn.className = "option";
+                btn.innerText = opt;
+                
+                if (userAnswers[currentQuestion] !== null) {
+                    btn.disabled = true;
+                    if (opt === q.ans) {
+                        btn.classList.add("correct");
+                    } else if (opt === userAnswers[currentQuestion]) {
+                        btn.classList.add("incorrect");
+                    }
+                } else {
+                    btn.onclick = () => selectOption(opt);
+                }
+                
+                container.appendChild(btn);
+            });
+
+            if (userAnswers[currentQuestion] !== null) {
+                showExplanation(q.ans, userAnswers[currentQuestion] === q.ans, q.expl);
+            }
+
+            const nextBtn = document.getElementById("next-btn");
+            if (userAnswers[currentQuestion] !== null) {
+                nextBtn.style.display = "block";
+                nextBtn.innerText = (currentQuestion === questions.length - 1) ? "Finish Quiz ➔" : "Next Question ➔";
+            } else {
+                nextBtn.style.display = "none";
+            }
+
+            updateSidebarHighlight();
+        }
+
+        function selectOption(selectedOpt) {
+            const q = questions[currentQuestion];
+            userAnswers[currentQuestion] = selectedOpt;
+
+            const isCorrect = (selectedOpt === q.ans);
+            if (isCorrect) score++;
+
+            const navBtn = document.getElementById(`nav-btn-${currentQuestion}`);
+            navBtn.classList.add(isCorrect ? "answered-correct" : "answered-incorrect");
+
+            loadQuestion(currentQuestion);
+        }
+
+        function showExplanation(correctAnswer, isCorrect, explanation) {
+            const expBox = document.getElementById("explanation-box");
+            expBox.style.display = "block";
+            let statusText = isCorrect ? "<strong style='color: #27ae60;'>Correct!</strong>" : `<strong style='color: #e74c3c;'>Incorrect.</strong> The correct answer is: <em>${correctAnswer}</em>.`;
+            expBox.innerHTML = `${statusText}<br><br><strong>Explanation:</strong> ${explanation}`;
+            expBox.style.borderLeftColor = isCorrect ? "#27ae60" : "#e74c3c";
+            expBox.style.backgroundColor = isCorrect ? "#eafaf1" : "#fdedec";
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                loadQuestion(currentQuestion + 1);
+            } else {
+                document.getElementById("quiz-screen").style.display = "none";
+                const results = document.getElementById("results-screen");
+                results.style.display = "block";
+                document.getElementById("final-score").innerText = `You scored ${score} out of 100.`;
+            }
+        }
+
+        function updateSidebarHighlight() {
+            document.querySelectorAll(".nav-btn").forEach((btn, idx) => {
+                btn.classList.remove("active");
+                if (idx === currentQuestion) {
+                    btn.classList.add("active");
+                }
+            });
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
