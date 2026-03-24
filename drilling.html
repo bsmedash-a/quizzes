@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drills & Drilling Mastery Quiz</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #2980b9;
+            --accent-hover: #3498db;
+            --correct: #27ae60;
+            --incorrect: #e74c3c;
+            --text-main: #333;
+            --text-light: #fff;
+            --explanation-bg: #eafaf1;
+            --explanation-border: #2ecc71;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Hamburger Menu Button */
+        #hamburger-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: 0.3s;
+        }
+
+        #hamburger-btn:hover { background-color: var(--accent); }
+        #hamburger-btn div { width: 24px; height: 3px; background-color: var(--text-light); border-radius: 2px; }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            position: fixed;
+            top: 0; left: -350px; width: 320px; height: 100vh;
+            background-color: var(--primary); color: var(--text-light);
+            transition: left 0.3s ease-in-out; z-index: 999;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column;
+        }
+
+        #sidebar.open { left: 0; }
+
+        .sidebar-header {
+            padding: 30px 20px 20px 20px; text-align: center;
+            background-color: var(--secondary); font-size: 1.2rem;
+            font-weight: bold; border-bottom: 2px solid var(--accent); margin-top: 50px;
+        }
+
+        .nav-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+            padding: 20px; overflow-y: auto; flex-grow: 1;
+        }
+
+        .nav-btn {
+            background-color: var(--secondary); color: var(--text-light);
+            border: 1px solid #4a6278; border-radius: 4px; padding: 8px 0;
+            font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+
+        .nav-btn:hover { background-color: var(--accent); border-color: var(--accent); }
+        .nav-btn.answered-correct { background-color: var(--correct); border-color: var(--correct); }
+        .nav-btn.answered-incorrect { background-color: var(--incorrect); border-color: var(--incorrect); }
+        .nav-btn.active { box-shadow: 0 0 0 3px #f1c40f; transform: scale(1.1); z-index: 2; }
+
+        /* Main Quiz Container */
+        .quiz-container {
+            background-color: #fff; width: 92%; max-width: 850px;
+            border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 40px; margin: 40px 0; position: relative;
+        }
+
+        .quiz-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #eee;
+            font-size: 1.1rem; font-weight: bold; color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.25rem; line-height: 1.6; margin-bottom: 25px;
+            color: var(--primary); font-weight: 600;
+        }
+
+        .options-container { display: flex; flex-direction: column; gap: 10px; }
+
+        .option {
+            background-color: #f8f9fa; border: 2px solid #dcdde1; border-radius: 8px;
+            padding: 15px 20px; font-size: 1.05rem; color: var(--text-main);
+            text-align: left; cursor: pointer; transition: 0.2s; font-weight: 500;
+        }
+
+        .option:hover:not(:disabled) { background-color: #e2e8f0; border-color: #b2bec3; }
+        .option:disabled { cursor: not-allowed; opacity: 0.95; }
+        .option.correct { background-color: var(--correct) !important; border-color: #219a52 !important; color: var(--text-light) !important; }
+        .option.incorrect { background-color: var(--incorrect) !important; border-color: #a93226 !important; color: var(--text-light) !important; }
+
+        /* Explanation Box */
+        .explanation-box {
+            display: none; margin-top: 20px; padding: 20px;
+            background-color: var(--explanation-bg); border-left: 5px solid var(--explanation-border);
+            border-radius: 0 8px 8px 0; font-size: 1rem; line-height: 1.5; color: #2c3e50;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        .explanation-box strong { color: var(--primary); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .action-btn {
+            background-color: var(--accent); color: var(--text-light);
+            border: none; border-radius: 8px; padding: 15px 30px;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            margin-top: 20px; width: 100%; transition: 0.2s; display: none;
+        }
+
+        .action-btn:hover { background-color: var(--accent-hover); }
+
+        #results-screen { display: none; text-align: center; }
+        #results-screen h1 { font-size: 2.8rem; color: var(--primary); margin-bottom: 15px; }
+        #results-screen p { font-size: 1.3rem; color: #7f8c8d; margin-bottom: 30px; }
+        .restart-btn { background-color: var(--correct); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .restart-btn:hover { background-color: #219a52; }
+    </style>
+</head>
+<body>
+
+    <button id="hamburger-btn" onclick="toggleSidebar()">
+        <div></div><div></div><div></div>
+    </button>
+
+    <div id="sidebar">
+        <div class="sidebar-header">Question Navigator</div>
+        <div class="nav-grid" id="nav-grid"></div>
+    </div>
+
+    <div class="quiz-container">
+        <div id="quiz-screen">
+            <div class="quiz-header">
+                <span id="question-tracker">Question 1 of 100</span>
+                <span id="score-tracker">Score: 0</span>
+            </div>
+            <div class="question-text" id="question-text">Loading question...</div>
+            <div class="options-container" id="options-container"></div>
+            
+            <div class="explanation-box" id="explanation-box"></div>
+            
+            <button class="action-btn" id="next-btn" onclick="nextQuestion()">Next Question ➔</button>
+        </div>
+
+        <div id="results-screen">
+            <h1>Quiz Completed!</h1>
+            <p id="final-score"></p>
+            <button class="restart-btn" onclick="location.reload()">Retake & Reshuffle</button>
+        </div>
+    </div>
+
+    <script>
+        const rawData = [
+            { q: "What machine is essential in any metal-working shop for producing holes?", opts: ["Drilling machine", "Milling machine", "Lathe", "Shaper"], ans: "Drilling machine", expl: "The text states 'The drilling machine or drill press is essential in any metal-working shop.' The other machines are not identified as the primary essential machine for producing holes in this text." },
+            { q: "What part of a drilling machine holds the workpiece rigidly in position?", opts: ["Work table", "Spindle", "Chuck", "Column"], ans: "Work table", expl: "The text states the 'work table which holds the workpiece rigidly in position as the hole is drilled.' The spindle turns the drill, the chuck holds the tool, and the column supports the machine." },
+            { q: "What part of the drilling machine turns the drill and can be advanced into the work?", opts: ["Spindle", "Base", "Work table", "Depth stop"], ans: "Spindle", expl: "The text defines the spindle as the part 'which turns the drill and which can be advanced into the work'. The base, table, and depth stop do not rotate the drill." },
+            { q: "Which operation is NOT listed as one that can be performed on a drilling machine?", opts: ["Welding", "Reaming", "Tapping", "Counterboring"], ans: "Welding", expl: "The text explicitly lists tapping, reaming, counterboring, countersinking, and spot facing as standard operations. Welding is not a drilling machine operation." },
+            { q: "What is the simplest type of drilling machine?", opts: ["Sensitive drill press", "Radial drilling machine", "Upright drilling machine", "Gang type drilling machine"], ans: "Sensitive drill press", expl: "The text explicitly states: 'The simplest type of drilling machine is the sensitive drill press.' The other machines are more complex or larger." },
+            { q: "Why is a sensitive drill press called 'sensitive'?", opts: ["The hand feed mechanism enables the operator to 'feel' how the drill is cutting", "It easily breaks if handled roughly", "It requires precise computer programming", "It can only drill very soft materials"], ans: "The hand feed mechanism enables the operator to 'feel' how the drill is cutting", expl: "The text states it 'has only a hand feed mechanism which enables the operator to \"feel\" how the drill is cutting'. The other options are incorrect interpretations." },
+            { q: "In what two models are sensitive drill presses manufactured?", opts: ["Bench and floor models", "Automatic and manual models", "Horizontal and vertical models", "Light and heavy models"], ans: "Bench and floor models", expl: "The text specifically notes that sensitive drill presses are 'manufactured in bench and floor models.' The other classifications are not used here." },
+            { q: "Which part of the drill press provides stability and a rigid mounting for the column?", opts: ["Base", "Spindle", "Table", "Drilling head"], ans: "Base", expl: "The text states: 'The base, usually made of cast iron, provides stability for the machines and also rigid mounting for the column.' The other parts sit above the base." },
+            { q: "What material is the base of a drill press usually made of?", opts: ["Cast iron", "Aluminum", "Stainless steel", "Copper"], ans: "Cast iron", expl: "The text explicitly says 'The base, usually made of cast iron...'. The other materials are not mentioned for the base." },
+            { q: "What is the purpose of slots or ribs in the base of a drill press?", opts: ["To allow the work holding device or workpiece to be fastened to the base", "To drain coolant fluid away", "To reduce the overall weight of the machine", "To hold spare drill bits"], ans: "To allow the work holding device or workpiece to be fastened to the base", expl: "The text states: 'The slots or ribs in the base allow the work holding device or the workpiece to be fastened to the base.' They are not for coolant, weight reduction, or storage." },
+            { q: "What describes the column of a drill press?", opts: ["An accurate cylindrical post which fits into the base", "A flat surface that holds the workpiece", "The rotating shaft that holds the chuck", "The lever used to lower the spindle"], ans: "An accurate cylindrical post which fits into the base", expl: "The text defines the column as 'an accurate cylindrical post which fits into the base.' The other descriptions fit the table, spindle, and hand feed lever." },
+            { q: "At what angle is the table's surface positioned relative to the column?", opts: ["90 degrees", "45 degrees", "180 degrees", "60 degrees"], ans: "90 degrees", expl: "The text states: 'The table, whose surface is at 90° to the column...' The other angles are incorrect." },
+            { q: "Where is the drill press head mounted?", opts: ["Near the top of the column", "At the very bottom of the base", "Directly underneath the work table", "On the hand feed lever"], ans: "Near the top of the column", expl: "The text specifies: 'The drill press head is mounted near the top of the column.' The other locations are structurally incorrect." },
+            { q: "What part houses the spindle in the drilling head?", opts: ["Spindle sleeve or quill", "Depth stop", "Drill chuck", "Gear box"], ans: "Spindle sleeve or quill", expl: "The text says 'The spindle... is house[d] in the spindle sleeve or quill.' The chuck attaches to the spindle, and the depth stop controls depth." },
+            { q: "What controls the vertical movement of the spindle sleeve and the cutting tool?", opts: ["Hand feed lever", "Depth stop", "Column clamp", "Base ribs"], ans: "Hand feed lever", expl: "The text states: 'The hand feed lever is used to control the vertical movement of the spindle sleeve and the cutting tool.' The depth stop only sets the limit." },
+            { q: "What device can be set to control the depth that a cutting tool enters the workpiece?", opts: ["Depth stop", "Spindle sleeve", "Table clamp", "Keyless chuck"], ans: "Depth stop", expl: "The text explicitly states: 'A depth stop... can be set to control the depth that a cutting tool enters the workpiece.' The other parts have different functions." },
+            { q: "How does the standard upright drilling machine differ from the sensitive type?", opts: ["It is larger, heavier, and equipped with a gear box", "It is smaller, lighter, and strictly hand-fed", "It only operates horizontally", "It cannot be used for tapping or reaming"], ans: "It is larger, heavier, and equipped with a gear box", expl: "The text notes the upright drill is 'larger and heavier' and is 'equipped with gear box to provide a greater variety of speeds'. The sensitive type is lighter and simpler." },
+            { q: "Which machine is developed primarily for handling larger workpieces than upright machines?", opts: ["Radial Drilling Machine", "Sensitive Drill Press", "Gang Type Drilling Machine", "Keyless Chuck Machine"], ans: "Radial Drilling Machine", expl: "The text states the radial drilling machine 'has been developed primarily for the handling of larger workpieces than is possible on upright machines.' The sensitive and gang types are not for larger single pieces." },
+            { q: "What is a major advantage of the radial drilling machine for greater production?", opts: ["The head may be moved rapidly to any location while the workpiece remains clamped", "It uses an automatic tool changer", "It requires no electricity", "It only drills one specific size of hole"], ans: "The head may be moved rapidly to any location while the workpiece remains clamped", expl: "The text states: 'The drilling head may be moved rapidly to any desired location, while the workpiece remained clamped... this feature permits greater production.' Auto tool changers belong to NC machines." },
+            { q: "On universal models of radial drilling machines, what special feature is available?", opts: ["The head may be swiveled so holes can be drilled on an angle", "It can automatically sweep the floor", "It has multiple spindles drilling at once", "It runs exclusively on computer code"], ans: "The head may be swiveled so holes can be drilled on an angle", expl: "The text notes: 'On universal models, the head may be swiveled so that holes can be drilled on an angle.' NC machines use code, and multi-spindle machines drill at once." },
+            { q: "Which drilling machine features several spindles or stations mounted on one long table?", opts: ["Gang Type Drilling Machine", "Radial Drilling Machine", "Sensitive Drill Press", "Numerical Control Machine"], ans: "Gang Type Drilling Machine", expl: "The text defines the Gang type machine as having 'several spindles or stations... mounted on one long table'. Radial drills have one main arm, and NC machines focus on computer automation." },
+            { q: "Which drilling machine has many spindles mounted on a single head to drill many holes simultaneously?", opts: ["Multi-spindle Drilling Machine", "Gang Type Drilling Machine", "Upright Drilling Machine", "Sensitive Drill Press"], ans: "Multi-spindle Drilling Machine", expl: "The text states: 'In the Multi-spindle drilling machine, there are many spindles mounted on one head to allow many holes to be drilled simultaneously.' Gang types have spindles along a long table, not one head." },
+            { q: "How is table position and tooling controlled in a Numerical Control (NC) drilling machine?", opts: ["Using a computer program", "By a hand feed lever only", "By swiveling the radial arm", "By moving the base across the floor"], ans: "Using a computer program", expl: "The text states for NC machines: 'Speeds, feeds, and table position is controlled using a computer program.' Manual levers defeat the purpose of NC." },
+            { q: "What feature allows a Numerical Control drilling machine to automatically change tooling?", opts: ["A turret or automatic tool changer", "A hand-tightened chuck", "A drill sleeve", "A keyless chuck"], ans: "A turret or automatic tool changer", expl: "The text says NC machines 'can automatically change tooling with a turret or automatic tool changer.' Chucks and sleeves are manual tools." },
+            { q: "What operation sizes and produces a smooth round hole from a previously drilled hole?", opts: ["Reaming", "Counterboring", "Tapping", "Spot-facing"], ans: "Reaming", expl: "The text defines Reaming as 'the operation of sizing and producing a smooth round hole from a previously drilled or bored hole'. Counterboring creates a shoulder, tapping makes threads." },
+            { q: "What cutting tool is used with several cutting edges to smooth and size a hole?", opts: ["A reamer", "A tap", "A center drill", "A boring bar"], ans: "A reamer", expl: "The operation is called 'Reaming' using a cutting tool having several cutting edges. A tap cuts threads, a center drill makes a starting hole." },
+            { q: "What operation involves cutting internal threads in a hole?", opts: ["Tapping", "Reaming", "Countersinking", "Centering"], ans: "Tapping", expl: "The text defines Tapping as 'the operation of cutting internal threads in a hole with a cutting tool called a tap.' The other options do not cut threads." },
+            { q: "What tools are used when tapping is performed by power in a machine?", opts: ["Special machines or gun taps with a tapping attachment", "Twist drills", "Boring bars", "Center drills"], ans: "Special machines or gun taps with a tapping attachment", expl: "The text states: 'Special machines or gun taps are used with a tapping attachments when this operation is performed by power in a machine.' Twist drills only make standard holes." },
+            { q: "What operation enlarges the top of a hole to provide a square shoulder for a bolt head?", opts: ["Counterboring", "Countersinking", "Spot-facing", "Reaming"], ans: "Counterboring", expl: "The text defines Counterboring as 'enlarging the top... to a given depth to provide a square shoulder for the head of a bold or a cap screw.' Countersinking makes a cone shape." },
+            { q: "What operation produces a tapered or cone-shaped enlargement to the end of a hole?", opts: ["Countersinking", "Counterboring", "Centering", "Tapping"], ans: "Countersinking", expl: "The text defines Countersinking as 'producing a tapered or cone-shaped enlargement to the end of a hole.' Counterboring produces a square shoulder." },
+            { q: "What is another name for the centering operation?", opts: ["Center drilling", "Spot-facing", "Reaming", "Tapping"], ans: "Center drilling", expl: "The text states: 'Centering operation also called center drilling...' Spot-facing and reaming are completely different finishing operations." },
+            { q: "What is the purpose of the centering operation?", opts: ["To drill a starting hole to accurately establish its location for subsequent drilling", "To cut internal threads", "To create a cone-shaped enlargement", "To smooth an existing hole"], ans: "To drill a starting hole to accurately establish its location for subsequent drilling", expl: "The text states it 'drills a starting hole to establish its location for subsequent drilling accurately.' It does not cut threads or smooth holes." },
+            { q: "What operation smooths and squares the surface around a hole to provide a seat for a nut?", opts: ["Spot-facing", "Counterboring", "Countersinking", "Reaming"], ans: "Spot-facing", expl: "The text defines Spot-facing as 'smoothing and squaring the surface around a hole to provide a seat for the head of a cap screw or a nut.' Counterboring actually enlarges the hole depth." },
+            { q: "What specific tool setup is generally used for spot-facing?", opts: ["A boring bar with a pilot section fitted with a double edge cutting tool", "A standard twist drill", "A single-edge tap", "A keyless chuck"], ans: "A boring bar with a pilot section fitted with a double edge cutting tool", expl: "The text states: 'A boring bar with a pilot section on the end... is generally fitted with a double edge cutting tool' for spot-facing." },
+            { q: "What is the most common device used on a drill press for holding straight shank cutting tools?", opts: ["Drill Chuck", "Drill Sleeve", "Drill Socket", "Spindle Sleeve"], ans: "Drill Chuck", expl: "The text explicitly states: 'Drill chucks are the most common devices used on a drill press for holding straight shank cutting tools.' Sleeves and sockets handle tapered shanks." },
+            { q: "How many jaws do most drill chucks contain?", opts: ["Three jaws", "Two jaws", "Four jaws", "Six jaws"], ans: "Three jaws", expl: "The text notes: 'Most drill chuck contains three jaws and move simultaneously...' Other numbers of jaws are not mentioned for these chucks." },
+            { q: "How do the jaws in a key type drill chuck move when the outer sleeve is turned?", opts: ["Simultaneously", "Independently", "Alternately", "One at a time"], ans: "Simultaneously", expl: "The text states the 'three jaws that move in or out simultaneously when the outer sleeve is turned.' They do not move independently." },
+            { q: "What is used to tighten a key type drill chuck to hold the drill securely?", opts: ["A key", "A wrench", "A pair of pliers", "A hammer"], ans: "A key", expl: "The text states: 'The sleeve is then tightened with the key causing the drill to be held securely...' Pliers or hammers are incorrect tools." },
+            { q: "Why are keyless drill chucks used more in production work?", opts: ["The chuck may be loosened or tightened without a key, making it quicker", "They hold much larger drills than key type chucks", "They automatically sharpen the drill", "They are made of computer chips"], ans: "The chuck may be loosened or tightened without a key, making it quicker", expl: "The text says they are used in production 'since the chuck may be loosened or tightened without a key' and it is done 'quickly and easily by means of a hand.'" },
+            { q: "What tool holding device adapts the tool shank to the spindle if the tool's taper is smaller than the spindle hole?", opts: ["Drill Sleeve", "Drill Socket", "Keyless Chuck", "Tang"], ans: "Drill Sleeve", expl: "The text defines Drill Sleeves as used 'to adapt the cutting tool shank... if the taper on the cutting tool is smaller than the tapered hole in the spindle.' Sockets are used when the spindle hole is too small." },
+            { q: "What tool holding device is used when the hole in the drill press spindle is too small for the taper shank of the drill?", opts: ["Drill Socket", "Drill Sleeve", "Drill Chuck", "Boring Bar"], ans: "Drill Socket", expl: "The text states: 'A drill socket is used when the hole in the spindle... is too small for the taper shank of the drill.' Sleeves are for when the tool taper is smaller." },
+            { q: "Besides adapting larger taper shanks to small spindles, what else can a drill socket be used for?", opts: ["As an extension socket to provide extra length", "To cut internal threads", "To cool the drill bit", "To hold straight shank tools"], ans: "As an extension socket to provide extra length", expl: "The text explicitly states: 'Drill socket may also be used as extension socket to provide extra length.' It does not cool or cut threads." },
+            { q: "What type of drills are end cutting tools used to produce holes in most types of material?", opts: ["Twist Drills", "Center Drills", "Taps", "Reamers"], ans: "Twist Drills", expl: "The text states: 'Twist drills are end cutting tools used to produce holes in most types of material.' Taps and reamers are for finishing/threading." },
+            { q: "What material are most twist drills used in machine shop work today made of?", opts: ["High speed steel", "Carbon tool steel", "Aluminum", "Brass"], ans: "High speed steel", expl: "The text explicitly notes: 'Most twist drills used in machine shop work today are made of high speed steel.' Aluminum and brass are materials to be cut, not the drill itself." },
+            { q: "Why has high speed steel replaced carbon steel for drills?", opts: ["They can be operated at double the cutting speed and the cutting edges last longer", "They are much cheaper to manufacture", "They do not require a drill chuck", "They bend easily without breaking"], ans: "They can be operated at double the cutting speed and the cutting edges last longer", expl: "The text provides this exact reason: 'they can be operated at double the cutting speed and the cutting edges last longer.' Cost or flexibility are not mentioned." },
+            { q: "What are the three main parts of a drill?", opts: ["Shank, body, and point", "Tang, margin, and web", "Chuck, sleeve, and socket", "Flute, lip, and heel"], ans: "Shank, body, and point", expl: "The text categorizes it clearly: 'A drill may be divided into three main parts: shank, body, and point.' Tang, flute, etc., are sub-parts." },
+            { q: "Drills up to 1/2 in. (12.7 mm) in diameter generally have what type of shank?", opts: ["Straight shanks", "Tapered shanks", "Square shanks", "Hexagonal shanks"], ans: "Straight shanks", expl: "The text states: 'Generally drills up to 1/2 in. or 12.7 mm in diameter have straight shanks'. Larger ones usually have tapered shanks." },
+            { q: "What type of shank do drills over 1/2 in. (12.7 mm) in diameter usually have?", opts: ["Tapered shanks", "Straight shanks", "Threaded shanks", "Keyless shanks"], ans: "Tapered shanks", expl: "The text says 'while those over this diameter usually have tapered shanks.' Straight shanks are for smaller sizes." },
+            { q: "How are straight shank drills held in the drill press?", opts: ["In a drill chuck", "Directly in the spindle hole", "In a drill socket", "In a drill sleeve"], ans: "In a drill chuck", expl: "The text states: 'Straight shank drills are held in a drill chuck'. Tapered ones fit directly into the spindle or adaptors." },
+            { q: "What is provided on the end of tapered shank drills to prevent them from slipping while cutting?", opts: ["A tang", "A margin", "A key", "A flute"], ans: "A tang", expl: "The text states: 'A tang is provided on the end of the tapered shank drills to prevent the drill from slipping while it is cutting'. The margin and flutes are on the body." },
+            { q: "Besides preventing slipping, what is another purpose of the tang on a tapered shank drill?", opts: ["To allow the drill to be removed from the spindle without damaging the shank", "To measure the depth of the hole", "To direct cutting fluid into the hole", "To cut internal threads"], ans: "To allow the drill to be removed from the spindle without damaging the shank", expl: "The text says the tang allows 'the drill to be removed from the spindle of socket without the shank being damaged.' It does not measure depth or cut." },
+            { q: "What is the portion of the drill between the shank and the point called?", opts: ["Body", "Web", "Flute", "Margin"], ans: "Body", expl: "The text defines it: 'The body is the portion of the drill between the shank and the point.' The web, flute, and margin are features *on* the body." },
+            { q: "What are the two helical grooves cut lengthwise around the body of the drill called?", opts: ["Flutes", "Margins", "Tangs", "Lips"], ans: "Flutes", expl: "The text states: 'The flutes are two or helical grooves cut around the body of the drill.' Margins are the raised edges next to them." },
+            { q: "Which of the following is NOT a purpose of the flutes on a twist drill?", opts: ["To adapt the drill to a larger spindle", "To form the cutting edges", "To admit cutting fluid", "To allow chips to escape"], ans: "To adapt the drill to a larger spindle", expl: "The text lists three purposes for flutes: 'form the cutting edges, admit cutting fluid, and allow chips to escape'. Adapting to a spindle is done by a sleeve." },
+            { q: "What is the narrow, raised section on the body of a drill immediately next to the flutes?", opts: ["Margin", "Web", "Chisel edge", "Tang"], ans: "Margin", expl: "The text defines it: 'The margin is the narrow, raised section on the body of a drill. It is immediately next to the flutes...'" },
+            { q: "What is the purpose of the margin on a drill?", opts: ["To provide a full size to the drill body and cutting edges", "To pump coolant into the hole", "To grip the chuck", "To lock into the drill socket"], ans: "To provide a full size to the drill body and cutting edges", expl: "The text explicitly states its purpose is 'to provide a full size to the drill body and cutting edges.' It does not pump coolant or grip chucks." },
+            { q: "What is the undercut portion of the body between the margin and the flutes?", opts: ["Body clearance", "Web", "Lip clearance", "Shank"], ans: "Body clearance", expl: "The text states: 'The body clearance is the undercut portion of the body between the margin and the flutes.' Lip clearance is on the point." },
+            { q: "Why is the body clearance made smaller than the margin?", opts: ["To reduce friction between the drill and the hole", "To increase the weight of the drill", "To make the drill more flexible", "To hold more cutting fluid"], ans: "To reduce friction between the drill and the hole", expl: "The text explains: 'It is made smaller to reduce friction between the drill and the hole during the drilling operation.' It does not add weight or flexibility." },
+            { q: "What is the thin partition in the center of the drill that extends the full length of the flutes?", opts: ["Web", "Margin", "Tang", "Body clearance"], ans: "Web", expl: "The text defines it: 'The web is the thin partition in the center of the drill which extends the full length of the flutes.' The tang is on the shank." },
+            { q: "What part does the web form at the cutting end of the drill?", opts: ["The chisel edge", "The tang", "The lip clearance", "The margin"], ans: "The chisel edge", expl: "The text states: 'This part forms the chisel edge at the cutting end of the drill.' The tang is at the opposite end." },
+            { q: "Why does the web gradually increase in thickness toward the shank?", opts: ["To give the drill strength", "To make it easier to sharpen", "To allow more chips to escape", "To fit tighter into the chuck"], ans: "To give the drill strength", expl: "The text explicitly answers this: 'The web gradually increases in thickness to ward the shank to give the drill strength.' It does not aid chip escape." },
+            { q: "Which of the following is a component of the drill's point?", opts: ["Chisel edge", "Tang", "Shank", "Body clearance"], ans: "Chisel edge", expl: "The text lists the point components: 'chisel edge, lips, lip clearance, and heel.' Tang and shank are at the top, body clearance is on the body." },
+            { q: "What is the chisel-shaped portion of the drill point called?", opts: ["Chisel edge", "Heel", "Flute", "Lip clearance"], ans: "Chisel edge", expl: "The text defines it simply: 'The chisel edge is the chisel shaped portion of the drill point.' The heel is the back part of the point." },
+            { q: "What part of the drill point actually cuts away the material when a hole is drilled?", opts: ["Cutting lip", "Heel", "Tang", "Margin"], ans: "Cutting lip", expl: "The text states: 'The cutting lip of the drill is the part of the point that actually cuts away the material...' The margin only sizes the hole." },
+            { q: "How many cutting lips are there on a standard twist drill?", opts: ["One for each flute", "Only one total", "Three", "Four"], ans: "One for each flute", expl: "The text notes: 'There is a cutting lip for each flute of the drill.' Since standard drills have two flutes, there are two lips." },
+            { q: "What is the relief ground on the point of the drill extending from the cutting lips back to the heel?", opts: ["Lip clearance", "Body clearance", "Web", "Chisel edge"], ans: "Lip clearance", expl: "The text defines it: 'The lip clearance is the relief which is ground on the point of the drill extending from the cutting lips back to the heel.' Body clearance is on the sides." },
+            { q: "What is the average cutting lip clearance angle?", opts: ["8 to 12 degrees", "15 to 20 degrees", "45 degrees", "90 to 100 degrees"], ans: "8 to 12 degrees", expl: "The text states: 'The average cutting lip clearance is from 8 to 12º...' The 90-100 degree angles refer to the drill point angle for cast iron." },
+            { q: "For a general class of work, what should the drill point angle be?", opts: ["118 degrees", "150 degrees", "90 degrees", "60 degrees"], ans: "118 degrees", expl: "According to the diagram 'Different Kinds of Drill Points', section A 'GENERAL CLASS OF WORK' specifies '118°'. Other angles are for specific materials." },
+            { q: "What drill point angle is recommended for heat-treated steels and drop forgings?", opts: ["125 to 135 degrees", "118 degrees", "60 degrees", "90 to 100 degrees"], ans: "125 to 135 degrees", expl: "Section C of the drill points diagram indicates 'HEAT-TREATED STEELS. DROP FORGINGS.' use an angle of '125° TO 135°'." },
+            { q: "What drill point angle is recommended for soft and medium cast iron?", opts: ["90 to 100 degrees", "118 degrees", "150 degrees", "60 degrees"], ans: "90 to 100 degrees", expl: "Section D of the diagram for 'SOFT & MEDIUM CAST IRON' specifies '90° TO 100°'." },
+            { q: "When drilling soft and medium cast iron, what else must be done to the drill's geometry according to the text?", opts: ["Reduce rake angle to 5 degrees", "Increase lip clearance to 20 degrees", "Sharpen the tang", "Remove the margin"], ans: "Reduce rake angle to 5 degrees", expl: "Section D of the drill point diagram explicitly states: 'REDUCE RAKE ANGLE TO 5°' for soft & medium cast iron." },
+            { q: "What drill point angle is used for steel rails, tough alloy steels, and armor plate?", opts: ["150 degrees", "118 degrees", "90 degrees", "60 degrees"], ans: "150 degrees", expl: "Section B of the diagram indicates 'STEEL RAILS... TOUGH ALLOY STEELS-ARMOR PLATE' requires a '150°' angle." },
+            { q: "What drill point angle is recommended for drilling wood?", opts: ["60 degrees", "90 degrees", "118 degrees", "150 degrees"], ans: "60 degrees", expl: "Section G of the drill point diagram specifically shows a '60°' angle for 'WOOD'." },
+            { q: "What is the speed of a twist drill generally referred to as?", opts: ["Cutting speed, surface speed, or peripheral speed", "Feed speed or rotational thrust", "Drill velocity", "Spindle acceleration"], ans: "Cutting speed, surface speed, or peripheral speed", expl: "The text states: 'The speed of a twist is generally referred to as cutting speed, surface speed, or peripheral speed.' The other terms are fabricated." },
+            { q: "How is cutting speed defined in drilling?", opts: ["The distance that a point on the circumference of a drill will travel in 1 minute", "The time it takes to drill one inch deep", "The number of revolutions the drill makes per second", "The speed the hand feed lever is pulled down"], ans: "The distance that a point on the circumference of a drill will travel in 1 minute", expl: "The text explicitly defines it as: 'It is the distance that a point on the circumference of a drill will travel in 1 minute.'" },
+            { q: "Which of the following is NOT a variable that the most economical drilling speed depends upon?", opts: ["The brand name of the drill press", "The type and hardness of the material", "The depth of the hole", "The efficiency of the cutting fluid"], ans: "The brand name of the drill press", expl: "The text lists 7 variables including material hardness, depth, and cutting fluid efficiency. The brand name is not a listed factor." },
+            { q: "What happens if the cutting speed and/or feed are set too high?", opts: ["The cutting tool will show premature wear", "Production time will be wasted", "The hole will become magnetic", "The drill press will automatically shut down"], ans: "The cutting tool will show premature wear", expl: "The text warns: 'the cutting tool will show premature wear if the speed and/or feed are set too high.' Setting it too low wastes time." },
+            { q: "What happens if the cutting speed and/or feed are set too low?", opts: ["Production time will be wasted", "The cutting tool will break instantly", "The drill bit will melt", "The margin will expand"], ans: "Production time will be wasted", expl: "The text states: 'Production time will be wasted if the speed and/or feed are set too low'. It does not cause breaking or melting." },
+            { q: "What is the recommended cutting speed for Aluminum using a High Speed Steel drill?", opts: ["200 ft/min", "100 ft/min", "80 ft/min", "30 ft/min"], ans: "200 ft/min", expl: "The 'Speeds for High Speed Steel Drills' table shows Aluminum has a cutting speed of 200 ft/min (60 m/min)." },
+            { q: "What is the recommended cutting speed for Cast Iron using a High Speed Steel drill?", opts: ["100 ft/min", "200 ft/min", "80 ft/min", "40 ft/min"], ans: "100 ft/min", expl: "The table indicates Cast iron has a cutting speed of 100 ft/min (30 m/min)." },
+            { q: "What is the recommended cutting speed for Stainless Steel using a High Speed Steel drill?", opts: ["30 ft/min", "80 ft/min", "50 ft/min", "200 ft/min"], ans: "30 ft/min", expl: "The table lists Stainless steel with the lowest cutting speed at 30 ft/min (9 m/min)." },
+            { q: "What is the recommended cutting speed for Machine Steel using a High Speed Steel drill?", opts: ["80 ft/min", "50 ft/min", "100 ft/min", "200 ft/min"], ans: "80 ft/min", expl: "The table shows Machine steel requires a cutting speed of 80 ft/min (24 m/min)." },
+            { q: "What is the recommended cutting speed for Tool Steel using a High Speed Steel drill?", opts: ["50 ft/min", "30 ft/min", "80 ft/min", "100 ft/min"], ans: "50 ft/min", expl: "The table indicates Tool steel should be drilled at 50 ft/min (15 m/min)." },
+            { q: "If you are using a drill made of carbon tool steel instead of high speed steel, how should you adjust the cutting speed?", opts: ["It should be about one-half less", "It should be doubled", "It should remain exactly the same", "It should be increased by 10%"], ans: "It should be about one-half less", expl: "The note under the speed table says: 'For drills made of carbon tool steel, the cutting speeds should be about one-half less.'" },
+            { q: "What does 'rpm' stand for in the context of drilling?", opts: ["Revolutions per minute", "Rotations per meter", "Rates per machine", "Radii per minute"], ans: "Revolutions per minute", expl: "The text explicitly defines it as 'revolutions per minute (rpm).' The other terms are incorrect." },
+            { q: "How does the travel distance of a small drill compare to a larger drill if both operate at the exact same RPM?", opts: ["The small drill will travel fewer feet per minute", "The small drill will travel more feet per minute", "They will travel the exact same distance", "The small drill will travel exactly twice the distance"], ans: "The small drill will travel fewer feet per minute", expl: "The text explains: 'A small drill operating at the same rpm as a larger drill will travel fewer feet per minute...' because its circumference is smaller." },
+            { q: "Because a small drill travels fewer feet per minute at the same RPM as a large drill, what is required for it to cut efficiently?", opts: ["It must operate at a higher number of rpm", "It must operate at a lower number of rpm", "It requires a completely different cutting fluid", "It must use a heavier feed rate"], ans: "It must operate at a higher number of rpm", expl: "The text concludes: 'it naturally would cut more efficiently at a higher number of rpm.' The speed must be increased to match the required surface speed." },
+            { q: "What is the formula used to determine the correct RPM of a drill press spindle?", opts: ["rpm = cs / (π * D)", "rpm = (pi * D) / cs", "rpm = (L / fs) * i", "rpm = V * R"], ans: "rpm = cs / (π * D)", expl: "The text provides the formula: 'r p m = cutting speed / Drill circumference = cs / πD'. The other formulas are for processing time or velocity." },
+            { q: "What is 'feed' in drilling operations?", opts: ["The distance that a drill advances into the work for each revolution", "The speed the drill rotates", "The type of cutting fluid applied", "The total depth of the hole"], ans: "The distance that a drill advances into the work for each revolution", expl: "The text defines it exactly: 'Feed is the distance that a drill advances into the work for each revolution.' It is not rotation speed or total depth." },
+            { q: "What is the general rule of thumb regarding feed rate and drill size?", opts: ["Feed rate increases as the drill size increases", "Feed rate decreases as the drill size increases", "Feed rate remains constant regardless of drill size", "Feed rate only depends on the material, not drill size"], ans: "Feed rate increases as the drill size increases", expl: "The text states: 'As general rule of thumb is the feed rate increases as the drill size increases.' The drill feed table confirms larger drills use larger feeds." },
+            { q: "What happens if you use too coarse a feed?", opts: ["It may chip the cutting edges or break the drill", "It causes a scraping noise that polishes the hole", "It extends the life of the drill bit", "It reduces the necessary RPM to zero"], ans: "It may chip the cutting edges or break the drill", expl: "The text warns: 'Too coarse a feed may chip the cutting edges or break the drill.' Light feeds cause the scraping noise." },
+            { q: "What happens if you use too light a feed?", opts: ["It causes a chattering or scraping noise which quickly dulls the cutting edges", "It will break the drill shank", "It creates blue chips instantly", "It speeds up the production time"], ans: "It causes a chattering or scraping noise which quickly dulls the cutting edges", expl: "The text explains: 'Too light a feed causes a chattering or scraping noise which quickly dulls the cutting edges of the drill.'" },
+            { q: "When drilling, what does it mean if the chips coming from the hole turn blue?", opts: ["There is too much heat at the cutting edge", "The material is too soft", "The correct feed and speed are being used", "The drill is perfectly sharp"], ans: "There is too much heat at the cutting edge", expl: "The text warns: 'Blue chip indicates too much heat at the cutting edge.' This is a sign to stop and examine the drill." },
+            { q: "What causes the excessive heat that turns chips blue?", opts: ["Either a dull cutting edge or too high a speed", "Too much cutting fluid", "A feed rate that is too coarse", "Using a high speed steel drill on aluminum"], ans: "Either a dull cutting edge or too high a speed", expl: "The text explicitly answers this: 'This heat is caused by either a dull cutting edge or too high a speed.' Too much fluid would cool it, not heat it." },
+            { q: "According to the Drill Feeds table, what is the recommended feed for a drill 1/8 inch and smaller?", opts: ["0.001 to 0.002 inches", "0.002 to 0.004 inches", "0.004 to 0.007 inches", "0.015 to 0.025 inches"], ans: "0.001 to 0.002 inches", expl: "The table indicates that '1/8 and smaller' corresponds to '0.001 to 0.002' inches per revolution." },
+            { q: "According to the Drill Feeds table, what is the recommended feed for a drill sized 1/4 to 1/2 inch?", opts: ["0.004 to 0.007 inches", "0.001 to 0.002 inches", "0.007 to 0.015 inches", "0.015 to 0.025 inches"], ans: "0.004 to 0.007 inches", expl: "The table lists '1/4 to 1/2' inches corresponding to a feed of '0.004 to 0.007' inches." },
+            { q: "According to the Drill Feeds table, what is the recommended feed for a large drill sized 1 to 1 1/2 inches?", opts: ["0.015 to 0.025 inches", "0.001 to 0.002 inches", "0.004 to 0.007 inches", "0.007 to 0.015 inches"], ans: "0.015 to 0.025 inches", expl: "The table shows the largest category '1 to 1 1/2' inches uses a coarse feed of '0.015 to 0.025' inches." },
+            { q: "What is processing time in drilling?", opts: ["The total time needed to drill and finish a hole", "The time it takes to sharpen the drill bit", "The time required to program an NC machine", "The time it takes for cutting fluid to dry"], ans: "The total time needed to drill and finish a hole", expl: "The text defines it clearly: 'Processing Time for Drilling: The total time needed to drill and finish a hole.' The other definitions are incorrect." },
+            { q: "What is the formula for calculating Processing Time (T)?", opts: ["T = (L / (f * rpm)) * i", "T = cs / (π * D)", "T = L * fs * i", "T = rpm / f"], ans: "T = (L / (f * rpm)) * i", expl: "The text provides the exact formula: 'T = (L / (f x rpm)) x i', where L is distance, f is feed, rpm is speed, and i is the number of holes." },
+            { q: "In the processing time formula, what does 'L' represent?", opts: ["Total drilling distance", "Length of the drill bit", "Lip clearance angle", "Land width"], ans: "Total drilling distance", expl: "The text defines the variables: 'L = total drilling distance'. It is not the length of the tool itself." },
+            { q: "In the processing time formula, what does 'i' represent?", opts: ["Number of holes", "Inches per minute", "Inner diameter", "Index of friction"], ans: "Number of holes", expl: "The text explicitly defines the variables under the formula: 'i = no. of holes'. The other terms are fabrications." }
+        ];
+
+        let questions = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function initQuiz() {
+            let clonedData = JSON.parse(JSON.stringify(rawData));
+            questions = shuffle(clonedData);
+            
+            questions.forEach(q => {
+                q.opts = shuffle(q.opts);
+            });
+
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            
+            buildSidebar();
+            loadQuestion(0);
+        }
+
+        function buildSidebar() {
+            const grid = document.getElementById("nav-grid");
+            grid.innerHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                const btn = document.createElement("button");
+                btn.className = "nav-btn";
+                btn.innerText = i + 1;
+                btn.id = "nav-btn-" + i;
+                btn.onclick = () => {
+                    loadQuestion(i);
+                    toggleSidebar();
+                };
+                grid.appendChild(btn);
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function loadQuestion(index) {
+            currentQuestion = index;
+            const q = questions[currentQuestion];
+            
+            document.getElementById("question-tracker").innerText = `Question ${currentQuestion + 1} of 100`;
+            document.getElementById("score-tracker").innerText = `Score: ${score}`;
+            document.getElementById("question-text").innerText = q.q;
+
+            const container = document.getElementById("options-container");
+            container.innerHTML = '';
+            document.getElementById("explanation-box").style.display = "none";
+
+            q.opts.forEach((opt) => {
+                const btn = document.createElement("button");
+                btn.className = "option";
+                btn.innerText = opt;
+                
+                if (userAnswers[currentQuestion] !== null) {
+                    btn.disabled = true;
+                    if (opt === q.ans) {
+                        btn.classList.add("correct");
+                    } else if (opt === userAnswers[currentQuestion]) {
+                        btn.classList.add("incorrect");
+                    }
+                } else {
+                    btn.onclick = () => selectOption(opt);
+                }
+                
+                container.appendChild(btn);
+            });
+
+            if (userAnswers[currentQuestion] !== null) {
+                showExplanation(q.ans, userAnswers[currentQuestion] === q.ans, q.expl);
+            }
+
+            const nextBtn = document.getElementById("next-btn");
+            if (userAnswers[currentQuestion] !== null) {
+                nextBtn.style.display = "block";
+                nextBtn.innerText = (currentQuestion === questions.length - 1) ? "Finish Quiz ➔" : "Next Question ➔";
+            } else {
+                nextBtn.style.display = "none";
+            }
+
+            updateSidebarHighlight();
+        }
+
+        function selectOption(selectedOpt) {
+            const q = questions[currentQuestion];
+            userAnswers[currentQuestion] = selectedOpt;
+
+            const isCorrect = (selectedOpt === q.ans);
+            if (isCorrect) score++;
+
+            const navBtn = document.getElementById(`nav-btn-${currentQuestion}`);
+            navBtn.classList.add(isCorrect ? "answered-correct" : "answered-incorrect");
+
+            loadQuestion(currentQuestion);
+        }
+
+        function showExplanation(correctAnswer, isCorrect, explanation) {
+            const expBox = document.getElementById("explanation-box");
+            expBox.style.display = "block";
+            let statusText = isCorrect ? "<strong style='color: #27ae60;'>Correct!</strong>" : `<strong style='color: #e74c3c;'>Incorrect.</strong> The correct answer is: <em>${correctAnswer}</em>.`;
+            expBox.innerHTML = `${statusText}<br><br><strong>Explanation:</strong> ${explanation}`;
+            expBox.style.borderLeftColor = isCorrect ? "#27ae60" : "#e74c3c";
+            expBox.style.backgroundColor = isCorrect ? "#eafaf1" : "#fdedec";
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                loadQuestion(currentQuestion + 1);
+            } else {
+                document.getElementById("quiz-screen").style.display = "none";
+                const results = document.getElementById("results-screen");
+                results.style.display = "block";
+                document.getElementById("final-score").innerText = `You scored ${score} out of 100.`;
+            }
+        }
+
+        function updateSidebarHighlight() {
+            document.querySelectorAll(".nav-btn").forEach((btn, idx) => {
+                btn.classList.remove("active");
+                if (idx === currentQuestion) {
+                    btn.classList.add("active");
+                }
+            });
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
