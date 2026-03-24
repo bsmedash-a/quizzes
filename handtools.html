@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Tools & Bench Work Mastery Quiz</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #d35400;
+            --accent-hover: #e67e22;
+            --correct: #27ae60;
+            --incorrect: #e74c3c;
+            --text-main: #333;
+            --text-light: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Hamburger Menu Button */
+        #hamburger-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: 0.3s;
+        }
+
+        #hamburger-btn:hover {
+            background-color: var(--accent);
+        }
+
+        #hamburger-btn div {
+            width: 24px;
+            height: 3px;
+            background-color: var(--text-light);
+            border-radius: 2px;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: -350px;
+            width: 320px;
+            height: 100vh;
+            background-color: var(--primary);
+            color: var(--text-light);
+            transition: left 0.3s ease-in-out;
+            z-index: 999;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 30px 20px 20px 20px;
+            text-align: center;
+            background-color: var(--secondary);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 2px solid var(--accent);
+            margin-top: 50px;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .nav-btn {
+            background-color: var(--secondary);
+            color: var(--text-light);
+            border: 1px solid #4a6278;
+            border-radius: 4px;
+            padding: 10px 0;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .nav-btn:hover { background-color: var(--accent); border-color: var(--accent); }
+        .nav-btn.answered-correct { background-color: var(--correct); border-color: var(--correct); }
+        .nav-btn.answered-incorrect { background-color: var(--incorrect); border-color: var(--incorrect); }
+        .nav-btn.active { box-shadow: 0 0 0 3px #f1c40f; transform: scale(1.1); z-index: 2; }
+
+        /* Main Quiz Container */
+        .quiz-container {
+            background-color: #fff;
+            width: 92%;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 40px;
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background-color: #f8f9fa;
+            border: 2px solid #dcdde1;
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+
+        .option:hover:not(:disabled) {
+            background-color: #e2e8f0;
+            border-color: #b2bec3;
+        }
+
+        .option:disabled {
+            cursor: not-allowed;
+            opacity: 0.95;
+        }
+
+        .option.correct {
+            background-color: var(--correct) !important;
+            border-color: #219a52 !important;
+            color: var(--text-light) !important;
+        }
+
+        .option.incorrect {
+            background-color: var(--incorrect) !important;
+            border-color: #a93226 !important;
+            color: var(--text-light) !important;
+        }
+
+        .action-btn {
+            background-color: var(--accent);
+            color: var(--text-light);
+            border: none;
+            border-radius: 8px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 30px;
+            width: 100%;
+            transition: 0.2s;
+            display: none;
+        }
+
+        .action-btn:hover { background-color: var(--accent-hover); }
+
+        /* Results Screen */
+        #results-screen {
+            display: none;
+            text-align: center;
+        }
+
+        #results-screen h1 { font-size: 2.8rem; color: var(--primary); margin-bottom: 15px; }
+        #results-screen p { font-size: 1.3rem; color: #7f8c8d; margin-bottom: 30px; }
+        
+        .restart-btn {
+            background-color: var(--correct);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .restart-btn:hover { background-color: #219a52; }
+
+    </style>
+</head>
+<body>
+
+    <button id="hamburger-btn" onclick="toggleSidebar()">
+        <div></div><div></div><div></div>
+    </button>
+
+    <div id="sidebar">
+        <div class="sidebar-header">Question Navigator</div>
+        <div class="nav-grid" id="nav-grid"></div>
+    </div>
+
+    <div class="quiz-container">
+        <div id="quiz-screen">
+            <div class="quiz-header">
+                <span id="question-tracker">Question 1 of 100</span>
+                <span id="score-tracker">Score: 0</span>
+            </div>
+            <div class="question-text" id="question-text">Loading question...</div>
+            <div class="options-container" id="options-container"></div>
+            <button class="action-btn" id="next-btn" onclick="nextQuestion()">Next Question ➔</button>
+        </div>
+
+        <div id="results-screen">
+            <h1>Quiz Completed!</h1>
+            <p id="final-score"></p>
+            <button class="restart-btn" onclick="location.reload()">Retake & Reshuffle</button>
+        </div>
+    </div>
+
+    <script>
+        const rawData = [
+            { q: "Hand tools are divided into two main classes. What are they?", opts: ["Non-cutting and cutting tools", "Power and manual tools", "Measuring and assembly tools", "Static and dynamic tools"], ans: "Non-cutting and cutting tools" },
+            { q: "Which tool is primarily used to hold small work securely for operations like sawing, filing, and drilling?", opts: ["Bench vise", "C-clamp", "Pliers", "Anvil"], ans: "Bench vise" },
+            { q: "The size of a bench vise is determined by what?", opts: ["The width of the jaw", "The length of the handle", "The weight of the base", "The diameter of the screw"], ans: "The width of the jaw" },
+            { q: "Which type of bench vise has a plate at the bottom that allows it to be swung in circular positions?", opts: ["Swivel base vise", "Solid base vise", "Vacuum base vise", "Pipe vise"], ans: "Swivel base vise" },
+            { q: "When gripping finished work or soft materials in a vise, what should be used to protect the work from damage?", opts: ["Jaw caps made of brass, aluminum, or copper", "A heavy cloth", "Masking tape", "Plastic ties"], ans: "Jaw caps made of brass, aluminum, or copper" },
+            { q: "Which part of the bench vise provides the 'unmovable object' used as a backstop for applied pressure?", opts: ["Static jaw", "Sliding jaw", "Anvil", "Base"], ans: "Static jaw" },
+            { q: "In a bench vise, what part converts the force applied to the handle into the movement of the sliding jaw?", opts: ["Screw", "Slide", "Anvil", "Base"], ans: "Screw" },
+            { q: "The handle of a bench vise operates on the principle of what?", opts: ["Leverage", "Centrifugal force", "Pneumatics", "Hydraulics"], ans: "Leverage" },
+            { q: "What part of a metalworking vise gives you a place to do light shaping of materials, such as hammering bent nails?", opts: ["Anvil", "Base", "Slide", "Static Jaw"], ans: "Anvil" },
+            { q: "Which part of the bench vise is the serrated area that actually meets whatever you are securing?", opts: ["Jaws", "Anvil", "Slide", "Base"], ans: "Jaws" },
+            { q: "What is the most common type of engineer's hammer used by a machinist?", opts: ["Ball-peen hammer", "Claw hammer", "Sledgehammer", "Mallet"], ans: "Ball-peen hammer" },
+            { q: "On a ball-peen hammer, what is the larger striking surface called?", opts: ["Face", "Peen", "Head", "Anvil"], ans: "Face" },
+            { q: "What part of the ball-peen hammer is generally used for riveting operations?", opts: ["Peen", "Face", "Shank", "Handle"], ans: "Peen" },
+            { q: "For soft metals like aluminum, which type of hammer should be used to prevent damage?", opts: ["Soft face hammer (hide, copper, or nylon)", "Ball-peen hammer", "Cross-peen hammer", "Sledgehammer"], ans: "Soft face hammer (hide, copper, or nylon)" },
+            { q: "What is the typical mass range for the head of a ball-peen hammer?", opts: ["2 ounces to 3 lbs", "1 lb to 5 lbs", "5 ounces to 10 lbs", "10 grams to 1 kg"], ans: "2 ounces to 3 lbs" },
+            { q: "A screwdriver blade that is fluted instead of flattened is designed for what type of screw?", opts: ["Phillips (cross)", "Slotted", "Torx", "Pozidriv"], ans: "Phillips (cross)" },
+            { q: "Which screwdriver is specially designed to help start screws where space is extremely limited?", opts: ["Stubby screwdriver", "Heavy-duty screwdriver", "Jeweler's screwdriver", "Offset screwdriver"], ans: "Stubby screwdriver" },
+            { q: "Which screwdriver features a square shank that permits the use of a wrench to assist in tightening?", opts: ["Heavy-duty screwdriver", "Stubby screwdriver", "Offset screwdriver", "Jeweler's screwdriver"], ans: "Heavy-duty screwdriver" },
+            { q: "Which screwdriver is L-shaped and used for turning screws in awkward places?", opts: ["Double-ended offset screwdriver", "Stubby screwdriver", "Jeweler's screwdriver", "Heavy-duty screwdriver"], ans: "Double-ended offset screwdriver" },
+            { q: "Which screwdrivers are best suited for working on small electronic devices and precision equipment?", opts: ["Jeweler's screwdriver", "Stubby screwdriver", "Heavy-duty screwdriver", "Offset screwdriver"], ans: "Jeweler's screwdriver" },
+            { q: "On an open-end wrench, the opening is usually offset by how many degrees to permit turning in limited spaces?", opts: ["15 degrees", "30 degrees", "45 degrees", "90 degrees"], ans: "15 degrees" },
+            { q: "Which wrench has one closed loop for hexagonal nuts and one open U-shaped end?", opts: ["Combination wrench", "Box-ended wrench", "Socket wrench", "Adjustable wrench"], ans: "Combination wrench" },
+            { q: "Which wrench completely surrounds the nut with 12 precisely cut notches and is preferred because it cannot slip?", opts: ["Box-ended wrench", "Open-end wrench", "Adjustable wrench", "Crowfoot wrench"], ans: "Box-ended wrench" },
+            { q: "Which tool is similar to a box wrench, surrounds the nut, and is commonly driven by a ratchet or torque handle?", opts: ["Socket wrench", "Adjustable wrench", "Combination wrench", "Alligator wrench"], ans: "Socket wrench" },
+            { q: "Which wrench is useful for odd-size nuts but carries a high risk of slipping and causing injury if not properly set?", opts: ["Adjustable wrench", "Socket wrench", "Box-ended wrench", "Flare nut wrench"], ans: "Adjustable wrench" },
+            { q: "Which wrenches are commonly called socket head setscrews and are measured across the flats?", opts: ["Hex key / Allen wrenches", "Torx wrenches", "Crowfoot wrenches", "Dog bone wrenches"], ans: "Hex key / Allen wrenches" },
+            { q: "Which curious open-ended wrench has no handle and is designed to attach directly to a ratchet extension for tight spaces?", opts: ["Crowfoot wrench", "Bung wrench", "Basin wrench", "Alligator wrench"], ans: "Crowfoot wrench" },
+            { q: "Which wrench is L-shaped or X-shaped and is used to tighten or loosen wheel nuts on cars?", opts: ["Lug wrench (Spider wrench)", "Pipe wrench", "Bung wrench", "Dog bone wrench"], ans: "Lug wrench (Spider wrench)" },
+            { q: "Which F-shaped, hefty wrench has serrated jaws and is used mainly by plumbers on metal pipes?", opts: ["Pipe wrench", "Basin wrench", "Bionic wrench", "Flare nut wrench"], ans: "Pipe wrench" },
+            { q: "Which socket-style wrench is designed specifically to remove the plastic or metal cap on drums?", opts: ["Bung wrench", "Dog bone wrench", "Drum key", "Crowfoot wrench"], ans: "Bung wrench" },
+            { q: "Which wrench is a hybrid design used in plumbing to grip nuts on tubes without damaging soft metals?", opts: ["Flare nut (line) wrench", "Alligator wrench", "Basin wrench", "Adjustable wrench"], ans: "Flare nut (line) wrench" },
+            { q: "Which wrench has a jaw that is serrated on the top and smooth on the bottom?", opts: ["Alligator wrench", "Pipe wrench", "Basin wrench", "Bionic wrench"], ans: "Alligator wrench" },
+            { q: "Which peculiar wrench has a long, T-shaped handle ending in a curved, serrated jaw used for under-sink fixtures?", opts: ["Basin (faucet) wrench", "Alligator wrench", "Dog bone wrench", "Bung wrench"], ans: "Basin (faucet) wrench" },
+            { q: "Which wrench consists of two box-shaped ends with different socket sizes on each side, used almost exclusively for bicycles?", opts: ["Dog bone (dumb-bell) wrench", "Cone wrench", "Bionic wrench", "Lug wrench"], ans: "Dog bone (dumb-bell) wrench" },
+            { q: "Which wide, flat wrench looks like an elephant stepped on it and is used on cup and cone hubs of bicycles?", opts: ["Cone wrench", "Dog bone wrench", "Bung wrench", "Crowfoot wrench"], ans: "Cone wrench" },
+            { q: "Which T-shaped wrench with flattened handles is used to tune percussion instruments?", opts: ["Drum key", "Bung wrench", "Torque wrench", "Hex key"], ans: "Drum key" },
+            { q: "Which specialty wrench has a round opening and two handles, working like an adjustable box-ended wrench when squeezed?", opts: ["Bionic wrench", "Alligator wrench", "Torque wrench", "Crowfoot wrench"], ans: "Bionic wrench" },
+            { q: "Which wrench is designed to deliver a specific, calibrated amount of tightening force to a bolt?", opts: ["Torque wrench", "Socket wrench", "Lug wrench", "Bionic wrench"], ans: "Torque wrench" },
+            { q: "On pliers, what is the pivot point that connects the handles and jaws called?", opts: ["Fulcrum", "Anvil", "Tang", "Slide"], ans: "Fulcrum" },
+            { q: "Which pliers have rounded openings in the jaws designed to grip round objects?", opts: ["Pipe grips", "Cutters", "Diagonal cutters", "Needle-nose pliers"], ans: "Pipe grips" },
+            { q: "Which adjustable pliers, also known as water pump pliers, are used for bending thin materials or gripping large/small pieces?", opts: ["Slip-joint pliers", "Tongue and groove pliers", "Vise-grip pliers", "Combination pliers"], ans: "Slip-joint pliers" },
+            { q: "Which pliers are designed to hold very small parts and position them in hard-to-reach places?", opts: ["Needle-nose pliers", "Slip-joint pliers", "Diagonal cutters", "Linesman pliers"], ans: "Needle-nose pliers" },
+            { q: "Which pliers are used solely for cutting wire and small pieces of soft metal flush?", opts: ["Diagonal cutters", "Combination pliers", "Needle-nose pliers", "Bail making pliers"], ans: "Diagonal cutters" },
+            { q: "Which multipurpose pliers have a serrated tip, a rounded pipe grip section, and a cutting section near the fulcrum?", opts: ["Combination pliers", "Needle-nose pliers", "Slip-joint pliers", "Vise-grip pliers"], ans: "Combination pliers" },
+            { q: "Which pliers provide extremely high gripping power using an adjustable lever action and a tension screw?", opts: ["Vise-grip (locking) pliers", "Tongue and groove pliers", "Slip-joint pliers", "Combination pliers"], ans: "Vise-grip (locking) pliers" },
+            { q: "Which adjustable pliers (Channel Locks) have a toothed groove allowing the lower jaw to lock into various positions?", opts: ["Tongue and groove pliers", "Slip-joint pliers", "Vise-grip pliers", "Brake spring pliers"], ans: "Tongue and groove pliers" },
+            { q: "Which pliers have short, round jaws specifically to open or close retaining rings that fit into dowel grooves?", opts: ["Snap ring (circlip) pliers", "Bail making pliers", "Bent nose pliers", "Hose clamp pliers"], ans: "Snap ring (circlip) pliers" },
+            { q: "Which pliers are designed to compress connections on radiators, often featuring a peg-shaped tooth on each jaw?", opts: ["Hose clamp pliers", "Battery pliers", "Brake spring pliers", "Tongue and groove pliers"], ans: "Hose clamp pliers" },
+            { q: "Which variation of needle nose pliers has jaws angled at 45 or 90 degrees to grip without blocking line of sight?", opts: ["Bent nose pliers", "Diagonal cutters", "Bail making pliers", "Snap ring pliers"], ans: "Bent nose pliers" },
+            { q: "Which pliers used in jewelry making consist of two dowels (one larger than the other) to form loops and clasps?", opts: ["Bail making pliers", "Bent nose pliers", "Snap ring pliers", "Crimping pliers"], ans: "Bail making pliers" },
+            { q: "Which pliers have short, thick, angled jaws and are used primarily for maintaining bolts on jumper cables?", opts: ["Battery pliers", "Fencing pliers", "Brake spring pliers", "Hose clamp pliers"], ans: "Battery pliers" },
+            { q: "Which multi-tool automotive pliers have one rounded jaw tip and one curved jaw tip for handling drum shoe springs?", opts: ["Brake spring pliers", "Battery pliers", "Hose clamp pliers", "Crimping pliers"], ans: "Brake spring pliers" },
+            { q: "Which pliers function like a nutcracker to deform plastic connectors so they stick to wires for telecommunications?", opts: ["Crimping pliers", "Fencing pliers", "Diagonal cutters", "Combination pliers"], ans: "Crimping pliers" },
+            { q: "Which multi-tool resembles a hammer with two handles and is used to drive or remove staples?", opts: ["Fencing pliers", "Battery pliers", "Bail making pliers", "Brake spring pliers"], ans: "Fencing pliers" },
+            { q: "A hand hacksaw consists of three main parts: the handle, the blade, and the...", opts: ["Frame", "Slide", "Anvil", "Tang"], ans: "Frame" },
+            { q: "Which hacksaw frame is more rigid but accommodates only one specific length of blade?", opts: ["Solid frame", "Adjustable frame", "Flexible frame", "Swivel frame"], ans: "Solid frame" },
+            { q: "What part of an adjustable hacksaw frame provides the adjustment for blade tensioning?", opts: ["Wing nut", "Adjusting screw", "Stud", "Slide"], ans: "Wing nut" },
+            { q: "Hacksaw blades are typically made of high-speed molybdenum or what other material?", opts: ["Tungsten-alloy steel", "Cast iron", "Aluminum alloy", "Brass"], ans: "Tungsten-alloy steel" },
+            { q: "Which type of hacksaw blade is hardened throughout and is very brittle?", opts: ["Solid (all-hard) blade", "Flexible blade", "Dreadnought blade", "Bimetal blade"], ans: "Solid (all-hard) blade" },
+            { q: "Which type of hacksaw blade has only the teeth hardened, leaving the back soft and resistant to breaking?", opts: ["Flexible blade", "Solid blade", "All-hard blade", "Tungsten blade"], ans: "Flexible blade" },
+            { q: "For cutting large sections of brass, tool steel, or cast iron, which hacksaw blade is preferred because it won't run out of line?", opts: ["Solid (all-hard) blade", "Flexible blade", "Coarse blade", "Needle blade"], ans: "Solid (all-hard) blade" },
+            { q: "For cutting channel iron, thin tubing, and copper, which hacksaw blade is preferred to prevent breaking?", opts: ["Flexible blade", "Solid blade", "Dreadnought blade", "Knife blade"], ans: "Flexible blade" },
+            { q: "What does 'pitch' refer to in relation to a hacksaw blade?", opts: ["Number of teeth per inch (TPI)", "Length of the blade", "Thickness of the blade", "Angle of the cut"], ans: "Number of teeth per inch (TPI)" },
+            { q: "Which hacksaw blade pitch is recommended for general workshop use?", opts: ["18 TPI", "14 TPI", "24 TPI", "32 TPI"], ans: "18 TPI" },
+            { q: "Which hacksaw blade pitch is suited for cutting large sizes of aluminum and other soft metals?", opts: ["14 TPI", "18 TPI", "24 TPI", "32 TPI"], ans: "14 TPI" },
+            { q: "Which hacksaw blade pitch is required for cutting hollow sections and thin tubing?", opts: ["32 TPI", "24 TPI", "18 TPI", "14 TPI"], ans: "32 TPI" },
+            { q: "When cutting with a hacksaw, what is the minimum number of teeth that should be in contact with the work at all times?", opts: ["At least two teeth", "At least one tooth", "At least five teeth", "At least ten teeth"], ans: "At least two teeth" },
+            { q: "What happens if you use a fine-toothed blade on a large soft metal section instead of a coarse blade?", opts: ["It will lack chip clearance and jam", "It will cut faster", "It will strip the teeth immediately", "It will break the frame"], ans: "It will lack chip clearance and jam" },
+            { q: "A hand cutting tool made of high-carbon steel with a series of teeth cut by parallel chisel cuts is called a...", opts: ["File", "Hacksaw", "Scraper", "Cold Chisel"], ans: "File" },
+            { q: "Which files have a single row of parallel teeth running diagonally across the face?", opts: ["Single-cut files", "Double-cut files", "Dreadnought files", "Bastard files"], ans: "Single-cut files" },
+            { q: "What are single-cut files primarily used for?", opts: ["Producing a smooth finish or finishing hard materials", "Fast removal of soft metals", "Enlarging round holes", "Cutting acute angles"], ans: "Producing a smooth finish or finishing hard materials" },
+            { q: "Which files have two intersecting rows of teeth (overcut and upcut)?", opts: ["Double-cut files", "Single-cut files", "Saw files", "Mill files"], ans: "Double-cut files" },
+            { q: "In a double-cut file, what is the first, coarser row of teeth called?", opts: ["Overcut", "Upcut", "Crosscut", "Bastard"], ans: "Overcut" },
+            { q: "What are the three standard grades of file cut, from coarsest to smoothest?", opts: ["Bastard, second cut, and smooth", "Rough, medium, and fine", "Coarse, bastard, and dead smooth", "Primary, secondary, and finishing"], ans: "Bastard, second cut, and smooth" },
+            { q: "Which file is rectangular in cross-section, double-cut on the faces, single-cut on the edges, and tapers towards the point?", opts: ["Flat file", "Square file", "Half-round file", "Knife file"], ans: "Flat file" },
+            { q: "Which file is double-cut on all sides and is used for filing keyways and small rectangular holes with 90° sides?", opts: ["Square file", "Triangular file", "Flat file", "Dreadnought file"], ans: "Square file" },
+            { q: "Which file has a 60° cross-section and is used for surfaces which meet at less than 90°?", opts: ["Triangular (three-square) file", "Knife edge file", "Square file", "Half-round file"], ans: "Triangular (three-square) file" },
+            { q: "Which file is of circular cross-section and is used for enlarging round holes and elongating slots?", opts: ["Round file", "Half-round file", "Needle file", "Square file"], ans: "Round file" },
+            { q: "Which file has one flat side (double-cut) and one curved side (single-cut) and is highly versatile?", opts: ["Half-round file", "Round file", "Knife edge file", "Flat file"], ans: "Half-round file" },
+            { q: "Which very small files (120mm to 180mm) have a slender circular handle and are used in intricate tool making?", opts: ["Needle files", "Dreadnought files", "Knife files", "Saw files"], ans: "Needle files" },
+            { q: "Which file has a wedge-shaped cross section where the thick edge tapers to the point, used for filing acute angles?", opts: ["Knife edge file", "Triangular file", "Half-round file", "Square file"], ans: "Knife edge file" },
+            { q: "Which file is designed with deep curved teeth to prevent clogging when rapidly removing soft materials?", opts: ["Dreadnought file", "Double-cut bastard file", "Needle file", "Single-cut smooth file"], ans: "Dreadnought file" },
+            { q: "The un-cut, tapered end of a file that fits into the handle is called the...", opts: ["Tang", "Point", "Shoulder", "Face"], ans: "Tang" },
+            { q: "Cold chisels are used to cut and shape 'cold' metal. The highest quality chisels are forged from what material?", opts: ["Nickel chromium steel", "High-speed steel", "Aluminum alloy", "Mild steel"], ans: "Nickel chromium steel" },
+            { q: "On a cold chisel, why is the shank (body) left 'soft' while the cutting edge is hardened?", opts: ["To withstand the shock of heavy hammer blows without shattering", "To make it easier to sharpen", "To prevent it from cutting the user's hand", "To reduce manufacturing costs"], ans: "To withstand the shock of heavy hammer blows without shattering" },
+            { q: "Which cold chisel is the most versatile, used for cutting off rivet heads, rusted nuts, or cutting rods to length?", opts: ["Flat chisel", "Crosscut (cape) chisel", "Round nose chisel", "Diamond point chisel"], ans: "Flat chisel" },
+            { q: "Which cold chisel tapers back from the cutting edge to prevent binding and is used to cut keyways in shafts?", opts: ["Crosscut (Cape) chisel", "Round nose chisel", "Diamond point chisel", "Flat chisel"], ans: "Crosscut (Cape) chisel" },
+            { q: "Which cold chisel is used to cut oil grooves in bearings or pull a wandering drill bit back to the center?", opts: ["Round nose chisel", "Crosscut chisel", "Diamond point chisel", "Flat chisel"], ans: "Round nose chisel" },
+            { q: "Which cold chisel is used for cutting vee-shaped grooves, preparing parts for welding, or squaring corners?", opts: ["Diamond point chisel", "Round nose chisel", "Cape chisel", "Flat chisel"], ans: "Diamond point chisel" },
+            { q: "To produce a truer surface than machining, such as fitting brass bearings to shafts, which process/tool is used?", opts: ["Metal scraping", "Filing", "Reaming", "Chipping"], ans: "Metal scraping" },
+            { q: "Which type of scraper is very popular because it maintains its cutting edge longer than standard tool steel?", opts: ["Carbide tipped scraper", "Nickel chromium scraper", "High-speed steel scraper", "Diamond scraper"], ans: "Carbide tipped scraper" },
+            { q: "Which tap has its first 7 to 10 threads ground flatter to enable easy starting in a hole?", opts: ["Taper tap", "Plug tap", "Bottoming tap", "Die tap"], ans: "Taper tap" },
+            { q: "Which tap has 3 to 5 tapered threads and is a good compromise for starting threads and going reasonably deep?", opts: ["Plug tap", "Bottoming tap", "Taper tap", "Starter tap"], ans: "Plug tap" },
+            { q: "Which tap has no ground threads at the starting end and is used to cut threads to the very base of a blind hole?", opts: ["Bottoming tap", "Plug tap", "Taper tap", "Die tap"], ans: "Bottoming tap" },
+            { q: "When hand tapping a hole, what tool is used to securely hold and rotate the tap?", opts: ["Tap wrench", "Die stock", "Socket wrench", "Slip-joint pliers"], ans: "Tap wrench" },
+            { q: "What hand tool is used to cut external threads on a rod or bolt?", opts: ["Threading die", "Taper tap", "Reamer", "Cold chisel"], ans: "Threading die" },
+            { q: "The threading die is held in a holder that has a central adjusting screw and two locking screws. What is this holder called?", opts: ["Die stock", "Tap wrench", "Ratchet handle", "Vise grip"], ans: "Die stock" },
+            { q: "Which tool is 'wound' into an undersized drilled hole to produce an accurate size and a smooth surface finish?", opts: ["Hand reamer", "Taper tap", "Threading die", "Round file"], ans: "Hand reamer" },
+            { q: "Why should you always withdraw a reamer carefully and avoid turning it backwards?", opts: ["To prevent the flutes from becoming blocked with swarf and scratching the finish", "Because it will dull the cutting edge instantly", "It will cause the reamer to snap in half", "It will reverse the threads"], ans: "To prevent the flutes from becoming blocked with swarf and scratching the finish" },
+            { q: "According to the Standard Thread Sizes table, what is the Pitch for an M6 metric thread?", opts: ["1.00", "0.80", "1.25", "1.50"], ans: "1.00" },
+            { q: "According to the English/Imperial table, how many Threads Per Inch (TPI) does a 1/4 UNC thread have?", opts: ["20", "18", "24", "16"], ans: "20" }
+        ];
+
+        let questions = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+
+        // Fisher-Yates Shuffle
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function initQuiz() {
+            let clonedData = JSON.parse(JSON.stringify(rawData));
+            questions = shuffle(clonedData);
+            
+            questions.forEach(q => {
+                q.opts = shuffle(q.opts);
+            });
+
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            
+            buildSidebar();
+            loadQuestion(0);
+        }
+
+        function buildSidebar() {
+            const grid = document.getElementById("nav-grid");
+            grid.innerHTML = '';
+            for (let i = 0; i < questions.length; i++) {
+                const btn = document.createElement("button");
+                btn.className = "nav-btn";
+                btn.innerText = i + 1;
+                btn.id = "nav-btn-" + i;
+                btn.onclick = () => {
+                    loadQuestion(i);
+                    toggleSidebar();
+                };
+                grid.appendChild(btn);
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function loadQuestion(index) {
+            currentQuestion = index;
+            const q = questions[currentQuestion];
+            
+            document.getElementById("question-tracker").innerText = `Question ${currentQuestion + 1} of 100`;
+            document.getElementById("score-tracker").innerText = `Score: ${score}`;
+            document.getElementById("question-text").innerText = q.q;
+
+            const container = document.getElementById("options-container");
+            container.innerHTML = '';
+
+            q.opts.forEach((opt) => {
+                const btn = document.createElement("button");
+                btn.className = "option";
+                btn.innerText = opt;
+                
+                if (userAnswers[currentQuestion] !== null) {
+                    btn.disabled = true;
+                    if (opt === q.ans) {
+                        btn.classList.add("correct");
+                    } else if (opt === userAnswers[currentQuestion]) {
+                        btn.classList.add("incorrect");
+                    }
+                } else {
+                    btn.onclick = () => selectOption(opt);
+                }
+                
+                container.appendChild(btn);
+            });
+
+            const nextBtn = document.getElementById("next-btn");
+            if (userAnswers[currentQuestion] !== null) {
+                nextBtn.style.display = "block";
+                nextBtn.innerText = (currentQuestion === questions.length - 1) ? "Finish Quiz ➔" : "Next Question ➔";
+            } else {
+                nextBtn.style.display = "none";
+            }
+
+            updateSidebarHighlight();
+        }
+
+        function selectOption(selectedOpt) {
+            const q = questions[currentQuestion];
+            userAnswers[currentQuestion] = selectedOpt;
+
+            if (selectedOpt === q.ans) {
+                score++;
+                document.getElementById(`nav-btn-${currentQuestion}`).classList.add("answered-correct");
+            } else {
+                document.getElementById(`nav-btn-${currentQuestion}`).classList.add("answered-incorrect");
+            }
+
+            loadQuestion(currentQuestion);
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                loadQuestion(currentQuestion + 1);
+            } else {
+                document.getElementById("quiz-screen").style.display = "none";
+                const results = document.getElementById("results-screen");
+                results.style.display = "block";
+                document.getElementById("final-score").innerText = `You scored ${score} out of 100.`;
+            }
+        }
+
+        function updateSidebarHighlight() {
+            document.querySelectorAll(".nav-btn").forEach((btn, idx) => {
+                btn.classList.remove("active");
+                if (idx === currentQuestion) {
+                    btn.classList.add("active");
+                }
+            });
+        }
+
+        window.onload = initQuiz;
+
+    </script>
+</body>
+</html>
