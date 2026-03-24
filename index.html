@@ -3,380 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DASH A Reviewer Hub</title>
+    <title>DASH A Review Center</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #00d2ff;
-            --secondary: #3a7bd5;
             --glass-bg: rgba(255, 255, 255, 0.1);
             --glass-border: rgba(255, 255, 255, 0.2);
             --text-light: #ffffff;
             --text-muted: #e0e0e0;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body {
             background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a2a6c, #11998e);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            color: var(--text-light);
-            min-height: 100vh;
-            padding: 2rem;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
+            background-size: 400% 400%; animation: gradientBG 15s ease infinite;
+            color: var(--text-light); min-height: 100vh; padding: 2rem; overflow-x: hidden; display: flex; flex-direction: column;
         }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Floating background shapes */
-        .shape {
-            position: absolute;
-            filter: blur(60px);
-            z-index: -1;
-            opacity: 0.5;
-            border-radius: 50%;
-            animation: float 10s infinite ease-in-out;
-        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        
+        .shape { position: absolute; filter: blur(60px); z-index: -1; opacity: 0.5; border-radius: 50%; animation: float 10s infinite ease-in-out; }
         .shape1 { top: 10%; left: 10%; width: 300px; height: 300px; background: #00d2ff; }
         .shape2 { bottom: 10%; right: 10%; width: 400px; height: 400px; background: #3a7bd5; animation-delay: -5s; }
         .shape3 { top: 50%; left: 50%; width: 250px; height: 250px; background: #8e2de2; animation-delay: -2s; }
+        @keyframes float { 0% { transform: translateY(0px) scale(1); } 50% { transform: translateY(-30px) scale(1.1); } 100% { transform: translateY(0px) scale(1); } }
 
-        @keyframes float {
-            0% { transform: translateY(0px) scale(1); }
-            50% { transform: translateY(-30px) scale(1.1); }
-            100% { transform: translateY(0px) scale(1); }
-        }
+        header { text-align: center; margin-bottom: 2rem; position: relative; z-index: 1; }
+        h1 { font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; background: -webkit-linear-gradient(45deg, #00d2ff, #ffffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p.subtitle { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem; }
 
-        header {
-            text-align: center;
-            margin-bottom: 2rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            background: -webkit-linear-gradient(45deg, #00d2ff, #ffffff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        p.subtitle {
-            font-size: 1.1rem;
-            color: var(--text-muted);
-            margin-bottom: 2rem;
-        }
-
-        /* View Containers */
-        .view-section {
-            display: none;
-            animation: fadeIn 0.5s ease-in-out;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            flex-grow: 1;
-        }
-
-        .view-section.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Back Button */
-        .back-btn {
-            display: inline-block;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            cursor: pointer;
-            text-decoration: none;
-            margin-bottom: 20px;
-            transition: 0.3s;
-            backdrop-filter: blur(10px);
-        }
-        .back-btn:hover {
-            background: rgba(255,255,255,0.2);
-            transform: translateX(-5px);
-        }
-
-        /* Main Menu Cards (Home) */
-        .main-menu {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            flex-wrap: wrap;
-            margin-top: 2rem;
-        }
-
+        .main-menu { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-top: 2rem; width: 100%; max-width: 1200px; margin: 0 auto; z-index: 1; position: relative; }
+        
+        /* Menu Links */
         .menu-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 3rem 2rem;
-            width: 350px;
-            text-align: center;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px;
+            padding: 3rem 2rem; width: 350px; text-align: center; backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); text-decoration: none; color: white;
+            transition: transform 0.3s, box-shadow 0.3s; display: block;
         }
-
-        .menu-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(0, 210, 255, 0.3);
-            border-color: rgba(255,255,255,0.4);
-        }
-
-        .menu-card .icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-
-        .menu-card h2 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Subject Layout (Quizzes View) */
-        .subject-header {
-            font-size: 2rem;
-            margin: 3rem 0 1.5rem 0;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--primary);
-            color: #fff;
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2rem;
-        }
-
-        .category-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            padding: 1.5rem;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .category-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #00d2ff;
-        }
-
-        .quiz-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .quiz-item a {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            color: var(--text-light);
-            text-decoration: none;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
-        }
-
-        .quiz-item a:hover {
-            background: rgba(0, 210, 255, 0.15);
-            border-color: var(--primary);
-            padding-left: 20px;
-            color: #fff;
-        }
-
-        .quiz-item a::after {
-            content: '→';
-            opacity: 0;
-            transform: translateX(-10px);
-            transition: all 0.3s ease;
-        }
-
-        .quiz-item a:hover::after {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .new-badge {
-            background: #ff4757;
-            color: white;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 10px;
-            margin-left: 10px;
-            font-weight: bold;
-        }
-
-        /* Blank State for Notes */
-        .blank-state {
-            text-align: center;
-            padding: 5rem 2rem;
-            background: var(--glass-bg);
-            border-radius: 20px;
-            border: 1px dashed var(--glass-border);
-            backdrop-filter: blur(10px);
-        }
-        .blank-state h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: #00d2ff;
-        }
-        .blank-state p {
-            font-size: 1.2rem;
-            color: #ccc;
-        }
-
+        .menu-card:hover { transform: translateY(-10px); box-shadow: 0 15px 40px rgba(0, 210, 255, 0.3); border-color: rgba(255,255,255,0.4); }
+        .menu-card .icon { font-size: 4rem; margin-bottom: 1rem; }
+        .menu-card h2 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        
+        @media (max-width: 768px) { h1 { font-size: 2.2rem; } .menu-card { width: 100%; } }
     </style>
 </head>
 <body>
-
     <div class="shape shape1"></div>
     <div class="shape shape2"></div>
     <div class="shape shape3"></div>
 
     <header>
         <h1>DASH A Reviewer Hub</h1>
-        <p class="subtitle">Eme eme ug toun HAHAAHAHAHAHAHAHAHAHAHAA</p>
+        <p class="subtitle">Comprehensive study materials and interactive quizzes especially made for dash a folks</p>
     </header>
 
-    <div id="home-view" class="view-section active">
-        <div class="main-menu">
-            <div class="menu-card" onclick="switchView('notes-view')">
-                <div class="icon">📓</div>
-                <h2>Notes</h2>
-                <p>Study guides, formulas, and lecture summaries.</p>
-            </div>
-            
-            <div class="menu-card" onclick="switchView('quizzes-view')">
-                <div class="icon">📝</div>
-                <h2>Quizzes</h2>
-                <p>Pang looks fam</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="notes-view" class="view-section">
-        <button class="back-btn" onclick="switchView('home-view')">← Back to Home</button>
+    <div class="main-menu">
+        <a href="notes.html" class="menu-card">
+            <div class="icon">📓</div>
+            <h2>Notes</h2>
+            <p>Study guides, formulas, and lecture summaries.</p>
+        </a>
         
-        <div class="blank-state">
-            <div style="font-size: 5rem; margin-bottom: 1rem;">🚧</div>
-            <h2>Coming Soon</h2>
-            <p>The reviewer notes for all subjects are currently being prepared.<br>Please check back later!</p>
-        </div>
+        <a href="quizzes.html" class="menu-card">
+            <div class="icon">📝</div>
+            <h2>Sample Quizzes</h2>
+            <p>For looksfamming</p>
+        </a>
     </div>
-
-    <div id="quizzes-view" class="view-section">
-        <button class="back-btn" onclick="switchView('home-view')">← Back to Home</button>
-
-        <h2 class="subject-header">Comprehensive Course 2</h2>
-        <div class="grid-container">
-            
-            <div class="category-card">
-                <h3>🛠️ Workshop</h3>
-                <ul class="quiz-list">
-                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/1" target="_blank">1. Hand Tools</a></li>
-                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/2" target="_blank">2. Layout Tools</a></li>
-                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/3" target="_blank">3. Measurement</a></li>
-                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/4" target="_blank">4. Safety</a></li>
-                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/5" target="_blank">5. Drilling</a></li>
-                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/6" target="_blank">6. Lathe</a></li>
-                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/7" target="_blank">7. Milling</a></li>
-                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/8" target="_blank">8. Shaper</a></li>
-                </ul>
-            </div>
-
-            <div class="category-card">
-                <h3>🧱 Materials</h3>
-                <ul class="quiz-list">
-                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials1" target="_blank">Quiz 1: Fundamentals</a></li>
-                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials2" target="_blank">Quiz 2: Properties</a></li>
-                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials3" target="_blank">Quiz 3: Testing</a></li>
-                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials4" target="_blank">Quiz 4: Processing</a></li>
-                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials5" target="_blank">Quiz 5: Selection</a></li>
-                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials6" target="_blank">Quiz 6: Advanced</a></li>
-                </ul>
-            </div>
-
-            <div class="category-card">
-                <h3>⚙️ Machine Elements</h3>
-                <ul class="quiz-list">
-                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-1" target="_blank">Elements (1-100)</a></li>
-                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-2" target="_blank">Elements (101-200)</a></li>
-                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-3" target="_blank">Elements (201-300)</a></li>
-                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-4" target="_blank">Elements (301-400)</a></li>
-                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-5" target="_blank">Elements (400+)</a></li>
-                    
-                    <li class="quiz-item">
-    <a href="elements.html" target="_blank">Mechanisms & Kinematics <span class="new-badge">NEW</span></a>
-</li>
-                </ul>
-            </div>
-        </div>
-
-        <h2 class="subject-header">Industrial Power Plant</h2>
-        <div class="grid-container">
-            <div class="category-card">
-                <h3>🏭 Industrial Topics</h3>
-                <ul class="quiz-list">
-                    <li class="quiz-item"><a href="https://regal-cheesecake-f9775f.netlify.app/air" target="_blank">Air Pollution</a></li>
-                    <li class="quiz-item"><a href="https://regal-cheesecake-f9775f.netlify.app/waterA" target="_blank">Waste Water (Set A)</a></li>
-                    <li class="quiz-item"><a href="https://regal-cheesecake-f9775f.netlify.app/waterB" target="_blank">Waste Water (Set B)</a></li>
-                    <li class="quiz-item"><a href="https://dreamy-gumption-fab1e9.netlify.app/pumps" target="_blank">Pumps & Compressors</a></li>
-                </ul>
-            </div>
-        </div>
-        
-        <div style="height: 50px;"></div> </div>
-
-    <script>
-        // Simple JavaScript to switch between the views
-        function switchView(viewId) {
-            // Hide all sections
-            document.querySelectorAll('.view-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // Show the target section
-            document.getElementById(viewId).classList.add('active');
-            
-            // Scroll to top
-            window.scrollTo(0, 0);
-        }
-    </script>
 </body>
 </html>
