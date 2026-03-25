@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Past Board Exams</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #00d2ff; 
+            --glass-bg: rgba(255, 255, 255, 0.1); 
+            --glass-border: rgba(255, 255, 255, 0.2); 
+            --text-light: #ffffff; 
+            --text-muted: #e0e0e0;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        body {
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a2a6c, #11998e); 
+            background-size: 400% 400%; 
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-light); 
+            min-height: 100vh; 
+            padding: 2rem; 
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        
+        /* Floating background shapes */
+        .shape { position: absolute; filter: blur(60px); z-index: -1; opacity: 0.5; border-radius: 50%; animation: float 10s infinite ease-in-out; }
+        .shape1 { top: 10%; left: 10%; width: 300px; height: 300px; background: #00d2ff; }
+        .shape2 { bottom: 10%; right: 10%; width: 400px; height: 400px; background: #3a7bd5; animation-delay: -5s; }
+        .shape3 { top: 50%; left: 50%; width: 250px; height: 250px; background: #8e2de2; animation-delay: -2s; }
+        @keyframes float { 0% { transform: translateY(0px) scale(1); } 50% { transform: translateY(-30px) scale(1.1); } 100% { transform: translateY(0px) scale(1); } }
+
+        .back-btn {
+            display: inline-block; background: var(--glass-bg); border: 1px solid var(--glass-border); color: white; padding: 10px 20px;
+            border-radius: 30px; cursor: pointer; text-decoration: none; margin-bottom: 20px; transition: 0.3s; backdrop-filter: blur(10px);
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.2); transform: translateX(-5px); }
+
+        .container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+        
+        header { text-align: center; margin-bottom: 3rem; }
+        h1 { font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; background: -webkit-linear-gradient(45deg, #00d2ff, #ffffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p.subtitle { font-size: 1.1rem; color: var(--text-muted); }
+
+        .subject-header { font-size: 2rem; margin: 2rem 0 1.5rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary); color: #fff; }
+        
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; }
+        
+        .category-card { 
+            background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 15px; 
+            padding: 1.5rem; backdrop-filter: blur(12px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2); 
+            display: flex; flex-direction: column; 
+        }
+        
+        .quiz-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+        
+        .quiz-item a {
+            display: flex; justify-content: space-between; padding: 12px 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;
+            color: var(--text-light); text-decoration: none; font-size: 1.05rem; transition: all 0.3s ease; border: 1px solid transparent;
+        }
+        .quiz-item a:hover { background: rgba(0, 210, 255, 0.15); border-color: var(--primary); padding-left: 20px; color: #fff; }
+        .quiz-item a::after { content: '→'; opacity: 0; transform: translateX(-10px); transition: all 0.3s ease; }
+        .quiz-item a:hover::after { opacity: 1; transform: translateX(0); }
+        
+        .new-badge { background: #ff4757; color: white; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; margin-left: 10px; font-weight: bold; letter-spacing: 1px;}
+        .placeholder-text { color: #aaa; font-style: italic; font-size: 0.95rem; padding: 10px; text-align: center; }
+
+        @media (max-width: 768px) { body { padding: 1rem; } h1 { font-size: 2.2rem; } .subject-header { font-size: 1.5rem; } }
+    </style>
+</head>
+<body>
+    <div class="shape shape1"></div>
+    <div class="shape shape2"></div>
+    <div class="shape shape3"></div>
+
+    <div class="container">
+        <a href="index.html" class="back-btn">← Back to Home</a>
+        
+        <header>
+            <h1>Past Board Exams</h1>
+            <p class="subtitle">Review and practice with previous engineering board examination questions.</p>
+        </header>
+
+        <h2 class="subject-header">Power Plant Engineering</h2>
+        <div class="grid-container">
+            <div class="category-card">
+                <ul class="quiz-list">
+                    <li class="quiz-item"><a href="pipe1.html" target="_blank">PIPE Board Exam Practice 1 <span class="new-badge"></span></a></li>
+                </ul>
+            </div>
+        </div>
+
+        <h2 class="subject-header">Mathematics</h2>
+        <div class="grid-container">
+            <div class="category-card">
+                <ul class="quiz-list">
+                    <p class="placeholder-text">Quizzes for this subject are currently being prepared. Check back later!</p>
+                    </ul>
+            </div>
+        </div>
+
+        <h2 class="subject-header">Machine Design, Materials & Shop Practice</h2>
+        <div class="grid-container">
+            <div class="category-card">
+                <ul class="quiz-list">
+                    <p class="placeholder-text">Quizzes for this subject are currently being prepared. Check back later!</p>
+                    </ul>
+            </div>
+        </div>
+        
+        <div style="height: 50px;"></div> </div>
+</body>
+</html>
