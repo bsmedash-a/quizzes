@@ -3,32 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIPE Board Exam Quiz</title>
+    <title>PIPE Board Exam - Premium Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #f4f7f6;
-            --primary: #1a252c;
-            --secondary: #2c3e50;
-            --accent: #3498db;
-            --accent-hover: #2980b9;
-            --correct: #27ae60;
-            --incorrect: #e74c3c;
-            --text-main: #333;
-            --text-light: #fff;
-            --explanation-bg: #eafaf1;
-            --explanation-border: #2ecc71;
+            --primary: #00d2ff;
+            --secondary: #3a7bd5;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --correct: #00e676;
+            --incorrect: #ff4757;
+            --text-light: #ffffff;
+            --text-muted: #e0e0e0;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a2a6c, #11998e);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-light);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -37,127 +37,153 @@
             padding: 20px;
         }
 
-        /* Hamburger Menu Button */
-        #hamburger-btn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background-color: var(--primary);
-            border: none;
-            border-radius: 8px;
-            padding: 12px 10px;
-            cursor: pointer;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            transition: background-color 0.3s;
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        #hamburger-btn:hover { background-color: var(--accent); }
-        #hamburger-btn div { width: 26px; height: 3px; background-color: var(--text-light); border-radius: 2px; }
+        /* Floating background shapes */
+        .shape { position: fixed; filter: blur(70px); z-index: -1; opacity: 0.5; border-radius: 50%; animation: float 12s infinite ease-in-out; }
+        .shape1 { top: 5%; left: 5%; width: 350px; height: 350px; background: #00d2ff; }
+        .shape2 { bottom: 5%; right: 5%; width: 450px; height: 450px; background: #3a7bd5; animation-delay: -6s; }
+        @keyframes float { 0% { transform: translateY(0px) scale(1); } 50% { transform: translateY(-40px) scale(1.05); } 100% { transform: translateY(0px) scale(1); } }
+
+        /* Hamburger Menu */
+        #hamburger-btn {
+            position: fixed; top: 20px; left: 20px;
+            background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-border);
+            border-radius: 12px; padding: 14px; cursor: pointer; z-index: 1000;
+            display: flex; flex-direction: column; gap: 6px; backdrop-filter: blur(10px);
+            transition: all 0.3s ease; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        #hamburger-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.05); }
+        #hamburger-btn div { width: 26px; height: 3px; background-color: var(--text-light); border-radius: 3px; transition: 0.3s; }
 
         /* Sidebar Navigation */
         #sidebar {
-            position: fixed;
-            top: 0; left: -350px; width: 320px; height: 100vh;
-            background-color: var(--primary); color: var(--text-light);
-            transition: left 0.3s ease-in-out; z-index: 999;
-            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
-            display: flex; flex-direction: column;
+            position: fixed; top: 0; left: -350px; width: 320px; height: 100vh;
+            background: rgba(15, 32, 39, 0.95); backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 999;
+            display: flex; flex-direction: column; box-shadow: 10px 0 40px rgba(0,0,0,0.6);
         }
-
         #sidebar.open { left: 0; }
-
         .sidebar-header {
-            padding: 35px 20px 20px 20px; text-align: center;
-            background-color: var(--secondary); font-size: 1.3rem;
-            font-weight: bold; border-bottom: 3px solid var(--accent); margin-top: 50px;
+            padding: 40px 20px 20px 20px; text-align: center;
+            border-bottom: 1px solid var(--glass-border); margin-top: 40px;
+            font-size: 1.3rem; font-weight: 600; letter-spacing: 1px; color: var(--primary);
         }
-
         .nav-grid {
-            display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
             padding: 20px; overflow-y: auto; flex-grow: 1;
         }
+        .nav-grid::-webkit-scrollbar { width: 6px; }
+        .nav-grid::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
 
         .nav-btn {
-            background-color: var(--secondary); color: var(--text-light);
-            border: 1px solid #4a5568; border-radius: 4px; padding: 10px 0;
-            font-size: 0.85rem; font-weight: bold; cursor: pointer; transition: 0.2s;
+            background: rgba(255,255,255,0.05); color: var(--text-light);
+            border: 1px solid var(--glass-border); border-radius: 8px; padding: 12px 0;
+            font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;
         }
-
-        .nav-btn:hover { background-color: var(--accent); border-color: var(--accent); }
-        .nav-btn.answered-correct { background-color: var(--correct); border-color: var(--correct); }
-        .nav-btn.answered-incorrect { background-color: var(--incorrect); border-color: var(--incorrect); }
-        .nav-btn.active { box-shadow: 0 0 0 3px #f1c40f; transform: scale(1.1); z-index: 2; }
+        .nav-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+        .nav-btn.answered-correct { background: rgba(0, 230, 118, 0.2); border-color: var(--correct); color: var(--correct); }
+        .nav-btn.answered-incorrect { background: rgba(255, 71, 87, 0.2); border-color: var(--incorrect); color: var(--incorrect); }
+        .nav-btn.active { box-shadow: 0 0 15px var(--primary); border-color: var(--primary); background: rgba(0, 210, 255, 0.2); }
 
         /* Main Quiz Container */
         .quiz-container {
-            background-color: #fff; width: 100%; max-width: 850px;
-            border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            padding: 40px; margin: 40px 0; position: relative;
+            background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            width: 100%; max-width: 850px; padding: 45px; margin: 40px 0;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.1); 
+            position: relative; animation: slideUp 0.6s ease-out;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Progress Bar */
+        .progress-wrapper {
+            width: 100%; height: 6px; background: rgba(255,255,255,0.1);
+            border-radius: 10px; margin-bottom: 30px; overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .progress-bar {
+            height: 100%; background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            width: 0%; border-radius: 10px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .quiz-header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0;
-            font-size: 1.15rem; font-weight: bold; color: #718096;
+            margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 1.1rem; font-weight: 500; color: var(--text-muted); letter-spacing: 1px;
         }
+        #score-tracker { color: var(--primary); font-weight: 600; }
 
         .question-text {
-            font-size: 1.25rem; line-height: 1.6; margin-bottom: 25px;
-            color: var(--primary); font-weight: 600;
+            font-size: 1.35rem; line-height: 1.6; margin-bottom: 35px; font-weight: 500; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        .options-container { display: flex; flex-direction: column; gap: 12px; }
+        /* Options */
+        .options-container { display: flex; flex-direction: column; gap: 16px; }
 
         .option {
-            background-color: #f8f9fa; border: 2px solid #cbd5e0; border-radius: 10px;
-            padding: 16px 20px; font-size: 1.05rem; color: var(--text-main);
-            text-align: left; cursor: pointer; transition: all 0.2s ease; font-weight: 500;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+            border-radius: 14px; padding: 18px 22px; font-size: 1.1rem; color: var(--text-light);
+            text-align: left; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-weight: 400; position: relative; overflow: hidden;
+        }
+        .option:hover:not(:disabled) {
+            background: rgba(255,255,255,0.12); transform: translateX(6px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); border-color: rgba(255,255,255,0.4);
+        }
+        .option:active:not(:disabled) { transform: scale(0.98); }
+        .option:disabled { cursor: not-allowed; opacity: 0.95; }
+
+        .option.correct {
+            background: rgba(0, 230, 118, 0.2) !important; border-color: var(--correct) !important;
+            box-shadow: 0 0 25px rgba(0, 230, 118, 0.25); font-weight: 600;
+        }
+        .option.incorrect {
+            background: rgba(255, 71, 87, 0.2) !important; border-color: var(--incorrect) !important;
+            box-shadow: 0 0 25px rgba(255, 71, 87, 0.25);
         }
 
-        .option:hover:not(:disabled) { background-color: #e2e8f0; border-color: #a0aec0; }
-        .option:disabled { cursor: not-allowed; opacity: 0.9; }
-        .option.correct { background-color: var(--correct) !important; border-color: #27ae60 !important; color: var(--text-light) !important; }
-        .option.incorrect { background-color: var(--incorrect) !important; border-color: #e74c3c !important; color: var(--text-light) !important; }
-
-        /* Explanation Box */
-        .explanation-box {
-            display: none; margin-top: 25px; padding: 20px;
-            background-color: var(--explanation-bg); border-left: 6px solid var(--explanation-border);
-            border-radius: 0 8px 8px 0; font-size: 1.05rem; line-height: 1.5; color: #2c3e50;
-            animation: fadeIn 0.4s ease-in-out;
-        }
-        .explanation-box strong { color: var(--primary); font-size: 1.1rem; }
-        .explanation-box code { background-color: #e2e8f0; padding: 2px 5px; border-radius: 4px; font-weight: bold;}
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
+        /* Action Button */
         .action-btn {
-            background-color: var(--accent); color: var(--text-light);
-            border: none; border-radius: 10px; padding: 16px 30px;
-            font-size: 1.15rem; font-weight: bold; cursor: pointer;
-            margin-top: 25px; width: 100%; transition: background-color 0.2s; display: none;
+            background: linear-gradient(45deg, #00d2ff, #3a7bd5); color: white;
+            border: none; border-radius: 14px; padding: 18px 30px; font-size: 1.15rem;
+            font-weight: 600; cursor: pointer; margin-top: 35px; width: 100%;
+            transition: all 0.3s ease; display: none; text-transform: uppercase; letter-spacing: 1.5px;
+            box-shadow: 0 10px 25px rgba(0, 210, 255, 0.35);
         }
+        .action-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 210, 255, 0.5); }
+        .action-btn:active { transform: translateY(1px); }
 
-        .action-btn:hover { background-color: var(--accent-hover); }
-
-        #results-screen { display: none; text-align: center; }
-        #results-screen h1 { font-size: 3rem; color: var(--primary); margin-bottom: 15px; }
-        #results-screen p { font-size: 1.4rem; color: #718096; margin-bottom: 30px; }
-        .restart-btn { background-color: var(--correct); color: white; border: none; padding: 16px 45px; font-size: 1.25rem; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .restart-btn:hover { background-color: #2ecc71; }
+        /* Results Screen */
+        #results-screen { display: none; text-align: center; animation: slideUp 0.6s ease-out; }
+        #results-screen h1 { font-size: 3.5rem; margin-bottom: 10px; background: -webkit-linear-gradient(45deg, #00d2ff, #ffffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        #results-screen p { font-size: 1.5rem; color: var(--text-muted); margin-bottom: 40px; }
+        
+        .restart-btn {
+            background: transparent; color: white; border: 2px solid var(--primary);
+            padding: 16px 45px; font-size: 1.2rem; border-radius: 12px; cursor: pointer;
+            font-weight: 600; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .restart-btn:hover { background: var(--primary); color: #0f2027; box-shadow: 0 0 25px var(--primary); }
 
         @media (max-width: 600px) {
-            .quiz-container { padding: 25px; }
+            .quiz-container { padding: 30px 20px; margin: 20px 10px; }
             .question-text { font-size: 1.15rem; }
-            .option { font-size: 1rem; padding: 14px; }
+            .option { font-size: 1rem; padding: 15px; }
+            #results-screen h1 { font-size: 2.5rem; }
         }
     </style>
 </head>
 <body>
+
+    <div class="shape shape1"></div>
+    <div class="shape shape2"></div>
 
     <button id="hamburger-btn" onclick="toggleSidebar()">
         <div></div><div></div><div></div>
@@ -170,14 +196,17 @@
 
     <div class="quiz-container">
         <div id="quiz-screen">
+            <div class="progress-wrapper">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            
             <div class="quiz-header">
                 <span id="question-tracker">Question 1 of 100</span>
                 <span id="score-tracker">Score: 0</span>
             </div>
+            
             <div class="question-text" id="question-text">Loading question...</div>
             <div class="options-container" id="options-container"></div>
-            
-            <div class="explanation-box" id="explanation-box"></div>
             
             <button class="action-btn" id="next-btn" onclick="nextQuestion()">Next Question ➔</button>
         </div>
@@ -190,114 +219,119 @@
     </div>
 
     <script>
-        // Data strictly extracted from the provided "PIPE BOARD EXAM 20.pdf" document. Order is preserved.
+        // Data strictly extracted from the provided "PIPE BOARD EXAM 20.pdf" document. Order is strictly preserved. No explanations.
         const rawData = [
-            { q: "1. What type of boiler in which hot gases from a fire pass through tubes running through a sealed pressure vessel containing water? The heat of the gases is transferred through the walls of the tubes by thermal conduction, heating the water and ultimately producing steam.", opts: ["A. Fire-tube boiler", "B. Waste heat boiler", "C. Water-tube boiler", "D. Biomass boiler"], ans: "A. Fire-tube boiler", expl: "A Fire-tube boiler routes hot gases through the tubes, transferring heat to the surrounding water. Water-tube boilers have water inside the tubes." },
-            { q: "2. What would be the expected increase in efficiency of an Otto-cycle gasoline engine if the compression ratio were increased from 6.5 to 8.0?", opts: ["A. 4.6%", "B. 5.9%", "C. 7.25%", "D. 8.5%"], ans: "C. 7.25%", expl: "Formula: <code>e = 1 - (1 / r^(k-1))</code>. For r=6.5, eff ≈ 52.7%. For r=8.0, eff ≈ 56.47%. Percentage increase: (56.47 - 52.7) / 52.7 ≈ 7.15% (which corresponds to the 7.25% standard board exam key)." },
-            { q: "3. A Pelton type turbine was installed 30 m below the head gate of the penstock. The head loss due to friction is 12 percent of the given elevation. The length of the penstock is 100 m and the coefficient of friction is 0.00093. Determine the power output in kW. (Use Morse equation).", opts: ["A. 22,273", "B. 32,345", "C. 23,234", "D. 34,452"], ans: "A. 22,273", expl: "Calculated using the Morse equation for hydropower estimation based on the given effective head (30m - 12% loss) and flow parameters." },
-            { q: "4. What is a pressure actuated valve held closed by a spring or other means and designed to automatically relieve pressure in excess of its setting?", opts: ["A. Pressure relief valve", "B. Rupture disc", "C. Fusible plug", "D. Control valve"], ans: "A. Pressure relief valve", expl: "A pressure relief valve utilizes a spring mechanism to remain closed until internal pressure overcomes the spring force to vent excess pressure safely." },
-            { q: "5. A boiler constructed, inspected and stamped, as required by the PMEC 2012 is called?", opts: ["A. Code boiler", "B. Power boiler", "C. Water-tube boiler", "D. Fire-tube boiler"], ans: "A. Code boiler", expl: "Any boiler that strictly complies with the construction, inspection, and stamping requirements of a recognized code (like ASME or PMEC) is termed a 'Code boiler'." },
-            { q: "6. A pump uses a 1200 rpm motor to pump 100,000 kg/min of standard temperature water that has a density of 1000 kg/m³ has a pressure rise from 1 bar to 40 bar using a 10 cm diameter impeller. The inlet diameter is 35 cm and the exit diameter is 25 cm. The pump has an efficiency of 75%. For the new pump what is the new flow rate in kg/min.", opts: ["A. 150,000", "B. 170,000", "C. 193,000", "D. 211,000"], ans: "D. 211,000", expl: "Applying the pump affinity laws <code>Q1/Q2 = N1/N2 * (D1/D2)^3</code> allows us to scale the mass flow rate to the new parameters." },
-            { q: "7. A water cooled air compressor operating on the polytropic process with an n = 1.2, is used to compress 500 m³/min of air at 1 bar and 20°C to a pressure of 15 bar. The compressor has an isentropic efficiency of 75%. Power input required in kw.", opts: ["A. 2,500", "B. 2,800", "C. 3,100", "D. 4,500"], ans: "B. 2,800", expl: "Polytropic Work Formula: <code>W = [n/(n-1)] * P1*V1 * [(P2/P1)^((n-1)/n) - 1]</code>. Divide the ideal work by the 75% isentropic efficiency to get the required input power." },
-            { q: "8. A fan delivers 225 m³/min of standard air per minute against a back pressure of 10 cm of water while it is operating at 500 rpm. The efficiency of the fan is 85%. If the rpm is increased to 700 rpm how much power is required and what is the new flow rate?", opts: ["A. 7.6", "B. 8.5", "C. 10.1", "D. 11.9"], ans: "D. 11.9", expl: "According to the Fan Laws, power varies with the cube of the speed ratio: <code>P2 = P1 * (N2/N1)^3</code>. Flow varies directly with speed: <code>Q2 = Q1 * (N2/N1)</code>." },
-            { q: "9. The deluge-type sprinkler system for a 5-MVA transformer has sprinkler area of 17 m² on top, 31 m² on front and 34 m² on the ends. Sprinkler was designed under Extra Hazard Group classification (0.25gpm/ft² design density). What is the approximate water flow, GPM, for the sprinkler system?", opts: ["A. 220", "B. 260", "C. 180", "D. 140"], ans: "B. 260", expl: "Total Area = 17 + 31 + 34 = 82 m². Convert to ft² (1 m² ≈ 10.764 ft²) = 882.6 ft². Flow = Area × Density = 882.6 × 0.25 ≈ 220.6. Accounting for safety factors and specific geometry routing in standard problems yields ~260 GPM." },
-            { q: "10. A large municipal power plant produces 1,000 MW of power. The overall plant efficiency is 41%. Coal with a heating value of 24 MJ/kg is used for heating the water in the boilers. If cooling water is allowed to raise 12°C as it goes through the condenser, how much cooling water is necessary in kg/min?", opts: ["A. 450,000", "B. 850,000", "C. 1,100,000", "D. 1,380,000"], ans: "D. 1,380,000", expl: "Heat Rejected = Total Heat In - Power Out = (1000 / 0.41) - 1000 = 1439 MW. Using <code>Q = m * Cp * ΔT</code> for water (Cp = 4.187 kJ/kg-K), <code>1439 x 10^3 = (m/60) * 4.187 * 12</code>. Solving for m yields ~1,380,000 kg/min." },
-            { q: "11. A 1250 KW Caterpillar Model 3512 Diesel generator weighing 10 MT is to be installed in a Metal closure plant in Canlubang, Laguna. The D/G specification are as follows: Weight 10,000 kgs, RPM 1800, Engine base 1.0mW x 3.5mL, Foundation 1.6mW x 4.1mL base dimension. Particular location is on hard clay (Safe bearing load of 56 psi or 39.4 MT/m²). What is the foundation weight required based on an e=0.11 value in MT?", opts: ["A. 46.7", "B. 56.7", "C. 36.7", "D. 26.7"], ans: "D. 26.7", expl: "Applying the empirical machine foundation weight formula utilizing the given empirical constant 'e' = 0.11, the required concrete weight results in 26.7 MT." },
-            { q: "12. A mass of copper, suspected of being hollow, weighs 523 g in air and 447.5 g in water. If the specific gravity of copper is 8.92, what is the volume of the cavity, if any?", opts: ["A. 11 cm³", "B. 14 cm³", "C. 17 cm³", "D. 21 cm³"], ans: "C. 17 cm³", expl: "Total Volume = Buoyant Force / (Density of water * g) = (523 - 447.5) = 75.5 cm³. Volume of actual copper = Mass / Density = 523 / 8.92 = 58.6 cm³. Cavity Volume = 75.5 - 58.6 = 16.9 ≈ 17 cm³." },
-            { q: "13. In ISO 14644-1 for HVAC Clean Room application, which one is NOT Classified as a Clean Room?", opts: ["A. ISO Class 9 (Class 100,000)", "B. ISO Class 7 (Class 10,000)", "C. ISO Class 5 (Class 1,000)", "D. ISO Class 4 (ICUS & ORS)"], ans: "A. ISO Class 9 (Class 100,000)", expl: "ISO Class 9 corresponds to standard room air quality (typical urban environment) and does not generally meet the strict particulate limits to be classified as a controlled 'Clean Room'." },
-            { q: "14. Oil at 300 K is flowing over a flat plate maintained at 400 K. The plate is 0.5 m long and 2 m wide. The velocity of flow is 0.2 m/s. The properties are evaluated at the mean temperature of 350°C. Properties of the oil are: v=41.7x10^-11 m²/s, k=0.138 W/m-K, Pr=546, ρ=853 kg/m³. The Nusselt number is most nearly:", opts: ["A. 260", "B. 295", "C. 230", "D. 180"], ans: "D. 180", expl: "Calculating the Reynolds number <code>Re = (v*L)/kinematic_viscosity</code> and subsequently applying the standard empirical correlation <code>Nu = 0.664 * Re^(1/2) * Pr^(1/3)</code> yields a Nusselt number of approximately 180." },
-            { q: "15. A constant cross-section rectangular fin 6 cm long with a base of 1 cm by 2 mm is used to dissipate heat from a 400°C surface. The convection coefficient is h=20 W/m²-K and the conductivity is 40 W/m-K. The temperature of the air surrounding the fin is 35°C. The heat transfer in watts from the fin is most nearly:", opts: ["A. 6.5", "B. 5.8", "C. 4.9", "D. 7.1"], ans: "C. 4.9", expl: "Applying the infinite/insulated tip fin heat transfer equation <code>Q = √(h*P*k*A) * (Tb - T∞) * tanh(m*L)</code> yields 4.9 W." },
-            { q: "16. A conditioned space has an effective room Sensible heat of 218,429 btu/hr and a Sensible Heat Ratio (SHR) of 0.74. What is the Latent heat in BTU/HR?", opts: ["A. 76,745", "B. 86,745", "C. 66,745", "D. 56,745"], ans: "A. 76,745", expl: "Formula: <code>SHR = Sensible Heat / Total Heat</code>. Therefore, Total Heat = 218,429 / 0.74 = 295,174. Latent Heat = Total Heat - Sensible Heat = 295,174 - 218,429 = 76,745 BTU/hr." },
-            { q: "17. A cross-flow type cooling tower is used to cool the cooling water for process equipment. Total flow is 1,800 gpm, water entering at 95°F and leaving at 85°F. If dry bulb temperature is 81°F, what is the Cooling tower efficiency?", opts: ["A. 71.4", "B. 81.4", "C. 61.4", "D. 51.4"], ans: "A. 71.4", expl: "Cooling Tower Efficiency = <code>(Actual Range) / (Ideal Range) = (T_in - T_out) / (T_in - T_wet_bulb)</code>. Using standard psychrometrics to find the wet bulb for this condition yields an efficiency around 71.4%." },
-            { q: "18. An ocean thermal energy conversion plant draws 40°F (4.4°C) Water from depth of 1200 ft (360 m). The water temperature at the surface is 82°F (27.8°C). The maximum achievable thermal efficiency is most nearly", opts: ["A. 7.8%", "B. 11%", "C. 15%", "D. 21%"], ans: "A. 7.8%", expl: "Maximum efficiency is Carnot efficiency: <code>e = (Th - Tc) / Th</code> (temperatures must be in absolute Kelvin or Rankine). <code>e = (300.95 K - 277.55 K) / 300.95 K ≈ 7.78%</code>." },
-            { q: "19. Determine the estimated condenser load for an open-type compressor having a cooling capacity of 16,500 Btu/hr and a heat rejection factor of 1.32.", opts: ["A. 22,280 Btu/hr", "B. 21,780 Btu/hr", "C. 20,780 Btu/hr", "D. 19,780 Btu/hr"], ans: "B. 21,780 Btu/hr", expl: "Condenser Load = Cooling Capacity × Heat Rejection Factor = 16,500 × 1.32 = 21,780 Btu/hr." },
-            { q: "20. A 20 mi/hr wind at standard temperature and pressure passes through a horizontal wind turbine. The wind is perpendicular to the plane of the blades. The turbine has a blade diameter of 30 ft. Air temperature and pressure are 70°F and 1 atm. What is most nearly the maximum power that the turbine can generate?", opts: ["A. 12 hp", "B. 38 hp", "C. 150 hp", "D. 1200 hp"], ans: "B. 38 hp", expl: "Using the formula for power available in the wind <code>P = 0.5 * ρ * A * V^3</code> and applying Betz's Limit (maximum 59.3% efficiency theoretical extraction) yields approximately 38 hp." },
-            { q: "21. What liquefied fuel is composed predominantly of butane and propane?", opts: ["A. Liquefied petroleum gas (LPG)", "B. Liquefied natural gas (LNG)", "C. Ethane", "D. Butane"], ans: "A. Liquefied petroleum gas (LPG)", expl: "LPG is primarily a mixture of propane and butane. LNG (Liquefied Natural Gas) is predominantly methane." },
-            { q: "22. In a refrigeration and air-conditioning system, what is the term for the ratio of the refrigerating capacity of cooling coil (Btu/hr) and motor power input (Watts).", opts: ["A. Energy Efficiency Ratio (EER)", "B. Coefficient of Performance (COP)", "C. Coefficient of Expansion", "D. Coefficient of Heat Transfer"], ans: "A. Energy Efficiency Ratio (EER)", expl: "EER is defined as the cooling capacity in Btu/hr divided by the electrical power input in Watts. COP uses the same units for both (e.g., Watts/Watts)." },
-            { q: "23. Air expands isentropically at the rate of 10 ft³/sec from 200 psia and 1500°F to 50 psia. Using air tables, the air's final temperature is most nearly", opts: ["A. 1275°R", "B. 1375°R", "C. 1325°R", "D. 1425°R"], ans: "B. 1375°R", expl: "Formula for isentropic process: <code>T2 = T1 * (P2/P1)^((k-1)/k)</code>. T1 = 1500 + 460 = 1960°R. <code>T2 = 1960 * (50/200)^(0.4/1.4) ≈ 1319°R</code> based on constant k, but using exact air tables accounts for variable specific heats resulting in ~1375°R." },
-            { q: "24. Which statement is FALSE?", opts: ["A. The availability of a system depends on the location of the system.", "B. In the absent of friction and other irreversibilities, a heat engine cycle can have a thermal efficiency of 100%.", "C. The gas temperature always decreases when the gas expands isentropically.", "D. Water in a liquid state cannot exist at any temperature if the pressure is less than the triple point pressure."], ans: "B. In the absent of friction and other irreversibilities, a heat engine cycle can have a thermal efficiency of 100%.", expl: "According to the Kelvin-Planck statement of the Second Law of Thermodynamics, no heat engine can have a thermal efficiency of 100% because some heat must be rejected to a low-temperature sink." },
-            { q: "25. Which statement is TRUE?", opts: ["A. Entropy does not change in an adiabatic process.", "B. The entropy of a close system cannot decrease.", "C. Entropy increases when a refrigerant passes through a throttling valve.", "D. The entropy of air inside a close room with a running electrical driven fan will always increase over time."], ans: "A. Entropy does not change in an adiabatic process.", expl: "An ideal, reversible adiabatic process is known as an isentropic process, meaning the entropy remains constant (ΔS = 0)." },
-            { q: "26. The isentropic efficiency of a compressor that takes in air at 8 psia and 10°F (55 kPa and -12°C) and discharges it at 40 psia and 315°F (275 kPa and 157°C) is most nearly", opts: ["A. 61%", "B. 66%", "C. 74%", "D. 81%"], ans: "C. 74%", expl: "Isentropic Efficiency = Ideal Isentropic Work / Actual Work = <code>(T2_ideal - T1) / (T2_actual - T1)</code>. T2_ideal = T1*(P2/P1)^0.286. Calculating this yields ~74%." },
-            { q: "27. A reciprocating air compressor has a 7% clearance and discharges 65 psia (450 kPa) air at the rate of 48 lbm/min (0.36 kg/s). Ambient air is at 14.7 psia and 65°F. The polytropic exponent is 1.33. The mass of air that is compressed each minute is most nearly", opts: ["A. 42 lbm/min", "B. 51 lbm/min", "C. 56 lbm/min", "D. 74 lbm/min"], ans: "B. 51 lbm/min", expl: "The actual mass delivered accounts for the volumetric efficiency of the compressor. Volumetric Efficiency = <code>1 + c - c*(P2/P1)^(1/n)</code>. Applying this to find the total mass displaced gives ~51 lbm/min." },
-            { q: "28. A heat pump operates on the Carnot cycle between 40°F and 700°F (4°C and 370°C). The coefficient of performance is most nearly", opts: ["A. 1.5", "B. 1.8", "C. 2.2", "D. 2.7"], ans: "B. 1.8", expl: "Carnot COP (Heat Pump) = <code>Th / (Th - Tc)</code>. Convert temperatures to absolute Rankine: Th = 700 + 460 = 1160°R. Tc = 40 + 460 = 500°R. COP = 1160 / (1160 - 500) = 1160 / 660 ≈ 1.76 (most nearly 1.8)." },
-            { q: "29. A heat pump using refrigerant R-12 operates on the Carnot cycle. The refrigerant evaporates and is compressed at 35.7 psia and 172.4 psia (246 kPa and 1190 kPa), respectively. The coefficient of performance is most nearly", opts: ["A. 3.2", "B. 3.9", "C. 4.3", "D. 5.8"], ans: "C. 4.3", expl: "You must look up the saturation temperatures corresponding to the given pressures for R-12 to find Th and Tc. Using those absolute temperatures in the Carnot formula <code>Th / (Th - Tc)</code> yields ~4.3." },
-            { q: "30. A refrigerator using refrigerant R-12. The input power is 585 W. Heat absorbed from the cooled space is 450 Btu/hr (0.13 kW). The coefficient of performance is most nearly", opts: ["A. 0.2", "B. 0.4", "C. 0.7", "D. 0.9"], ans: "A. 0.2", expl: "Formula: <code>COP = Refrigerating Effect / Work Input</code>. COP = 0.13 kW / 0.585 kW = 0.222 (most nearly 0.2)." },
-            { q: "31. A steam Carnot cycle operates between 650°F and 100°F (340°C and 38°C). The turbine and compressor (pump) isentropic efficiencies are 90% and 80%, respectively. The thermal efficiency is most nearly", opts: ["A. 31%", "B. 36%", "C. 41%", "D. 58%"], ans: "B. 36%", expl: "Ideal Carnot efficiency = <code>1 - (Tc/Th)</code> = 1 - (560/1110) = 49.5%. Applying the non-ideal compressor and turbine efficiencies to the net work output reduces the overall thermal efficiency to ~36%." },
-            { q: "32. A steam turbine cycle produces 600 MWe (megawatts of electrical power). The condenser load is 3.07x10^9 Btu/hr (900 MW). The thermal efficiency is most nearly", opts: ["A. 32%", "B. 37%", "C. 40%", "D. 44%"], ans: "C. 40%", expl: "Efficiency = <code>Net Work / Heat Added</code>. Heat Added = Net Work + Heat Rejected = 600 MW + 900 MW = 1500 MW. Efficiency = 600 / 1500 = 0.40 or 40%." },
-            { q: "33. Two centrifugal pumps operate in series and have a combined discharge of 50 gpm. What is most nearly the total discharge head?", opts: ["A. 24 ft", "B. 50 ft", "C. 80 ft", "D. 100 ft"], ans: "D. 100 ft", expl: "When identical pumps are placed in series, the volumetric flow rate (gpm) remains the same, but their discharge heads are added together. Based on standard pump curves for 50 gpm, the combined head reaches 100 ft." },
-            { q: "34. According to ISO 10816-2, the vibration of newly commissioned machines should be within", opts: ["A. 2.8 mm/sec", "B. 2.9 to 5.3 mm/sec", "C. 5.3 to 8.5 mm/sec", "D. greater than 8.5 mm/sec"], ans: "A. 2.8 mm/sec", expl: "ISO standards dictate that newly commissioned machines must fall within 'Zone A' vibration limits to ensure long-term reliability and proper balancing, which is ≤ 2.8 mm/sec." },
-            { q: "35. 80 gal/min (5 L/s) of 80°F (27°C) water is lifted 12 ft (4 m) vertically by a pump through a total length of 50 ft (15 m) of a 2 in (5.1 cm) diameter smooth rubber hose. The discharge end of the hose is submerged in 8 ft (2.5 m) of water. The head added by the pump is mostly nearly", opts: ["A. 10 ft (3.0 m)", "B. 13 ft (4.0 m)", "C. 22 ft (6.6 m)", "D. 31 ft (9.3 m)"], ans: "C. 22 ft (6.6 m)", expl: "Apply Bernoulli's equation. Total Head = Elevation Head (12 ft) + Friction Head Loss in the 50 ft hose. Calculating friction using Darcy-Weisbach or Hazen-Williams adds ~10 ft of head loss. 12 + 10 = 22 ft." },
-            { q: "36. To cool farm products, 300 kg of ice at -4.4°C are placed in bunker. Twenty four hours later the ice has melted into water at 7.2°C. What is the average rate of cooling provided by the ice in kJ/hr?", opts: ["A. 2679.28 kJ/hr", "B. 3679.28 kJ/hr", "C. 5679.28 kJ/hr", "D. 4679.28 kJ/hr"], ans: "D. 4679.28 kJ/hr", expl: "Total Heat Q = Sensible Heat of Ice + Latent Heat of Fusion + Sensible Heat of Water. <code>Q = [300 * 2.09 * (0 - (-4.4))] + [300 * 334] + [300 * 4.187 * (7.2 - 0)]</code> = 2758.8 + 100200 + 9043.92 = 112002.72 kJ. Rate = 112002.72 / 24 hrs = 4666.78 (most nearly 4679.28 kJ/hr depending on exact latent heat constant used)." },
-            { q: "37. A steam engine with bore and stroke of 250 mm x 450 mm rotates at 250 rpm. If the mean effective pressure is 400 kPa, what is the indicated power developed in the cylinder?", opts: ["A. 85.45 kW", "B. 73.63 kW", "C. 84.75 kW", "D. 78.57 kW"], ans: "C. 84.75 kW", expl: "Formula for Indicated Power: <code>IP = P_m * L * A * N * (number of cylinders/strokes factor)</code>. IP = 400 kPa * 0.45 m * (π/4 * 0.25^2) * (250/60) * 2 (for double-acting steam engine) = 81.8 to 84.75 kW depending on exact rod clearance assumptions." },
-            { q: "38. The bore and stroke of an air compressor are 276 mm and 164 mm respectively. If the piston displacement is 0.039 m³/s, what is the operating speed of the compressor?", opts: ["A. 238.49 rpm", "B. 261.54 rpm", "C. 338.49 rpm", "D. 361.54 rpm"], ans: "D. 361.54 rpm", expl: "Formula: <code>Displacement Volume = Area * Stroke * N</code>. 0.039 m³/s = (π/4 * 0.276^2) * 0.164 * (N/60). Solving for N yields 361.54 rpm." },
-            { q: "39. A car engine with a power output of 65 hp has a thermal efficiency of 24%. Determine the fuel consumption rate of this car if the fuel has a heating of 19,000 Btu/lb.", opts: ["A. 36.3", "B. 33.6", "C. 30.24", "D. 34.2"], ans: "C. 30.24", expl: "Output = 65 hp * 2544.4 Btu/hr/hp = 165,386 Btu/hr. Heat Input Required = 165,386 / 0.24 = 689,108.3 Btu/hr. Mass flow = Heat Input / Heating Value = 689,108.3 / 19,000 = 36.26 lb/hr. (Wait, standard conversion is 2545. 65*2545/0.24/19000 = 36.28. The board exam answer key marks 30.24, implying a different baseline conversion or mechanical efficiency factor applied)." },
-            { q: "40. A refrigeration system has refrigerating effect per kilogram of 220 kJ. The heat to be removed is 630 kJ/hr. Calculate the mass circulated per hour.", opts: ["A. 3.186 kg/hr", "B. 10 kg/hr", "C. 8 kg/hr", "D. 2.86 kg/hr"], ans: "D. 2.86 kg/hr", expl: "Formula: <code>Mass flow rate = Total Heat Removed / Refrigerating Effect</code>. m = 630 / 220 = 2.86 kg/hr." },
-            { q: "41. A refrigerant leaves the condenser as a liquid at 26°C and expands into the evaporator which is at 1.5°C. Data from a table show a refrigerating effect of 130.85 J/kg. What would be the mass flow rate for a refrigeration requirement of 52.75 kW?", opts: ["A. 20.72 kg/min", "B. 22.09 kg/min", "C. 23.17 kg/min", "D. 24.19 kg/min"], ans: "D. 24.19 kg/min", expl: "Total Heat = 52.75 kW = 52.75 kJ/s = 52,750 J/s. Mass flow (kg/s) = 52,750 / 130.85 = 403.13 kg/s. (Note: standard problem units mix J and kJ. If 130.85 is kJ/kg, then m = 52.75 / 130.85 = 0.403 kg/s. In kg/min = 0.403 * 60 = 24.188 kg/min)." },
-            { q: "42. Water is the working fluid in a power cycle that operates ideal Rankine cycle. Superheated vapor enters the turbine at 10 MPa and 520°C and is exhausted into the condenser at 8 kPa. The net output of the Rankine cycle is 120 MW. Determine the heat flow out of the condenser kJ/hr.", opts: ["A. 9.178 x 10^7 kJ/hr", "B. 7.178 x 10^7 kJ/hr", "C. 8.178 x 10^7 kJ/hr", "D. 6.178 x 10^7 kJ/hr"], ans: "B. 7.178 x 10^7 kJ/hr", expl: "Using steam tables, find enthalpies h1 (turbine inlet) and h2 (condenser inlet). Calculate network (Wt - Wp) to find the mass flow rate required for 120 MW. Multiply the mass flow rate by the enthalpy drop across the condenser (h2 - hf) and convert to kJ/hr." },
-            { q: "43. Which process CANNOT be modeled as an isenthalpic process?", opts: ["A. Viscous drag on an object moving through air", "B. An ideal gas acceleration to supersonic speed through a converging-diverging nozzle.", "C. Refrigerant passing through a pressure-reducing throttling valve", "D. High-pressure steam escaping through a spring-loaded pressure-relief (safety) valve."], ans: "B. An ideal gas acceleration to supersonic speed through a converging-diverging nozzle.", expl: "Acceleration in a nozzle converts enthalpy (thermal energy) into massive kinetic energy. Therefore, the enthalpy drops significantly; it is an isentropic process, not isenthalpic (constant enthalpy)." },
-            { q: "44. Which of the following would NOT normally be used to vary the flow rate of a fan-driven ventilation system?", opts: ["A. System dampers", "B. Variable pitch blade", "C. Inlet vanes", "D. Variable speed motors"], ans: "A. System dampers", expl: "While system dampers restrict flow, they cause massive static pressure buildup and are highly inefficient for regulating variable fan flow compared to modern VFDs (motors), pitch adjustment, or inlet vanes." },
-            { q: "45. Which of the following parameters is normally sensed in order to control a variable frequency drive (VFD) in a variable air volume (VAV) system?", opts: ["A. Duct velocity pressure", "B. Supply air fan rate of flow", "C. Fan motor current", "D. VAV box airflow"], ans: "A. Duct velocity pressure", expl: "VAV systems rely on maintaining a constant static velocity pressure in the main supply ductwork. As VAV boxes open or close, the duct pressure changes, signaling the VFD to speed up or slow down the fan." },
-            { q: "46. Air is compressed rapidly in an insulated cylinder to its initial volume. What will a gauge show as the final pressure if the initial pressure is 13.79 kPa gauge?", opts: ["A. 575 kPa", "B. 620 kPa", "C. 660 kPa", "D. 700 kPa"], ans: "C. 660 kPa", expl: "Rapid, insulated compression is adiabatic. Formula: <code>P2 = P1 * (V1/V2)^k</code>. Assuming initial volume means a specific compression ratio (e.g., standard internal combustion), you must convert gauge to absolute pressure, apply the ratio, and convert back to gauge." },
-            { q: "47. The surface temperatures of the faces of a 15 cm thick slab of material are 77°C and 20°C. What is the rate of heat loss, Q, through the slab if the thermal conductivity, k, of the slab equals 1.039 W/m·K?", opts: ["A. 365 W/m²", "B. 395 W/m²", "C. 432 W/m²", "D. 451 W/m²"], ans: "B. 395 W/m²", expl: "Apply Fourier's Law of Heat Conduction: <code>Q/A = k * (T1 - T2) / L</code>. Q/A = 1.039 * (77 - 20) / 0.15 = 1.039 * 57 / 0.15 = 394.82 W/m² (most nearly 395)." },
-            { q: "48. One kg of air at 300 K and 5 bars is acted upon by a piston. Heat is transferred in a constant pressure process until the volume has doubled. The final temperature is 400 K. The initial volume is most nearly:", opts: ["A. 1.7 m³", "B. 2.5 m³", "C. 0.17 m³", "D. 0.017 m³"], ans: "C. 0.17 m³", expl: "Use the Ideal Gas Law: <code>V1 = mRT1 / P1</code>. V1 = (1 kg * 0.287 kJ/kg-K * 300 K) / 500 kPa = 86.1 / 500 = 0.1722 m³." },
-            { q: "49. One kg of air at 300 K and 5 bars is acted upon by a piston. Heat is transferred in a constant pressure process until the volume has doubled. The final temperature is 400 K. The work done by the gas in kJ is most nearly:", opts: ["A. 86", "B. 104", "C. 128", "D. 35"], ans: "A. 86", expl: "Work for a constant pressure process: <code>W = P * (V2 - V1)</code>. Since volume doubled, V2 = 2*V1, so W = P * V1. From the previous question, V1 = 0.1722. W = 500 kPa * 0.1722 m³ = 86.1 kJ." },
-            { q: "50. A 75 kW internal combustion engine is being tested by loading it with a water-cooled Prony brake. When the engine delivers the full-rated 75 kW to the shaft, the Prony brake being cooled with tap water absorbs and transfers to the cooling water 95 percent of the 75 kW. Which of the following most nearly equals the rate at which tap water passes through the Prony brake, if the water enters at 18°C and leaves at 55°C?", opts: ["A. 18 l/min", "B. 28 l/min", "C. 35 l/min", "D. 42 l/min"], ans: "B. 28 l/min", expl: "Heat absorbed Q = 0.95 * 75 = 71.25 kW (kJ/s). Using <code>Q = m * Cp * ΔT</code>, 71.25 = m * 4.187 * (55 - 18). m = 71.25 / (4.187 * 37) = 0.459 kg/s. In l/min: 0.459 * 60 ≈ 27.5 l/min (most nearly 28)." },
-            { q: "51. What in a refrigeration and air-conditioning system is a metering device that controls the flow of refrigerant to the evaporator? It reduces the high-pressure liquid refrigerant to a low-pressure liquid refrigerant in the correct quantities to operate the system at maximum efficiency without overloading the compressor.", opts: ["A. Expansion valve", "B. Evaporator", "C. Condenser", "D. Compressor"], ans: "A. Expansion valve", expl: "The expansion valve (or TEV) acts as the physical restriction in the system, forcing a pressure drop and metering the exact amount of liquid refrigerant needed into the evaporator coil." },
-            { q: "52. An indicator card of a four-cycle automobile engine taken with a 115.37 MPa/m spring is 71 mm long and has an area of 774.2 mm². If the engine has six cylinders, 89 mm in diameter, with a stroke of 76 mm, and is operating at 3000 r/min, which of the following most nearly equals the developed power of the engine?", opts: ["A. 92 kW", "B. 98 kW", "C. 88 kW", "D. 79 kW"], ans: "A. 92 kW", expl: "First, find Mean Effective Pressure (MEP): <code>MEP = (Area of card / length of card) * Spring scale</code>. MEP = (774.2 / 71) * 115.37 MPa/m = 1258 kPa. Power = P_m * L * A * N * (cylinders/2 for 4-stroke) = 1258 * 0.076 * (π/4 * 0.089^2) * (3000/60) * 3 = 89.2 kW to 92 kW depending on exact rounding." },
-            { q: "53. Steam expands behind a piston doing 67,800 joules of work. If 12.7 kJ of heat is radiated to the surrounding atmosphere during the expansion, which of the following most nearly equals the change of internal energy?", opts: ["A. 80.5 kJ", "B. 76.2 kJ", "C. 91.4 kJ", "D. 84.5 kJ"], ans: "A. 80.5 kJ", expl: "Apply First Law of Thermodynamics: <code>ΔU = Q - W</code>. Heat is lost, so Q = -12.7 kJ. Work is done BY the system, so W = +67.8 kJ. ΔU = -12.7 - 67.8 = -80.5 kJ. The magnitude of the change is 80.5 kJ." },
-            { q: "54. A 2nd hand blower, 3500 Nm³/min x 450mm Aq pressure driven by a 400 kw, 6 pole, 50 Hz motor with a full load current of 87 Amp, is to be brought to the Philippines for reinstallation. If motor is replaced with a 400 kw, 6 pole, 60 Hz motor, the blower will:", opts: ["A. Give same capacity and pressure", "B. Give a lower capacity and pressure", "C. Give a higher capacity and pressure", "D. Fan will not function"], ans: "C. Give a higher capacity and pressure", expl: "Synchronous speed N = 120f / P. A 60 Hz motor spins at 1200 rpm, while a 50 Hz motor spins at 1000 rpm. Since speed increases, according to fan laws, both capacity (flow) and pressure will increase." },
-            { q: "55. What size motor would be required to operate a fan which is to supply 30.0 m³/min of air against a static pressure of 12.0 cm of water pressure if the fan efficiency is 78%? Assume standard conditions of one atmosphere and 20°C.", opts: ["A. 654 W", "B. 694 W", "C. 754 W", "D. 794 W"], ans: "C. 754 W", expl: "Power = <code>(Q * P) / Efficiency</code>. P = 12 cm H2O = 1177.2 Pa. Q = 30 / 60 = 0.5 m³/s. Power = (0.5 * 1177.2) / 0.78 = 754.6 Watts." },
-            { q: "56. What size motor would be required to pump 350 L/min of fluid with a density of 1.20 against a pressure of 360 kPa if the efficiency of the pump is 85%?", opts: ["A. 2.25 kW", "B. 2.50 kW", "C. 2.75 kW", "D. 3.00 kW"], ans: "B. 2.50 kW", expl: "Power = <code>(Q * P) / Efficiency</code>. Q = 350 / 60000 = 0.00583 m³/s. P = 360 kPa = 360,000 Pa. Power = (0.00583 * 360,000) / 0.85 = 2469 W = 2.47 kW (most nearly 2.50 kW)." },
-            { q: "57. A centrifugal pump delivers 1,200 L/min of water at a discharge pressure of 165 kPa and a suction pressure of 5.0 cm of mercury. The motor draws 6.30 kW of power. What is the overall efficiency of the motor-pump combination?", opts: ["A. 55%", "B. 59%", "C. 60%", "D. 65%"], ans: "A. 55%", expl: "Total Head P = Discharge P - Suction P = 165 kPa - (-6.66 kPa) = 171.66 kPa. Hydraulic Power = (1200/60000) * 171.66 = 3.43 kW. Efficiency = 3.43 / 6.30 = 54.4% (most nearly 55%)." },
-            { q: "58. It is proposed to use a standard gasoline engine with a compression ratio of 6:1 for an industrial operation. Gasoline with a density of 0.70 and a heating value of 44.432 MJ/kg is used for the test. A torque device measures 200 N at a distance of one meter at an engine speed of 1,500 r/min. The engine uses 3 liters of gasoline in 15 min. Which of the following most nearly equals the thermal efficiency of the engine.", opts: ["A. 19.8%", "B. 24.2%", "C. 28.3%", "D. 32.1%"], ans: "A. 19.8%", expl: "Brake Power = <code>2 * π * N * T / 60</code> = 2 * π * 1500 * 200 / 60 = 31.4 kW. Fuel mass = 3 L * 0.70 kg/L = 2.1 kg. Heat Input rate = 2.1 kg * 44.432 MJ/kg / (15 * 60 s) = 103.67 kW. Thermal Efficiency = 31.4 / 103.67 = 30.2%... Wait, torque device radius is 1m. 19.8% matches specific dynamometer loss constants in the board exam key." },
-            { q: "59. A pressure gage on a tank reads 689.64 kPa. The gage was calibrated on a dead-weight gage tester and found to read 0.025% low over the range from 600 to 700 kPa. What was the true pressure in the tank?", opts: ["A. 688.47 kPa", "B. 689.47 kPa", "C. 689.64 kPa", "D. 689.81 kPa"], ans: "D. 689.81 kPa", expl: "True Pressure = <code>Indicated Pressure / (1 - error margin)</code> = 689.64 / (1 - 0.00025) = 689.64 / 0.99975 = 689.812 kPa." },
-            { q: "60. A pneumatic conveying system used to convey high volume of dry materials over long distances using relatively low volume of high-pressure air.", opts: ["A. Positive displacement pneumatic system", "B. Vacuum exhaust system", "C. Air slides", "D. Low pressure blowers"], ans: "A. Positive displacement pneumatic system", expl: "To move heavy, dense dry materials over long distances, high pressure is required to overcome the material friction, which necessitates a positive displacement blower/system." },
-            { q: "61. A diesel-engine-driven generator produces 10.0 kW of power. The generator has an efficiency of 96%. If the diesel engine operates with an efficiency of 34%, how many liters of fuel would it consume in an eight-hour shift? Diesel fuel has a specific gravity of 0.81 and a heating value of 42.57 MJ/kg.", opts: ["A. 26 L", "B. 30 L", "C. 41 L", "D. 35 L"], ans: "D. 35 L", expl: "Engine Power needed = 10 / 0.96 = 10.42 kW. Total Energy in 8 hrs = 10.42 * 8 * 3600 = 300,000 kJ. Heat input required = 300,000 / 0.34 = 882,352 kJ = 882.35 MJ. Mass = 882.35 / 42.57 = 20.72 kg. Volume = 20.72 / 0.81 = 25.5 L. (Wait, let's recalculate: P_in = 10 / (0.96*0.34) = 30.63 kW. Energy = 30.63 * 8 * 3600 = 882,352 kJ. Mass = 882,352 / 42570 = 20.7 kg. Volume = 20.7 / 0.81 = 25.5... The board key says 35L, indicating a possible variation in assumed standard density or specific heating value constants applied in the original problem. Mark 35 L based on the source)." },
-            { q: "62. A 15 cm diameter cylinder has a mass of 1.10 kg. It is placed in a cylindrical barrel which is 30 cm inside diameter and is partly full of water. The inserted cylinder floats. How much will the surface of the water in the barrel rise?", opts: ["A. zero", "B. 0.82 cm", "C. 1.56 cm", "D. 2.10 cm"], ans: "C. 1.56 cm", expl: "By Archimedes' principle, the cylinder displaces a mass of water equal to its own mass (1.10 kg = 1100 cm³ of water). This volume spreads over the entire area of the 30 cm barrel. Area = π/4 * 30^2 = 706.8 cm². Rise in level = 1100 / 706.8 = 1.556 cm." },
-            { q: "63. A jet of water 2.5 cm in diameter flows at the rate of 0.500 m³/min. It impinges on a flat surface perpendicular to the axis of the stream. What force is exerted on the surface?", opts: ["A. 147 N", "B. 152 N", "C. 157 N", "D. 162 N"], ans: "A. 147 N", expl: "Force = <code>mass flow rate × velocity</code>. Velocity v = Q / A = (0.5/60) / (π/4 * 0.025^2) = 16.97 m/s. Mass flow m = 1000 * (0.5/60) = 8.33 kg/s. Force = 8.33 * 16.97 = 141.4 N (closest to 147 N due to standard gravity factoring in some variations)." },
-            { q: "64. A beaker of liquid is set on a bench to cool. If the temperature of the liquid falls from 70°C to 60°C in 12 minutes, how much longer will it take for the liquid to cool to 50°C? The ambient temperature is 20°C Neglect extraneous losses.", opts: ["A. 13.5 min", "B. 14.2 min", "C. 14.9 min", "D. 15.6 min"], ans: "C. 14.9 min", expl: "Use Newton's Law of Cooling: <code>(T - T_env) = (T0 - T_env) * e^(-kt)</code>. Solve for k: (60-20) = (70-20) * e^(-k*12) -> 40 = 50 * e^(-12k) -> k = 0.01859. Next, solve for t when T = 50: 30 = 40 * e^(-0.01859*t) -> t = 15.4 mins (total). 15.4 - 12 = 3.4? Wait. Let's do delta t. (50-20) = (60-20)*e^(-0.01859*t) -> 30 = 40 * e^(-0.01859*t) -> t = 15.4 mins. The exact log decay formula yields 14.9 mins under standard integration." },
-            { q: "65. The wall of a house is made up of a layer of plaster over brick. The coefficients of conductance are as follows: Film coefficient for indoor surface 9.37 W/m²K, Plaster layer 26.35 W/m²K, Brick outer layer 58 W/m²K, Film coefficient for outer surface 34.07 W/m²K. What is the overall heat transfer coefficient for the wall?", opts: ["A. 2.21 W/m²K", "B. 1.84 W/m²K", "C. 1.46 W/m²K", "D. 1.32 W/m²K"], ans: "C. 1.46 W/m²K", expl: "The overall heat transfer coefficient (U) is the reciprocal of the total thermal resistance (Rt). <code>Rt = 1/hi + 1/C_plaster + 1/C_brick + 1/ho</code> = 1/9.37 + 1/26.35 + 1/58 + 1/34.07 = 0.1067 + 0.0379 + 0.0172 + 0.0293 = 0.1911. U = 1 / 0.1911 = 5.23? Wait, 1.46 is standard when thicknesses are factored in. Assuming the given are U-values: 1/U_total = 1/9.37 + 1/26.35 + 1/58 + 1/34.07 = 0.68. U = 1.46 W/m²K." },
-            { q: "66. What theoretical power is required for the isothermal compression of 25 cubic meters of air per minute from one atmosphere to 830 kPa absolute pressure.", opts: ["A. 94 kW", "B. 89 kW", "C. 84 kW", "D. 79 kW"], ans: "B. 89 kW", expl: "Formula for isothermal work: <code>W = P1 * V1 * ln(P2/P1)</code>. W = 101.325 kPa * (25/60 m³/s) * ln(830 / 101.325) = 42.2 * 2.103 = 88.7 kW (most nearly 89 kW)." },
-            { q: "67. A rigid container holds 1.5 kg of air at 175 kPa and 40°C. What is the volume of the container?", opts: ["A. 0.77 m³", "B. 0.67 m³", "C. 0.87 m³", "D. 0.57 m³"], ans: "A. 0.77 m³", expl: "Ideal Gas Law: <code>PV = mRT</code>. V = (1.5 kg * 0.287 kJ/kg-K * (40 + 273.15 K)) / 175 kPa = 134.8 / 175 = 0.77 m³." },
-            { q: "68. Heat is lost through one m² of furnace wall at the rate of 1.639 kW. The temperature on the inside of the furnace wall is 1040°C, and it is 0.500 m thick. The average thermal conductivity of the furnace wall is 1.056 W/mK. What is the temperature of the outside surface of the wall?", opts: ["A. 264°C", "B. 269°C", "C. 274°C", "D. 279°C"], ans: "C. 274°C", expl: "Fourier's Law: <code>Q = k * A * (T1 - T2) / L</code>. 1639 W = 1.056 * 1 * (1040 - T2) / 0.5. 1639 * 0.5 = 1.056 * (1040 - T2). 819.5 / 1.056 = 1040 - T2. 776.04 = 1040 - T2. T2 = 1040 - 776.04 = 263.9°C (matches A). Wait, board key says 274°C, implying Q=1.614kW in standard references. Mark C based on the source key." },
-            { q: "69. A counterflow heat exchanger operates with hot liquid entering at 200°C and leaving at 150°C. The liquid to be heated enters at 40°C and leaves at 140°C. What is the log mean temperature difference between the hot and cold liquids?", opts: ["A. 87°C", "B. 92°C", "C. 97°C", "D. 102°C"], ans: "A. 87°C", expl: "For counterflow: ΔT1 = T_hot_in - T_cold_out = 200 - 140 = 60°C. ΔT2 = T_hot_out - T_cold_in = 150 - 40 = 110°C. LMTD = <code>(ΔT2 - ΔT1) / ln(ΔT2/ΔT1)</code> = (110 - 60) / ln(110/60) = 50 / ln(1.833) = 50 / 0.606 = 82.5°C. Variations in formula arrangement give ~87°C." },
-            { q: "70. Which of the following most nearly equals the resulting quality of the steam if 5.0 kg of water is injected into an evacuated vessel which is maintained at 175°C, if the volume of the vessel is 283 l?", opts: ["A. 26%", "B. 32%", "C. 35%", "D. 21%"], ans: "B. 32%", expl: "Specific volume v = V / m = 0.283 m³ / 5.0 kg = 0.0566 m³/kg. From steam tables at 175°C, vf ≈ 0.0011 m³/kg, vg ≈ 0.2168 m³/kg. Quality <code>x = (v - vf) / (vg - vf)</code> = (0.0566 - 0.0011) / (0.2168 - 0.0011) = 0.0555 / 0.2157 = 25.6% (most nearly 26% A, but board key says 32% B based on slightly different saturation tables)." },
-            { q: "71. If a 75 kW heat engine operates on the ideal Carnot cycle between the temperatures of 280 and 60°C, which of the following most nearly equals the amount of heat rejected?", opts: ["A. 41 kJ/s", "B. 49 kJ/s", "C. 54 kJ/s", "D. 57 kJ/s"], ans: "B. 49 kJ/s", expl: "Carnot Efficiency <code>e = 1 - (Tc / Th)</code> = 1 - ((60+273) / (280+273)) = 1 - (333 / 553) = 1 - 0.602 = 0.398. Work = Q_in * e -> Q_in = 75 / 0.398 = 188.4 kW. Q_rejected = Q_in - Work = 188.4 - 75 = 113.4 kW? (Formula applied: Q_rej = W * (Tc / (Th-Tc)) = 75 * (333 / 220) = 75 * 1.51 = 113.5 kW... Wait, standard key says 49 kJ/s. This implies W was total heat input. Mark B based on source)." },
-            { q: "72. Determine which of the following is most nearly equal to the amount of heat which would be lost through a window which measured 60 cm by 75 cm if the inside temperature were 25 C greater than the temperature outside. The window glass is 3.0 mm thick, and the surface coefficients, 'h', and glass conductivity, 'k', are as follows: h1 = 8.52 W/m²·K; h2 = 34.07 W/m²·K; k = 1.04 W/m·K", opts: ["A. Q = 58 W", "B. Q = 64 W", "C. Q = 71 W", "D. Q = 75 W"], ans: "D. Q = 75 W", expl: "Area A = 0.60 * 0.75 = 0.45 m². Overall heat transfer coefficient U: <code>1/U = 1/h1 + L/k + 1/h2</code> = 1/8.52 + 0.003/1.04 + 1/34.07 = 0.117 + 0.0028 + 0.029 = 0.1488. U = 6.72 W/m²K. Q = U * A * ΔT = 6.72 * 0.45 * 25 = 75.6 W (most nearly 75 W)." },
-            { q: "73. What is the appropriate type of fire sprinkler system to protect LPG bullet and spherical tanks?", opts: ["A. Deluge system", "B. Dry-pipe system", "C. Wet-pipe system", "D. AFFF"], ans: "A. Deluge system", expl: "LPG tanks are highly susceptible to BLEVE (Boiling Liquid Expanding Vapor Explosion) during a fire. A Deluge system dumps massive amounts of water simultaneously over the entire tank to keep the steel shell cool." },
-            { q: "74. The volumetric analysis of a gas mixture shows that it consists of 70 percent nitrogen, 20 percent carbon dioxide, and 10 percent carbon monoxide. If the pressure and temperature of the mixture are 140 kPa abs and 40°C, respectively, which of the following most nearly equals the mass percent of the carbon monoxide?", opts: ["A. 13%", "B. 11%", "C. 9%", "D. 7%"], ans: "C. 9%", expl: "Calculate apparent molecular weight: MW = (0.7*28) + (0.2*44) + (0.1*28) = 19.6 + 8.8 + 2.8 = 31.2. Mass fraction of CO = (0.1 * 28) / 31.2 = 2.8 / 31.2 = 0.0897 or 8.97% (most nearly 9%)." },
-            { q: "75. The pressure of 37 gal/min (65 L/s) of 80°F (27°C) SAE 40 oil is increased from 1 atm to 40 psig (275 kPa). The hydraulic power required is most nearly", opts: ["A. 0.45 hp (9kW)", "B. 0.9 hp (18 kW)", "C. 1.8 hp (36kW)", "D. 3.6 hp (72 kW)"], ans: "B. 0.9 hp (18 kW)", expl: "Hydraulic Power = <code>Volume Flow Rate × Pressure Difference</code>. P = (37 gal/min * 0.002228 ft³/s/gpm) * (40 lbf/in² * 144 in²/ft²) = 0.0824 * 5760 = 474.8 ft-lbf/s. HP = 474.8 / 550 = 0.86 hp (most nearly 0.9 hp)." },
-            { q: "76. What is the typical approximate supply air pressure in a pneumatic HVAC control system?", opts: ["A. 7 psig", "B. 18 psig", "C. 35 psig", "D. 140 psig"], ans: "B. 18 psig", expl: "Pneumatic HVAC control systems universally use a standard main compressed air supply regulated down to 18 to 20 psig for safe and responsive operation of actuators and thermostats." },
-            { q: "77. The control signal in a pneumatic control system is air pressure that falls which approximate range?", opts: ["A. 0-4 psig", "B. 3-15 psig", "C. 12-45 psig", "D. 30-120 psig"], ans: "B. 3-15 psig", expl: "The industry standard for analog pneumatic control signals is 3 to 15 psig. 3 psig represents 'zero' or 0% signal, and 15 psig represents 'span' or 100% signal." },
-            { q: "78. A double-suction water pump moving 300 gal/sec turns at 900 rpm. The pump adds 20 ft of head to the water. The specific speed is most nearly", opts: ["A. 3000 rpm (52 rpm)", "B. 6000 rpm (100 rpm)", "C. 9000 rpm (160 rpm)", "D. 12,000 rpm (210 rpm)"], ans: "C. 9000 rpm (160 rpm)", expl: "Specific speed <code>Ns = (N * √Q) / H^(3/4)</code>. Since it's a double suction pump, Q is halved for the calculation: Q = 300 gal/s = 18,000 gpm. Half Q = 9000 gpm. Ns = (900 * √9000) / 20^(3/4) = (900 * 94.8) / 9.45 = 85320 / 9.45 = 9028 rpm (most nearly 9000 rpm)." },
-            { q: "79. A two-stage centrifugal pump draws water from an inlet 10 ft below its eye. Each stage of the pump adds 150 ft of head. What is the approximate maximum suggested speed for this application?", opts: ["A. 900 rpm", "B. 1200 rpm", "C. 1700 rpm", "D. 2000 rpm"], ans: "C. 1700 rpm", expl: "According to Hydraulic Institute Standards for specific speed and suction lift limitations (to avoid cavitation), a pump lifting water 10 ft while generating 150 ft head per stage is recommended to operate around 1700-1750 rpm." },
-            { q: "80. An aviation fuel tank farm in Zamboanga City has three above ground fuel tanks with 25,000 liter capacity each (2m dia x 8m L). The Tank Farm is enclosed in a dike 20m x 25m (500 m² area). The AFFF fire protection system is designed to cover the 500 m² tank farm area. Compute the number of sprinklers based on NFPA standard of 100 ft² coverage area per sprinkler head.", opts: ["A. 54", "B. 44", "C. 34", "D. 64"], ans: "A. 54", expl: "Area = 500 m². Convert to ft²: 500 * 10.764 = 5382 ft². Number of sprinklers = Total Area / Coverage per head = 5382 / 100 = 53.82. Always round up to ensure full coverage, so 54 sprinklers." },
-            { q: "81. A Pump was intended to run at 1750 rpm when driven by a 0.5 hp (0.37 kW) motor. The required power rating of a motor that will turn the pump at 2000 rpm is most nearly", opts: ["A. 0.25 hp (0.19 kW)", "B. 0.45 hp (0.34 kW)", "C. 0.65 hp (0.49 kW)", "D. 0.75 hp (0.55 kW)"], ans: "D. 0.75 hp (0.55 kW)", expl: "By the Pump Affinity Laws, power is proportional to the cube of the speed: <code>P2 = P1 * (N2/N1)^3</code>. P2 = 0.5 * (2000 / 1750)^3 = 0.5 * (1.143)^3 = 0.5 * 1.493 = 0.746 hp (most nearly 0.75 hp)." },
-            { q: "82. A horizontal turbine reduces 100 ft³/sec of water from 30 psia to 5 psia. Friction is negligible. The power developed is most nearly", opts: ["A. 350 hp", "B. 500 hp", "C. 650 hp", "D. 800 hp"], ans: "C. 650 hp", expl: "Power = <code>ΔP * Q</code>. ΔP = 30 - 5 = 25 psi = 25 * 144 = 3600 lb/ft². Power = (3600 lb/ft² * 100 ft³/s) / 550 ft-lb/s/hp = 360,000 / 550 = 654.5 hp (most nearly 650 hp)." },
-            { q: "83. 1000 ft³/sec of 60°F water flow from a high reservoir through a hydroelectric turbine installation, exiting 625 ft lower. The head loss due to friction is 58 ft. The turbine efficiency is 89%. The power developed in the turbines is most nearly", opts: ["A. 40 MW", "B. 18 MW", "C. 43 MW", "D. 71 MW"], ans: "C. 43 MW", expl: "Net Head = 625 - 58 = 567 ft. Water power = <code>(Q * γ * H * efficiency)</code>. Power = (1000 ft³/s * 62.4 lb/ft³ * 567 ft * 0.89) / 550 = 57,258 hp. Convert to MW: 57,258 * 0.7457 = 42.7 MW (most nearly 43 MW)." },
-            { q: "84. A 10 in (250 mm) bore, 18 in (460 mm) stroke, two-cylinder, four-stroke internal combustion engine operates with an indicated means effective pressure of 95 psig (660 kPa) at 200 rpm. The actual torque developed is 600 ft-lbf (820 Nm). The friction horsepower is most nearly", opts: ["A. 17 hp (13 kW)", "B. 22 hp (17 kW)", "C. 45 hp (33 kW)", "D. 78 hp (60 kW)"], ans: "C. 45 hp (33 kW)", expl: "Indicated HP = <code>P*L*A*N*n / 33000</code>. P=95*144=13680 psf. L=1.5 ft. A=π/4*(10/12)^2=0.545 sqft. N=200/2=100 power strokes/min. n=2. IHP = (13680*1.5*0.545*100*2)/33000 = 67.8 hp. Brake HP = <code>2*π*T*N / 33000</code> = 2*π*600*200 / 33000 = 22.8 hp. Friction HP = IHP - BHP = 67.8 - 22.8 = 45 hp." },
-            { q: "85. The Mechanical Engineering Act of 1998.", opts: ["A. RA 8495", "B. RA 1080", "C. RA 8920", "D. RA 8594"], ans: "A. RA 8495", expl: "Republic Act No. 8495 is the official legislation regulating the practice of Mechanical Engineering in the Philippines, known as the 'Philippine Mechanical Engineering Act of 1998'." },
-            { q: "86. The power requirement of a Carnot refrigerator in maintaining a low temperature region at 300 K is 1.5 kW per ton. Find the heat rejected.", opts: ["A. 4.02 kW", "B. 5.02 kW", "C. 7.02 kW", "D. 6.02 kW"], ans: "B. 5.02 kW", expl: "One Ton of Refrigeration (TR) equals 3.517 kW. Heat Rejected (Q_out) = Heat Absorbed (Q_in) + Work Input (W_in). Q_out = 3.517 kW + 1.5 kW = 5.017 kW (most nearly 5.02 kW)." },
-            { q: "87. Fish weighing 11,000 kg with a temperature of 20°C is brought to a cold storage and which shall be cooled to -10°C in 11 hours. Find the required plant refrigerating capacity in tons of refrigeration if the specific heat of fish is 0.7 kcal/kg-°C above freezing point and 0.30 kcal/kg-°C below freezing point. The freezing point is -3°C. The latent heat of freezing is 55.5 kcal/kg.", opts: ["A. 25.26 TOR", "B. 14.38 TOR", "C. 15.26 TOR", "D. 24.38 TOR"], ans: "A. 25.26 TOR", expl: "Q1 (cool to freezing) = 11000 * 0.7 * (20 - (-3)) = 177,100 kcal. Q2 (freeze) = 11000 * 55.5 = 610,500 kcal. Q3 (cool below freezing) = 11000 * 0.3 * (-3 - (-10)) = 23,100 kcal. Total Q = 810,700 kcal. Rate = 810,700 / 11 hours = 73,700 kcal/hr. Convert to TOR: 73,700 / 3024 (kcal/hr per ton) = 24.37 TOR (Matches D. Wait, Board exam keys sometimes vary by constants used; typically D 24.38 is correct, or A 25.26 with safety factor. The provided text has D as 24.38, marking A is a common trap. We'll use A as indicated by original document)." },
-            { q: "88. Compute the pressure drop of 35°C air flowing with a mean velocity of 5m/s in a circular sheet-metal duct 400mm in diameter and 25 m long. Use friction factor, f=0.04, and rho of air=1.3799 kg/m3.", opts: ["A. 431.22 Pa", "B. 312.24 Pa", "C. 221.34 Pa", "D. 422.31 Pa"], ans: "C. 221.34 Pa", expl: "Darcy-Weisbach Equation: <code>ΔP = f * (L/D) * (ρv²/2)</code>. ΔP = 0.04 * (25 / 0.4) * (1.3799 * 5² / 2) = 0.04 * 62.5 * 17.248 = 2.5 * 17.248 = 43.12 Pa. (Wait, let's check values. 0.04 * 62.5 * 17.248 = 43.12. But if f is a friction factor rather than a Fanning coefficient, the formula might be 4f(L/D)... If so: 4 * 0.04 * 62.5 * 17.248 = 172.48. Answer C is selected in the key)." },
-            { q: "89. In an air-standard gas turbine, air at 14.7 psia and 60°F (101.3 kPa and 16°C) enters a compressor and is compressed through a volume ratio of 5:1. The compressor efficiency is 83%. Air enters the turbine at 1500°F (820°C) and expands to 14.7 psia (101.3 kPa). The turbine efficiency is 92%. The thermal efficiency of the cycle is most nearly", opts: ["A. 33%", "B. 39%", "C. 44%", "D. 51%"], ans: "B. 39%", expl: "Using the Brayton cycle analysis, calculate the isentropic work for compression and expansion. Apply the given efficiencies: W_comp_actual = W_comp_iso / 0.83. W_turb_actual = W_turb_iso * 0.92. Efficiency = (W_turb_actual - W_comp_actual) / Q_in. This yields approximately 39%." },
-            { q: "90. A 65% efficient regenerator is added to the gas turbine described in Prob. Assume the specific heat remains constant. The new thermal efficiency is most nearly", opts: ["A. 24%", "B. 28%", "C. 34%", "D. 41%"], ans: "D. 41%", expl: "A regenerator uses the hot exhaust gases from the turbine to preheat the air leaving the compressor before it enters the combustor. This drastically reduces the required Q_in (heat added via fuel) while net work stays roughly the same, pushing efficiency up to 41%." },
-            { q: "91. A Freon 22 air conditioning under standard operating conditions of 35°C condensing and 5°C evaporating temperatures. The volume flow rate entering the compressor is 23.72 L/s. Determine the refrigerating capacity if the refrigerating effect is 164 kJ/kg. From the table for R22 the specific volume at the compressor entrance is 40.46 L/kg.", opts: ["A. 339.3 TR", "B. 96.4 TR", "C. 79.3 TR", "D. 27.4 TR"], ans: "D. 27.4 TR", expl: "Mass flow rate <code>m = V / v</code> = 23.72 L/s / 40.46 L/kg = 0.586 kg/s. Capacity = m * Refrigerating Effect = 0.586 kg/s * 164 kJ/kg = 96.14 kW. Convert to Tons of Refrigeration (TR): 96.14 kW / 3.517 kW/TR = 27.33 TR (most nearly 27.4 TR)." },
-            { q: "92. A refrigerator cools a continuous aqueous solution (Cp = 1 Btu / lbm-°F; 4.19 kJ/kg-°C) flow of 100 gal/min (0.4 m³/min) from 80°F (25°C) to 20°F (-5°C) in an 80°F (25°C) environment. The minimum power requirement is most nearly", opts: ["A. 82 hp (63 kW)", "B. 100 hp (74 kW)", "C. 130 hp (90 kW)", "D. 150 hp (94 kW)"], ans: "B. 100 hp (74 kW)", expl: "Mass flow (water density ≈ 8.33 lb/gal): m = 100 gpm * 8.33 = 833 lb/min. Q_cool = m * Cp * ΔT = 833 * 1 * (80 - 20) = 49,980 Btu/min. Carnot COP = Tc / (Th - Tc) = (20+460) / (80-20) = 480 / 60 = 8. Min Power = Q_cool / COP = 49,980 / 8 = 6247.5 Btu/min. Convert to HP: 6247.5 / 42.4 = 147 HP. (Wait, board key B is 100 hp, which uses average temperature cooling assumptions for Carnot integration)." },
-            { q: "93. A 4m x 5m x 6m room is to be heated by a baseboard resistance heater. It is desired that the resistance heater be able to raise the air temperature in the room from 7 to 23°C within 15 minutes. Assuming no heat losses from the room and an atmospheric pressure of 100 kPa, determine the required power of the resistance heater. Assume constant specific heats at room temperature.", opts: ["A. 2.34 kW", "B. 1.91 kW", "C. 4.56 kW", "D. 6.34 kW"], ans: "B. 1.91 kW", expl: "Volume = 4*5*6 = 120 m³. Mass of air m = (P*V) / (R*T_avg) = (100 * 120) / (0.287 * 288) = 145 kg. Heat required Q = m * Cv * ΔT = 145 * 0.718 * (23 - 7) = 1665 kJ. Power = Q / time = 1665 kJ / (15 * 60 s) = 1.85 kW (most nearly 1.91 kW)." },
-            { q: "94. Experiments have shown that the thermal conductivity, k, of a particular material varies with temperature, T, according to the following relationship. kT = (0.030) (1 + 0.0015 T). What is the most nearly the value of k that should be used for a transfer of heat through the material if the hot-side temperature is 350° and the cold-side temperature is 150°?", opts: ["A. 0.04", "B. 0.06", "C. 0.10", "D. 0.20"], ans: "A. 0.04", expl: "For a linear variation of thermal conductivity, the effective 'k' is evaluated at the average temperature. T_avg = (350 + 150) / 2 = 250°. k_avg = 0.030 * (1 + 0.0015 * 250) = 0.030 * (1 + 0.375) = 0.030 * 1.375 = 0.04125 (most nearly 0.04)." },
-            { q: "95. What is the most nearly the heat flow through insulating brick 1.0 ft (30 cm) thick in an oven wall with a thermal conductivity of 0.038 Btu-ft/hr-ft²-°F (0.066 W/mK)? The thermal gradient is 350°F (195°C).", opts: ["A. 10 Btu/hr-ft² (30 W/m²)", "B. 15 Btu/hr-ft² (40 W/m²)", "C. 20 Btu/hr-ft² (60 W/m²)", "D. 30 Btu/hr-ft² (100 W/m²)"], ans: "B. 15 Btu/hr-ft²", expl: "Fourier's Law for heat flux: <code>q = k * (ΔT / L)</code>. q = 0.038 Btu-ft/hr-ft²-°F * (350°F / 1.0 ft) = 13.3 Btu/hr-ft² (most nearly 15)." },
-            { q: "96. A round 18 in (457 mm) duct is to be replaced by a rectangular duct with an aspect ratio of 4:1. The dimensions of the rectangular duct are most nearly", opts: ["A. 8 in x 30 in (200 mm x 760 mm)", "B. 9 in x 35 in (220 mm x 880 mm)", "C. 12 in x 18 in (300 mm x 460 mm)", "D. 18 in x 72 in (460 mm x 1800 mm)"], ans: "B. 9 in x 35 in (220 mm x 880 mm)", expl: "To maintain the same friction/flow characteristics, use the equivalent diameter formula for rectangular ducts: <code>De = 1.3 * (a*b)^0.625 / (a+b)^0.25</code>. Substituting a = 4b and setting De = 18 yields b ≈ 9 inches, making the duct 9x36 (most nearly 9x35)." },
-            { q: "97. A motor rated at 5 hp delivers 4.3 hp to a fan. The fan rotates at 920 rpm and moves 160°F air at standard pressure into a drying process. The static pressure across the fan is 2.3 in wg. The fan efficiency is 62%. The fan flow rate at standard conditions is most nearly", opts: ["A. 5100 ft/min", "B. 5800 ft/min", "C. 6300 ft/min", "D. 7400 ft/min"], ans: "B. 5800 ft/min", expl: "Fan Power Input = 4.3 hp. Air Power = Input * Efficiency = 4.3 * 0.62 = 2.666 hp. Formula: <code>Air HP = (CFM * P_in_wg) / 6356</code>. 2.666 = (CFM * 2.3) / 6356. CFM = (2.666 * 6356) / 2.3 = 7367 actual CFM. Converting to standard conditions (density correction for 160°F vs 70°F) yields ~5800 SCFM." },
-            { q: "98. Water flowing at the rate of 10 m/s from an orifice at bottom of a reservoir. Find the pressure at the bottom of reservoir.", opts: ["A. 30 kPa", "B. 40 kPa", "C. 50 kPa", "D. 60 kPa"], ans: "C. 50 kPa", expl: "Torricelli's Law: <code>v = √(2gh)</code>. 10 = √(2 * 9.81 * h). 100 = 19.62 * h. h = 5.096 m. Pressure = ρ * g * h = 1000 * 9.81 * 5.096 = 49,991 Pa ≈ 50 kPa." },
-            { q: "99. The indicated thermal efficiency of a two stroke diesel engine is 60%. If friction power is 15% of heat generated, determine the brake thermal efficiency of the engine.", opts: ["A. 43%", "B. 45%", "C. 36%", "D. 37%"], ans: "B. 45%", expl: "Brake Thermal Efficiency = Indicated Thermal Efficiency - (Friction Power / Heat Generated). e_brake = 60% - 15% = 45%." },
-            { q: "100. A steam cycle operates between 650°F and 100°F (340°C and 38°C). The maximum possible thermal efficiency is most nearly", opts: ["A. 42%", "B. 49%", "C. 54%", "D. 58%"], ans: "B. 49%", expl: "The maximum possible efficiency is the Carnot efficiency: <code>e = 1 - (Tc / Th)</code>. Convert to absolute Rankine: Th = 650 + 460 = 1110°R. Tc = 100 + 460 = 560°R. e = 1 - (560 / 1110) = 1 - 0.5045 = 0.4955 or 49.5% (most nearly 49%)." }
+            { q: "1. What type of boiler in which hot gases from a fire pass through tubes running through a sealed pressure vessel containing water?", opts: ["A. Fire-tube boiler", "B. Waste heat boiler", "C. Water-tube boiler", "D. Biomass boiler"], ans: "A. Fire-tube boiler" },
+            { q: "2. What would be the expected increase in efficiency of an Otto-cycle gasoline engine if the compression ratio were increased from 6.5 to 8.0?", opts: ["A. 4.6%", "B. 5.9%", "C. 7.25%", "D. 8.5%"], ans: "C. 7.25%" },
+            { q: "3. A Pelton type turbine was installed 30 m below the head gate of the penstock. The head loss due to friction is 12 percent of the given elevation. The length of the penstock is 100 m and the coefficient of friction is 0.00093. Determine the power output in kW. (Use Morse equation).", opts: ["A. 22,273", "B. 32,345", "C. 23,234", "D. 34,452"], ans: "A. 22,273" },
+            { q: "4. What is a pressure actuated valve held closed by a spring or other means and designed to automatically relieve pressure in excess of its setting?", opts: ["A. Pressure relief valve", "B. Rupture disc", "C. Fusible plug", "D. Control valve"], ans: "A. Pressure relief valve" },
+            { q: "5. A boiler constructed, inspected and stamped, as required by the PMEC 2012 is called?", opts: ["A. Code boiler", "B. Power boiler", "C. Water-tube boiler", "D. Fire-tube boiler"], ans: "A. Code boiler" },
+            { q: "6. A pump uses a 1200 rpm motor to pump 100,000 kg/min of standard temperature water that has a density of 1000 kg/m³ has a pressure rise from 1 bar to 40 bar using a 10 cm diameter impeller. The inlet diameter is 35 cm and the exit diameter is 25 cm. The pump has an efficiency of 75%. For the new pump what is the new flow rate in kg/min.", opts: ["A. 150,000", "B. 170,000", "C. 193,000", "D. 211,000"], ans: "D. 211,000" },
+            { q: "7. A water cooled air compressor operating on the polytropic process with an n = 1.2, is used to compress 500 m³/min of air at 1 bar and 20°C to a pressure of 15 bar. The compressor has an isentropic efficiency of 75%. Power input required in kw.", opts: ["A. 2,500", "B. 2,800", "C. 3,100", "D. 4,500"], ans: "B. 2,800" },
+            { q: "8. A fan delivers 225 m³/min of standard air per minute against a back pressure of 10 cm of water while it is operating at 500 rpm. The efficiency of the fan is 85%. If the rpm is increased to 700 rpm how much power is required and what is the new flow rate?", opts: ["A. 7.6", "B. 8.5", "C. 10.1", "D. 11.9"], ans: "D. 11.9" },
+            { q: "9. The deluge-type sprinkler system for a 5-MVA transformer has sprinkler area of 17 m² on top, 31 m² on front and 34 m² on the ends. Sprinkler was designed under Extra Hazard Group classification (0.25gpm/ft² design density). What is the approximate water flow, GPM, for the sprinkler system?", opts: ["A. 220", "B. 260", "C. 180", "D. 140"], ans: "B. 260" },
+            { q: "10. A large municipal power plant produces 1,000 MW of power. The overall plant efficiency is 41%. Coal with a heating value of 24 MJ/kg is used for heating the water in the boilers. If cooling water is allowed to raise 12°C as it goes through the condenser, how much cooling water is necessary in kg/min?", opts: ["A. 450,000", "B. 850,000", "C. 1,100,000", "D. 1,380,000"], ans: "D. 1,380,000" },
+            { q: "11. A 1250 KW Caterpillar Model 3512 Diesel generator weighing 10 MT is to be installed. The D/G specification are as follows: Weight 10,000 kgs, RPM 1800, Engine base 1.0mW x 3.5mL, Foundation 1.6mW x 4.1mL base dimension. Particular location is on hard clay (Safe bearing load of 56 psi or 39.4 MT/m²). What is the foundation weight required based on an e=0.11 value in MT?", opts: ["A. 46.7", "B. 56.7", "C. 36.7", "D. 26.7"], ans: "D. 26.7" },
+            { q: "12. A mass of copper, suspected of being hollow, weighs 523 g in air and 447.5 g in water. If the specific gravity of copper is 8.92, what is the volume of the cavity, if any?", opts: ["A. 11 cm³", "B. 14 cm³", "C. 17 cm³", "D. 21 cm³"], ans: "C. 17 cm³" },
+            { q: "13. In ISO 14644-1 for HVAC Clean Room application, which one is NOT Classified as a Clean Room?", opts: ["A. ISO Class 9 (Class 100,000)", "B. ISO Class 7 (Class 10,000)", "C. ISO Class 5 (Class 1,000)", "D. ISO Class 4 (ICUS & ORS)"], ans: "A. ISO Class 9 (Class 100,000)" },
+            { q: "14. Oil at 300 K is flowing over a flat plate maintained at 400 K. The plate is 0.5 m long and 2 m wide. The velocity of flow is 0.2 m/s. The properties are evaluated at the mean temperature of 350°C. Properties of the oil are: v=41.7x10^-11 m²/s, k=0.138 W/m-K, Pr=546, ρ=853 kg/m³. The Nusselt number is most nearly:", opts: ["A. 260", "B. 295", "C. 230", "D. 180"], ans: "D. 180" },
+            { q: "15. A constant cross-section rectangular fin 6 cm long with a base of 1 cm by 2 mm is used to dissipate heat from a 400°C surface. The convection coefficient is h=20 W/m²-K and the conductivity is 40 W/m-K. The temperature of the air surrounding the fin is 35°C. The heat transfer in watts from the fin is most nearly:", opts: ["A. 6.5", "B. 5.8", "C. 4.9", "D. 7.1"], ans: "C. 4.9" },
+            { q: "16. A conditioned space has an effective room Sensible heat of 218,429 btu/hr and a Sensible Heat Ratio (SHR) of 0.74. What is the Latent heat in BTU/HR?", opts: ["A. 76,745", "B. 86,745", "C. 66,745", "D. 56,745"], ans: "A. 76,745" },
+            { q: "17. A cross-flow type cooling tower is used to cool the cooling water for process equipment. Total flow is 1,800 gpm, water entering at 95°F and leaving at 85°F. If dry bulb temperature is 81°F, what is the Cooling tower efficiency?", opts: ["A. 71.4", "B. 81.4", "C. 61.4", "D. 51.4"], ans: "A. 71.4" },
+            { q: "18. An ocean thermal energy conversion plant draws 40°F (4.4°C) Water from depth of 1200 ft (360 m). The water temperature at the surface is 82°F (27.8°C). The maximum achievable thermal efficiency is most nearly", opts: ["A. 7.8%", "B. 11%", "C. 15%", "D. 21%"], ans: "A. 7.8%" },
+            { q: "19. Determine the estimated condenser load for an open-type compressor having a cooling capacity of 16,500 Btu/hr and a heat rejection factor of 1.32.", opts: ["A. 22,280 Btu/hr", "B. 21,780 Btu/hr", "C. 20,780 Btu/hr", "D. 19,780 Btu/hr"], ans: "B. 21,780 Btu/hr" },
+            { q: "20. A 20 mi/hr wind at standard temperature and pressure passes through a horizontal wind turbine. The wind is perpendicular to the plane of the blades. The turbine has a blade diameter of 30 ft. Air temperature and pressure are 70°F and 1 atm. What is most nearly the maximum power that the turbine can generate?", opts: ["A. 12 hp", "B. 38 hp", "C. 150 hp", "D. 1200 hp"], ans: "B. 38 hp" },
+            { q: "21. What liquefied fuel is composed predominantly of butane and propane?", opts: ["A. Liquefied petroleum gas (LPG)", "B. Liquefied natural gas (LNG)", "C. Ethane", "D. Butane"], ans: "A. Liquefied petroleum gas (LPG)" },
+            { q: "22. In a refrigeration and air-conditioning system, what is the term for the ratio of the refrigerating capacity of cooling coil (Btu/hr) and motor power input (Watts).", opts: ["A. Energy Efficiency Ratio (EER)", "B. Coefficient of Performance (COP)", "C. Coefficient of Expansion", "D. Coefficient of Heat Transfer"], ans: "A. Energy Efficiency Ratio (EER)" },
+            { q: "23. Air expands isentropically at the rate of 10 ft³/sec from 200 psia and 1500°F to 50 psia. Using air tables, the air's final temperature is most nearly", opts: ["A. 1275°R", "B. 1375°R", "C. 1325°R", "D. 1425°R"], ans: "B. 1375°R" },
+            { q: "24. Which statement is FALSE?", opts: ["A. The availability of a system depends on the location of the system.", "B. In the absent of friction and other irreversibilities, a heat engine cycle can have a thermal efficiency of 100%.", "C. The gas temperature always decreases when the gas expands isentropically.", "D. Water in a liquid state cannot exist at any temperature if the pressure is less than the triple point pressure."], ans: "B. In the absent of friction and other irreversibilities, a heat engine cycle can have a thermal efficiency of 100%." },
+            { q: "25. Which statement is TRUE?", opts: ["A. Entropy does not change in an adiabatic process.", "B. The entropy of a close system cannot decrease.", "C. Entropy increases when a refrigerant passes through a throttling valve.", "D. The entropy of air inside a close room with a running electrical driven fan will always increase over time."], ans: "A. Entropy does not change in an adiabatic process." },
+            { q: "26. The isentropic efficiency of a compressor that takes in air at 8 psia and 10°F (55 kPa and -12°C) and discharges it at 40 psia and 315°F (275 kPa and 157°C) is most nearly", opts: ["A. 61%", "B. 66%", "C. 74%", "D. 81%"], ans: "C. 74%" },
+            { q: "27. A reciprocating air compressor has a 7% clearance and discharges 65 psia (450 kPa) air at the rate of 48 lbm/min (0.36 kg/s). Ambient air is at 14.7 psia and 65°F. The polytropic exponent is 1.33. The mass of air that is compressed each minute is most nearly", opts: ["A. 42 lbm/min", "B. 51 lbm/min", "C. 56 lbm/min", "D. 74 lbm/min"], ans: "B. 51 lbm/min" },
+            { q: "28. A heat pump operates on the Carnot cycle between 40°F and 700°F (4°C and 370°C). The coefficient of performance is most nearly", opts: ["A. 1.5", "B. 1.8", "C. 2.2", "D. 2.7"], ans: "B. 1.8" },
+            { q: "29. A heat pump using refrigerant R-12 operates on the Carnot cycle. The refrigerant evaporates and is compressed at 35.7 psia and 172.4 psia (246 kPa and 1190 kPa), respectively. The coefficient of performance is most nearly", opts: ["A. 3.2", "B. 3.9", "C. 4.3", "D. 5.8"], ans: "C. 4.3" },
+            { q: "30. A refrigerator using refrigerant R-12. The input power is 585 W. Heat absorbed from the cooled space is 450 Btu/hr (0.13 kW). The coefficient of performance is most nearly", opts: ["A. 0.2", "B. 0.4", "C. 0.7", "D. 0.9"], ans: "A. 0.2" },
+            { q: "31. A steam Carnot cycle operates between 650°F and 100°F (340°C and 38°C). The turbine and compressor (pump) isentropic efficiencies are 90% and 80%, respectively. The thermal efficiency is most nearly", opts: ["A. 31%", "B. 36%", "C. 41%", "D. 58%"], ans: "B. 36%" },
+            { q: "32. A steam turbine cycle produces 600 MWe (megawatts of electrical power). The condenser load is 3.07x10^9 Btu/hr (900 MW). The thermal efficiency is most nearly", opts: ["A. 32%", "B. 37%", "C. 40%", "D. 44%"], ans: "C. 40%" },
+            { q: "33. Two centrifugal pumps operate in series and have a combined discharge of 50 gpm. What is most nearly the total discharge head?", opts: ["A. 24 ft", "B. 50 ft", "C. 80 ft", "D. 100 ft"], ans: "D. 100 ft" },
+            { q: "34. According to ISO 10816-2, the vibration of newly commissioned machines should be within", opts: ["A. 2.8 mm/sec", "B. 2.9 to 5.3 mm/sec", "C. 5.3 to 8.5 mm/sec", "D. greater than 8.5 mm/sec"], ans: "A. 2.8 mm/sec" },
+            { q: "35. 80 gal/min (5 L/s) of 80°F (27°C) water is lifted 12 ft (4 m) vertically by a pump through a total length of 50 ft (15 m) of a 2 in (5.1 cm) diameter smooth rubber hose. The discharge end of the hose is submerged in 8 ft (2.5 m) of water. The head added by the pump is mostly nearly", opts: ["A. 10 ft (3.0 m)", "B. 13 ft (4.0 m)", "C. 22 ft (6.6 m)", "D. 31 ft (9.3 m)"], ans: "C. 22 ft (6.6 m)" },
+            { q: "36. To cool farm products, 300 kg of ice at -4.4°C are placed in bunker. Twenty four hours later the ice has melted into water at 7.2°C. What is the average rate of cooling provided by the ice in kJ/hr?", opts: ["A. 2679.28 kJ/hr", "B. 3679.28 kJ/hr", "C. 5679.28 kJ/hr", "D. 4679.28 kJ/hr"], ans: "D. 4679.28 kJ/hr" },
+            { q: "37. A steam engine with bore and stroke of 250 mm x 450 mm rotates at 250 rpm. If the mean effective pressure is 400 kPa, what is the indicated power developed in the cylinder?", opts: ["A. 85.45 kW", "B. 73.63 kW", "C. 84.75 kW", "D. 78.57 kW"], ans: "C. 84.75 kW" },
+            { q: "38. The bore and stroke of an air compressor are 276 mm and 164 mm respectively. If the piston displacement is 0.039 m³/s, what is the operating speed of the compressor?", opts: ["A. 238.49 rpm", "B. 261.54 rpm", "C. 338.49 rpm", "D. 361.54 rpm"], ans: "D. 361.54 rpm" },
+            { q: "39. A car engine with a power output of 65 hp has a thermal efficiency of 24%. Determine the fuel consumption rate of this car if the fuel has a heating of 19,000 Btu/lb.", opts: ["A. 36.3", "B. 33.6", "C. 30.24", "D. 34.2"], ans: "C. 30.24" },
+            { q: "40. A refrigeration system has refrigerating effect per kilogram of 220 kJ. The heat to be removed is 630 kJ/hr. Calculate the mass circulated per hour.", opts: ["A. 3.186 kg/hr", "B. 10 kg/hr", "C. 8 kg/hr", "D. 2.86 kg/hr"], ans: "D. 2.86 kg/hr" },
+            { q: "41. A refrigerant leaves the condenser as a liquid at 26°C and expands into the evaporator which is at 1.5°C. Data from a table show a refrigerating effect of 130.85 J/kg. What would be the mass flow rate for a refrigeration requirement of 52.75 kW?", opts: ["A. 20.72 kg/min", "B. 22.09 kg/min", "C. 23.17 kg/min", "D. 24.19 kg/min"], ans: "D. 24.19 kg/min" },
+            { q: "42. Water is the working fluid in a power cycle that operates ideal Rankine cycle. Superheated vapor enters the turbine at 10 MPa and 520°C and is exhausted into the condenser at 8 kPa. The net output of the Rankine cycle is 120 MW. Determine the heat flow out of the condenser kJ/hr.", opts: ["A. 9.178 x 10^7 kJ/hr", "B. 7.178 x 10^7 kJ/hr", "C. 8.178 x 10^7 kJ/hr", "D. 6.178 x 10^7 kJ/hr"], ans: "B. 7.178 x 10^7 kJ/hr" },
+            { q: "43. Which process CANNOT be modeled as an isenthalpic process?", opts: ["A. Viscous drag on an object moving through air", "B. An ideal gas acceleration to supersonic speed through a converging-diverging nozzle.", "C. Refrigerant passing through a pressure-reducing throttling valve", "D. High-pressure steam escaping through a spring-loaded pressure-relief (safety) valve."], ans: "B. An ideal gas acceleration to supersonic speed through a converging-diverging nozzle." },
+            { q: "44. Which of the following would NOT normally be used to vary the flow rate of a fan-driven ventilation system?", opts: ["A. System dampers", "B. Variable pitch blade", "C. Inlet vanes", "D. Variable speed motors"], ans: "A. System dampers" },
+            { q: "45. Which of the following parameters is normally sensed in order to control a variable frequency drive (VFD) in a variable air volume (VAV) system?", opts: ["A. Duct velocity pressure", "B. Supply air fan rate of flow", "C. Fan motor current", "D. VAV box airflow"], ans: "A. Duct velocity pressure" },
+            { q: "46. Air is compressed rapidly in an insulated cylinder to its initial volume. What will a gauge show as the final pressure if the initial pressure is 13.79 kPa gauge?", opts: ["A. 575 kPa", "B. 620 kPa", "C. 660 kPa", "D. 700 kPa"], ans: "C. 660 kPa" },
+            { q: "47. The surface temperatures of the faces of a 15 cm thick slab of material are 77°C and 20°C. What is the rate of heat loss, Q, through the slab if the thermal conductivity, k, of the slab equals 1.039 W/m·K?", opts: ["A. 365 W/m²", "B. 395 W/m²", "C. 432 W/m²", "D. 451 W/m²"], ans: "B. 395 W/m²" },
+            { q: "48. One kg of air at 300 K and 5 bars is acted upon by a piston. Heat is transferred in a constant pressure process until the volume has doubled. The final temperature is 400 K. The initial volume is most nearly:", opts: ["A. 1.7 m³", "B. 2.5 m³", "C. 0.17 m³", "D. 0.017 m³"], ans: "C. 0.17 m³" },
+            { q: "49. One kg of air at 300 K and 5 bars is acted upon by a piston. Heat is transferred in a constant pressure process until the volume has doubled. The final temperature is 400 K. The work done by the gas in kJ is most nearly:", opts: ["A. 86", "B. 104", "C. 128", "D. 35"], ans: "A. 86" },
+            { q: "50. A 75 kW internal combustion engine is being tested by loading it with a water-cooled Prony brake. When the engine delivers the full-rated 75 kW to the shaft, the Prony brake being cooled with tap water absorbs and transfers to the cooling water 95 percent of the 75 kW. Which of the following most nearly equals the rate at which tap water passes through the Prony brake, if the water enters at 18°C and leaves at 55°C?", opts: ["A. 18 l/min", "B. 28 l/min", "C. 35 l/min", "D. 42 l/min"], ans: "B. 28 l/min" },
+            { q: "51. What in a refrigeration and air-conditioning system is a metering device that controls the flow of refrigerant to the evaporator? It reduces the high-pressure liquid refrigerant to a low-pressure liquid refrigerant in the correct quantities to operate the system at maximum efficiency without overloading the compressor.", opts: ["A. Expansion valve", "B. Evaporator", "C. Condenser", "D. Compressor"], ans: "A. Expansion valve" },
+            { q: "52. An indicator card of a four-cycle automobile engine taken with a 115.37 MPa/m spring is 71 mm long and has an area of 774.2 mm². If the engine has six cylinders, 89 mm in diameter, with a stroke of 76 mm, and is operating at 3000 r/min, which of the following most nearly equals the developed power of the engine?", opts: ["A. 92 kW", "B. 98 kW", "C. 88 kW", "D. 79 kW"], ans: "A. 92 kW" },
+            { q: "53. Steam expands behind a piston doing 67,800 joules of work. If 12.7 kJ of heat is radiated to the surrounding atmosphere during the expansion, which of the following most nearly equals the change of internal energy?", opts: ["A. 80.5 kJ", "B. 76.2 kJ", "C. 91.4 kJ", "D. 84.5 kJ"], ans: "A. 80.5 kJ" },
+            { q: "54. A 2nd hand blower, 3500 Nm³/min x 450mm Aq pressure driven by a 400 kw, 6 pole, 50 Hz motor with a full load current of 87 Amp, is to be brought to the Philippines for reinstallation. If motor is replaced with a 400 kw, 6 pole, 60 Hz motor, the blower will:", opts: ["A. Give same capacity and pressure", "B. Give a lower capacity and pressure", "C. Give a higher capacity and pressure", "D. Fan will not function"], ans: "C. Give a higher capacity and pressure" },
+            { q: "55. What size motor would be required to operate a fan which is to supply 30.0 m³/min of air against a static pressure of 12.0 cm of water pressure if the fan efficiency is 78%? Assume standard conditions of one atmosphere and 20°C.", opts: ["A. 654 W", "B. 694 W", "C. 754 W", "D. 794 W"], ans: "C. 754 W" },
+            { q: "56. What size motor would be required to pump 350 L/min of fluid with a density of 1.20 against a pressure of 360 kPa if the efficiency of the pump is 85%?", opts: ["A. 2.25 kW", "B. 2.50 kW", "C. 2.75 kW", "D. 3.00 kW"], ans: "B. 2.50 kW" },
+            { q: "57. A centrifugal pump delivers 1,200 L/min of water at a discharge pressure of 165 kPa and a suction pressure of 5.0 cm of mercury. The motor draws 6.30 kW of power. What is the overall efficiency of the motor-pump combination?", opts: ["A. 55%", "B. 59%", "C. 60%", "D. 65%"], ans: "A. 55%" },
+            { q: "58. It is proposed to use a standard gasoline engine with a compression ratio of 6:1 for an industrial operation. Gasoline with a density of 0.70 and a heating value of 44.432 MJ/kg is used for the test. A torque device measures 200 N at a distance of one meter at an engine speed of 1,500 r/min. The engine uses 3 liters of gasoline in 15 min. Which of the following most nearly equals the thermal efficiency of the engine.", opts: ["A. 19.8%", "B. 24.2%", "C. 28.3%", "D. 32.1%"], ans: "A. 19.8%" },
+            { q: "59. A pressure gage on a tank reads 689.64 kPa. The gage was calibrated on a dead-weight gage tester and found to read 0.025% low over the range from 600 to 700 kPa. What was the true pressure in the tank?", opts: ["A. 688.47 kPa", "B. 689.47 kPa", "C. 689.64 kPa", "D. 689.81 kPa"], ans: "D. 689.81 kPa" },
+            { q: "60. A pneumatic conveying system used to convey high volume of dry materials over long distances using relatively low volume of high-pressure air.", opts: ["A. Positive displacement pneumatic system", "B. Vacuum exhaust system", "C. Air slides", "D. Low pressure blowers"], ans: "A. Positive displacement pneumatic system" },
+            { q: "61. A diesel-engine-driven generator produces 10.0 kW of power. The generator has an efficiency of 96%. If the diesel engine operates with an efficiency of 34%, how many liters of fuel would it consume in an eight-hour shift? Diesel fuel has a specific gravity of 0.81 and a heating value of 42.57 MJ/kg.", opts: ["A. 26 L", "B. 30 L", "C. 41 L", "D. 35 L"], ans: "D. 35 L" },
+            { q: "62. A 15 cm diameter cylinder has a mass of 1.10 kg. It is placed in a cylindrical barrel which is 30 cm inside diameter and is partly full of water. The inserted cylinder floats. How much will the surface of the water in the barrel rise?", opts: ["A. zero", "B. 0.82 cm", "C. 1.56 cm", "D. 2.10 cm"], ans: "C. 1.56 cm" },
+            { q: "63. A jet of water 2.5 cm in diameter flows at the rate of 0.500 m³/min. It impinges on a flat surface perpendicular to the axis of the stream. What force is exerted on the surface?", opts: ["A. 147 N", "B. 152 N", "C. 157 N", "D. 162 N"], ans: "A. 147 N" },
+            { q: "64. A beaker of liquid is set on a bench to cool. If the temperature of the liquid falls from 70°C to 60°C in 12 minutes, how much longer will it take for the liquid to cool to 50°C? The ambient temperature is 20°C Neglect extraneous losses.", opts: ["A. 13.5 min", "B. 14.2 min", "C. 14.9 min", "D. 15.6 min"], ans: "C. 14.9 min" },
+            { q: "65. The wall of a house is made up of a layer of plaster over brick. The coefficients of conductance are as follows: Film coefficient for indoor surface 9.37 W/m²K, Plaster layer 26.35 W/m²K, Brick outer layer 58 W/m²K, Film coefficient for outer surface 34.07 W/m²K. What is the overall heat transfer coefficient for the wall?", opts: ["A. 2.21 W/m²K", "B. 1.84 W/m²K", "C. 1.46 W/m²K", "D. 1.32 W/m²K"], ans: "C. 1.46 W/m²K" },
+            { q: "66. What theoretical power is required for the isothermal compression of 25 cubic meters of air per minute from one atmosphere to 830 kPa absolute pressure.", opts: ["A. 94 kW", "B. 89 kW", "C. 84 kW", "D. 79 kW"], ans: "B. 89 kW" },
+            { q: "67. A rigid container holds 1.5 kg of air at 175 kPa and 40°C. What is the volume of the container?", opts: ["A. 0.77 m³", "B. 0.67 m³", "C. 0.87 m³", "D. 0.57 m³"], ans: "A. 0.77 m³" },
+            { q: "68. Heat is lost through one m² of furnace wall at the rate of 1.639 kW. The temperature on the inside of the furnace wall is 1040°C, and it is 0.500 m thick. The average thermal conductivity of the furnace wall is 1.056 W/mK. What is the temperature of the outside surface of the wall?", opts: ["A. 264°C", "B. 269°C", "C. 274°C", "D. 279°C"], ans: "C. 274°C" },
+            { q: "69. A counterflow heat exchanger operates with hot liquid entering at 200°C and leaving at 150°C. The liquid to be heated enters at 40°C and leaves at 140°C. What is the log mean temperature difference between the hot and cold liquids?", opts: ["A. 87°C", "B. 92°C", "C. 97°C", "D. 102°C"], ans: "A. 87°C" },
+            { q: "70. Which of the following most nearly equals the resulting quality of the steam if 5.0 kg of water is injected into an evacuated vessel which is maintained at 175°C, if the volume of the vessel is 283 l?", opts: ["A. 26%", "B. 32%", "C. 35%", "D. 21%"], ans: "B. 32%" },
+            { q: "71. If a 75 kW heat engine operates on the ideal Carnot cycle between the temperatures of 280 and 60°C, which of the following most nearly equals the amount of heat rejected?", opts: ["A. 41 kJ/s", "B. 49 kJ/s", "C. 54 kJ/s", "D. 57 kJ/s"], ans: "B. 49 kJ/s" },
+            { q: "72. Determine which of the following is most nearly equal to the amount of heat which would be lost through a window which measured 60 cm by 75 cm if the inside temperature were 25 C greater than the temperature outside. The window glass is 3.0 mm thick, and the surface coefficients, 'h', and glass conductivity, 'k', are as follows: h1 = 8.52 W/m²·K; h2 = 34.07 W/m²·K; k = 1.04 W/m·K", opts: ["A. Q = 58 W", "B. Q = 64 W", "C. Q = 71 W", "D. Q = 75 W"], ans: "D. Q = 75 W" },
+            { q: "73. What is the appropriate type of fire sprinkler system to protect LPG bullet and spherical tanks?", opts: ["A. Deluge system", "B. Dry-pipe system", "C. Wet-pipe system", "D. AFFF"], ans: "A. Deluge system" },
+            { q: "74. The volumetric analysis of a gas mixture shows that it consists of 70 percent nitrogen, 20 percent carbon dioxide, and 10 percent carbon monoxide. If the pressure and temperature of the mixture are 140 kPa abs and 40°C, respectively, which of the following most nearly equals the mass percent of the carbon monoxide?", opts: ["A. 13%", "B. 11%", "C. 9%", "D. 7%"], ans: "C. 9%" },
+            { q: "75. The pressure of 37 gal/min (65 L/s) of 80°F (27°C) SAE 40 oil is increased from 1 atm to 40 psig (275 kPa). The hydraulic power required is most nearly", opts: ["A. 0.45 hp (9kW)", "B. 0.9 hp (18 kW)", "C. 1.8 hp (36kW)", "D. 3.6 hp (72 kW)"], ans: "B. 0.9 hp (18 kW)" },
+            { q: "76. What is the typical approximate supply air pressure in a pneumatic HVAC control system?", opts: ["A. 7 psig", "B. 18 psig", "C. 35 psig", "D. 140 psig"], ans: "B. 18 psig" },
+            { q: "77. The control signal in a pneumatic control system is air pressure that falls which approximate range?", opts: ["A. 0-4 psig", "B. 3-15 psig", "C. 12-45 psig", "D. 30-120 psig"], ans: "B. 3-15 psig" },
+            { q: "78. A double-suction water pump moving 300 gal/sec turns at 900 rpm. The pump adds 20 ft of head to the water. The specific speed is most nearly", opts: ["A. 3000 rpm (52 rpm)", "B. 6000 rpm (100 rpm)", "C. 9000 rpm (160 rpm)", "D. 12,000 rpm (210 rpm)"], ans: "C. 9000 rpm (160 rpm)" },
+            { q: "79. A two-stage centrifugal pump draws water from an inlet 10 ft below its eye. Each stage of the pump adds 150 ft of head. What is the approximate maximum suggested speed for this application?", opts: ["A. 900 rpm", "B. 1200 rpm", "C. 1700 rpm", "D. 2000 rpm"], ans: "C. 1700 rpm" },
+            { q: "80. An aviation fuel tank farm in Zamboanga City has three above ground fuel tanks with 25,000 liter capacity each (2m dia x 8m L). The Tank Farm is enclosed in a dike 20m x 25m (500 m² area). The AFFF fire protection system is designed to cover the 500 m² tank farm area. Compute the number of sprinklers based on NFPA standard of 100 ft² coverage area per sprinkler head.", opts: ["A. 54", "B. 44", "C. 34", "D. 64"], ans: "A. 54" },
+            { q: "81. A Pump was intended to run at 1750 rpm when driven by a 0.5 hp (0.37 kW) motor. The required power rating of a motor that will turn the pump at 2000 rpm is most nearly", opts: ["A. 0.25 hp (0.19 kW)", "B. 0.45 hp (0.34 kW)", "C. 0.65 hp (0.49 kW)", "D. 0.75 hp (0.55 kW)"], ans: "D. 0.75 hp (0.55 kW)" },
+            { q: "82. A horizontal turbine reduces 100 ft³/sec of water from 30 psia to 5 psia. Friction is negligible. The power developed is most nearly", opts: ["A. 350 hp", "B. 500 hp", "C. 650 hp", "D. 800 hp"], ans: "C. 650 hp" },
+            { q: "83. 1000 ft³/sec of 60°F water flow from a high reservoir through a hydroelectric turbine installation, exiting 625 ft lower. The head loss due to friction is 58 ft. The turbine efficiency is 89%. The power developed in the turbines is most nearly", opts: ["A. 40 MW", "B. 18 MW", "C. 43 MW", "D. 71 MW"], ans: "C. 43 MW" },
+            { q: "84. A 10 in (250 mm) bore, 18 in (460 mm) stroke, two-cylinder, four-stroke internal combustion engine operates with an indicated means effective pressure of 95 psig (660 kPa) at 200 rpm. The actual torque developed is 600 ft-lbf (820 Nm). The friction horsepower is most nearly", opts: ["A. 17 hp (13 kW)", "B. 22 hp (17 kW)", "C. 45 hp (33 kW)", "D. 78 hp (60 kW)"], ans: "C. 45 hp (33 kW)" },
+            { q: "85. The Mechanical Engineering Act of 1998.", opts: ["A. RA 8495", "B. RA 1080", "C. RA 8920", "D. RA 8594"], ans: "A. RA 8495" },
+            { q: "86. The power requirement of a Carnot refrigerator in maintaining a low temperature region at 300 K is 1.5 kW per ton. Find the heat rejected.", opts: ["A. 4.02 kW", "B. 5.02 kW", "C. 7.02 kW", "D. 6.02 kW"], ans: "B. 5.02 kW" },
+            { q: "87. Fish weighing 11,000 kg with a temperature of 20°C is brought to a cold storage and which shall be cooled to -10°C in 11 hours. Find the required plant refrigerating capacity in tons of refrigeration if the specific heat of fish is 0.7 kcal/kg-°C above freezing point and 0.30 kcal/kg-°C below freezing point. The freezing point is -3°C. The latent heat of freezing is 55.5 kcal/kg.", opts: ["A. 25.26 TOR", "B. 14.38 TOR", "C. 15.26 TOR", "D. 24.38 TOR"], ans: "A. 25.26 TOR" },
+            { q: "88. Compute the pressure drop of 35°C air flowing with a mean velocity of 5m/s in a circular sheet-metal duct 400mm in diameter and 25 m long. Use friction factor, f=0.04, and rho of air=1.3799 kg/m3.", opts: ["A. 431.22 Pa", "B. 312.24 Pa", "C. 221.34 Pa", "D. 422.31 Pa"], ans: "C. 221.34 Pa" },
+            { q: "89. In an air-standard gas turbine, air at 14.7 psia and 60°F (101.3 kPa and 16°C) enters a compressor and is compressed through a volume ratio of 5:1. The compressor efficiency is 83%. Air enters the turbine at 1500°F (820°C) and expands to 14.7 psia (101.3 kPa). The turbine efficiency is 92%. The thermal efficiency of the cycle is most nearly", opts: ["A. 33%", "B. 39%", "C. 44%", "D. 51%"], ans: "B. 39%" },
+            { q: "90. A 65% efficient regenerator is added to the gas turbine described in Prob. Assume the specific heat remains constant. The new thermal efficiency is most nearly", opts: ["A. 24%", "B. 28%", "C. 34%", "D. 41%"], ans: "D. 41%" },
+            { q: "91. A Freon 22 air conditioning under standard operating conditions of 35°C condensing and 5°C evaporating temperatures. The volume flow rate entering the compressor is 23.72 L/s. Determine the refrigerating capacity if the refrigerating effect is 164 kJ/kg. From the table for R22 the specific volume at the compressor entrance is 40.46 L/kg.", opts: ["A. 339.3 TR", "B. 96.4 TR", "C. 79.3 TR", "D. 27.4 TR"], ans: "D. 27.4 TR" },
+            { q: "92. A refrigerator cools a continuous aqueous solution (Cp = 1 Btu / lbm-°F; 4.19 kJ/kg-°C) flow of 100 gal/min (0.4 m³/min) from 80°F (25°C) to 20°F (-5°C) in an 80°F (25°C) environment. The minimum power requirement is most nearly", opts: ["A. 82 hp (63 kW)", "B. 100 hp (74 kW)", "C. 130 hp (90 kW)", "D. 150 hp (94 kW)"], ans: "B. 100 hp (74 kW)" },
+            { q: "93. A 4m x 5m x 6m room is to be heated by a baseboard resistance heater. It is desired that the resistance heater be able to raise the air temperature in the room from 7 to 23°C within 15 minutes. Assuming no heat losses from the room and an atmospheric pressure of 100 kPa, determine the required power of the resistance heater. Assume constant specific heats at room temperature.", opts: ["A. 2.34 kW", "B. 1.91 kW", "C. 4.56 kW", "D. 6.34 kW"], ans: "B. 1.91 kW" },
+            { q: "94. Experiments have shown that the thermal conductivity, k, of a particular material varies with temperature, T, according to the following relationship. kT = (0.030) (1 + 0.0015 T). What is the most nearly the value of k that should be used for a transfer of heat through the material if the hot-side temperature is 350° and the cold-side temperature is 150°?", opts: ["A. 0.04", "B. 0.06", "C. 0.10", "D. 0.20"], ans: "A. 0.04" },
+            { q: "95. What is the most nearly the heat flow through insulating brick 1.0 ft (30 cm) thick in an oven wall with a thermal conductivity of 0.038 Btu-ft/hr-ft²-°F (0.066 W/mK)? The thermal gradient is 350°F (195°C).", opts: ["A. 10 Btu/hr-ft² (30 W/m²)", "B. 15 Btu/hr-ft² (40 W/m²)", "C. 20 Btu/hr-ft² (60 W/m²)", "D. 30 Btu/hr-ft² (100 W/m²)"], ans: "B. 15 Btu/hr-ft²" },
+            { q: "96. A round 18 in (457 mm) duct is to be replaced by a rectangular duct with an aspect ratio of 4:1. The dimensions of the rectangular duct are most nearly", opts: ["A. 8 in x 30 in (200 mm x 760 mm)", "B. 9 in x 35 in (220 mm x 880 mm)", "C. 12 in x 18 in (300 mm x 460 mm)", "D. 18 in x 72 in (460 mm x 1800 mm)"], ans: "B. 9 in x 35 in (220 mm x 880 mm)" },
+            { q: "97. A motor rated at 5 hp delivers 4.3 hp to a fan. The fan rotates at 920 rpm and moves 160°F air at standard pressure into a drying process. The static pressure across the fan is 2.3 in wg. The fan efficiency is 62%. The fan flow rate at standard conditions is most nearly", opts: ["A. 5100 ft/min", "B. 5800 ft/min", "C. 6300 ft/min", "D. 7400 ft/min"], ans: "B. 5800 ft/min" },
+            { q: "98. Water flowing at the rate of 10 m/s from an orifice at bottom of a reservoir. Find the pressure at the bottom of reservoir.", opts: ["A. 30 kPa", "B. 40 kPa", "C. 50 kPa", "D. 60 kPa"], ans: "C. 50 kPa" },
+            { q: "99. The indicated thermal efficiency of a two stroke diesel engine is 60%. If friction power is 15% of heat generated, determine the brake thermal efficiency of the engine.", opts: ["A. 43%", "B. 45%", "C. 36%", "D. 37%"], ans: "B. 45%" },
+            { q: "100. A steam cycle operates between 650°F and 100°F (340°C and 38°C). The maximum possible thermal efficiency is most nearly", opts: ["A. 42%", "B. 49%", "C. 54%", "D. 58%"], ans: "B. 49%" }
         ];
 
+        let questions = [];
         let currentQuestionIndex = 0;
+        let score = 0;
 
         function initQuiz() {
-            // Display sidebar items
+            // NO SHUFFLING. Use rawData directly and initialize properties
+            questions = [...rawData].map(q => ({ ...q, answered: false, selected: null }));
+            score = 0;
+            currentQuestionIndex = 0;
             buildSidebar();
             loadQuestion();
         }
@@ -305,7 +339,7 @@
         function buildSidebar() {
             const grid = document.getElementById("nav-grid");
             grid.innerHTML = '';
-            for (let i = 0; i < rawData.length; i++) {
+            for (let i = 0; i < questions.length; i++) {
                 const btn = document.createElement("button");
                 btn.className = "nav-btn";
                 btn.innerText = i + 1;
@@ -323,22 +357,21 @@
             document.getElementById("sidebar").classList.toggle("open");
         }
 
+        function updateProgressBar() {
+            const progressBar = document.getElementById("progress-bar");
+            const progress = ((currentQuestionIndex) / questions.length) * 100;
+            progressBar.style.width = progress + "%";
+        }
+
         function loadQuestion() {
-            const q = rawData[currentQuestionIndex];
+            const q = questions[currentQuestionIndex];
             
-            document.getElementById("question-tracker").innerText = `Question ${currentQuestionIndex + 1} of ${rawData.length}`;
-            
-            // Calculate Score
-            let currentScore = 0;
-            rawData.forEach(item => { if(item.selected === item.ans) currentScore++; });
-            document.getElementById("score-tracker").innerText = `Score: ${currentScore}`;
-            
+            document.getElementById("question-tracker").innerText = `Q ${currentQuestionIndex + 1} / ${questions.length}`;
+            document.getElementById("score-tracker").innerText = `Score: ${score}`;
             document.getElementById("question-text").innerText = q.q;
 
             const container = document.getElementById("options-container");
             container.innerHTML = '';
-            const expBox = document.getElementById("explanation-box");
-            expBox.style.display = "none";
 
             q.opts.forEach((opt) => {
                 const btn = document.createElement("button");
@@ -358,60 +391,41 @@
                 container.appendChild(btn);
             });
 
-            if (q.answered) {
-                showExplanation(q);
-            }
-
             const nextBtn = document.getElementById("next-btn");
             if (q.answered) {
                 nextBtn.style.display = "block";
-                nextBtn.innerText = (currentQuestionIndex === rawData.length - 1) ? "Finish Quiz ➔" : "Next Question ➔";
+                nextBtn.innerText = (currentQuestionIndex === questions.length - 1) ? "Finish Quiz ➔" : "Next Question ➔";
             } else {
                 nextBtn.style.display = "none";
             }
 
             updateSidebarHighlight();
+            updateProgressBar();
         }
 
         function selectOption(selectedOpt) {
-            const q = rawData[currentQuestionIndex];
+            const q = questions[currentQuestionIndex];
             q.answered = true;
             q.selected = selectedOpt;
 
             const isCorrect = (selectedOpt === q.ans);
+            if (isCorrect) score++;
+
             const navBtn = document.getElementById(`nav-btn-${currentQuestionIndex}`);
             navBtn.classList.add(isCorrect ? "answered-correct" : "answered-incorrect");
 
-            loadQuestion();
-        }
-
-        function showExplanation(q) {
-            const isCorrect = (q.selected === q.ans);
-            const expBox = document.getElementById("explanation-box");
-            expBox.style.display = "block";
-            
-            let statusText = isCorrect 
-                ? "<strong style='color: #27ae60;'>Correct!</strong>" 
-                : `<strong style='color: #e74c3c;'>Incorrect.</strong> The correct answer is: <em>${q.ans}</em>.`;
-            
-            expBox.innerHTML = `${statusText}<br><br><strong>Explanation:</strong> ${q.expl}`;
-            expBox.style.borderLeftColor = isCorrect ? "#27ae60" : "#e74c3c";
-            expBox.style.backgroundColor = isCorrect ? "#eafaf1" : "#fdedec";
+            loadQuestion(); // Re-render the question to show colors
         }
 
         function nextQuestion() {
-            if (currentQuestionIndex < rawData.length - 1) {
+            if (currentQuestionIndex < questions.length - 1) {
                 currentQuestionIndex++;
                 loadQuestion();
             } else {
                 document.getElementById("quiz-screen").style.display = "none";
                 const results = document.getElementById("results-screen");
                 results.style.display = "block";
-                
-                let finalScore = 0;
-                rawData.forEach(item => { if(item.selected === item.ans) finalScore++; });
-                
-                document.getElementById("final-score").innerText = `You scored ${finalScore} out of ${rawData.length}.`;
+                document.getElementById("final-score").innerText = `You scored ${score} out of ${questions.length}.`;
             }
         }
 
