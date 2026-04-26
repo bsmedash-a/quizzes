@@ -3,190 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Air Compressors Quiz (100 Questions) | NEXUS</title>
+    <title>Air Compressors Quiz | NEXUS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #00e5ff;
-            --primary-hover: #00b8cc;
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
-            --text-light: #f8fafc;
-            --text-muted: #94a3b8;
-            --correct: #10b981;
-            --wrong: #ef4444;
+            /* Exact colors from your screenshot */
+            --primary-bg: #1a3c54;
+            --gradient-light: #228b9c;
+            --gradient-dark: #12283e;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-light: #ffffff;
+            --text-cyan: #38bdf8;
+            --btn-blue: #1da1f2;
+            --btn-blue-hover: #1a8cd8;
+            --correct-bg: rgba(16, 185, 129, 0.15);
+            --correct-border: #10b981;
+            --wrong-bg: rgba(239, 68, 68, 0.15);
+            --wrong-border: #ef4444;
+            --nav-bg: rgba(18, 40, 62, 0.95);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
 
         body {
-            background-color: var(--bg-dark);
+            /* Matches the deep teal radial gradient */
+            background: radial-gradient(circle at 10% 40%, var(--gradient-light), var(--gradient-dark) 80%);
+            background-attachment: fixed;
             color: var(--text-light);
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* --- NAVIGATION / HAMBURGER MENU --- */
-        nav {
+        /* --- HAMBURGER & TOP NAV --- */
+        .top-nav {
             width: 100%;
-            background-color: var(--bg-card);
-            padding: 1rem 2rem;
+            padding: 20px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            justify-content: flex-start;
             position: relative;
             z-index: 100;
         }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary);
-            letter-spacing: 2px;
-        }
-
         .hamburger {
-            background: none;
-            border: none;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
             color: var(--text-light);
             font-size: 1.8rem;
             cursor: pointer;
-        }
-
-        .nav-links {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background-color: var(--bg-card);
-            width: 200px;
-            display: none;
-            flex-direction: column;
-            box-shadow: -2px 4px 6px rgba(0, 0, 0, 0.5);
-        }
-
-        .nav-links.active {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
             display: flex;
-        }
-
-        .nav-links a {
-            color: var(--text-light);
-            text-decoration: none;
-            padding: 1rem 2rem;
-            border-bottom: 1px solid #334155;
+            justify-content: center;
+            align-items: center;
             transition: 0.3s;
         }
 
-        .nav-links a:hover {
-            background-color: #334155;
-            color: var(--primary);
+        .hamburger:hover {
+            background: rgba(255, 255, 255, 0.15);
         }
 
-        /* --- QUIZ CONTAINER --- */
+        /* --- SIDE NAVIGATION (QUESTION GRID) --- */
+        .side-nav {
+            position: fixed;
+            top: 0;
+            left: -350px; /* Hidden by default */
+            width: 320px;
+            height: 100vh;
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            padding: 80px 20px 20px 20px;
+            transition: 0.4s ease-in-out;
+            z-index: 99;
+            overflow-y: auto;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+        }
+
+        .side-nav.active {
+            left: 0;
+        }
+
+        .nav-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            text-align: center;
+            color: var(--text-cyan);
+            font-weight: 600;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            color: var(--text-light);
+            padding: 10px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-btn.active-q {
+            border: 2px solid var(--text-cyan);
+            background: rgba(56, 189, 248, 0.2);
+        }
+
+        .nav-btn.correct-nav {
+            background: var(--correct-border);
+            color: #fff;
+            border: none;
+        }
+
+        .nav-btn.wrong-nav {
+            background: var(--wrong-border);
+            color: #fff;
+            border: none;
+        }
+
+        /* --- QUIZ CONTAINER (GLASSMORPHISM) --- */
         .quiz-container {
-            background-color: var(--bg-card);
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
             width: 90%;
-            max-width: 700px;
-            margin: 3rem auto;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            max-width: 800px;
+            margin: 0 auto 40px auto;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 10;
         }
 
         .quiz-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            border-bottom: 2px solid #334155;
-            padding-bottom: 1rem;
+            margin-bottom: 20px;
         }
 
         .question-number {
-            color: var(--primary);
-            font-weight: bold;
-            font-size: 1.1rem;
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
         }
 
         .score-tracker {
-            color: var(--text-muted);
-            font-size: 0.9rem;
+            color: var(--text-cyan);
+            font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+
+        .divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+            width: 100%;
         }
 
         .question-text {
-            font-size: 1.2rem;
-            margin-bottom: 1.5rem;
-            line-height: 1.5;
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 30px;
+            line-height: 1.6;
         }
 
         .options-grid {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
+            margin-bottom: 30px;
         }
 
         .option-btn {
-            background-color: #334155;
-            border: 2px solid transparent;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
             color: var(--text-light);
-            padding: 1rem;
-            border-radius: 8px;
-            font-size: 1rem;
+            padding: 18px 25px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 400;
             cursor: pointer;
             text-align: left;
             transition: all 0.2s ease;
         }
 
         .option-btn:hover:not(:disabled) {
-            background-color: #475569;
-            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.12);
         }
 
         .option-btn.correct {
-            background-color: rgba(16, 185, 129, 0.2);
-            border-color: var(--correct);
-            color: var(--correct);
+            background: var(--correct-bg);
+            border: 1px solid var(--correct-border);
         }
 
         .option-btn.wrong {
-            background-color: rgba(239, 68, 68, 0.2);
-            border-color: var(--wrong);
-            color: var(--wrong);
+            background: var(--wrong-bg);
+            border: 1px solid var(--wrong-border);
         }
 
         .option-btn:disabled {
-            cursor: not-allowed;
-            opacity: 0.7;
+            cursor: default;
         }
 
-        /* --- CONTROLS --- */
-        .controls {
-            margin-top: 1.5rem;
-            display: flex;
-            justify-content: flex-end;
-        }
-
+        /* --- NEXT BUTTON --- */
         .next-btn {
-            background-color: var(--primary);
-            color: var(--bg-dark);
+            background-color: var(--btn-blue);
+            color: #fff;
             border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: bold;
+            width: 100%;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
             cursor: pointer;
-            display: none;
+            display: none; 
             transition: 0.3s;
+            text-transform: uppercase;
         }
 
         .next-btn:hover {
-            background-color: var(--primary-hover);
+            background-color: var(--btn-blue-hover);
+            box-shadow: 0 4px 15px rgba(29, 161, 242, 0.4);
         }
 
         /* --- RESULTS SCREEN --- */
@@ -196,74 +258,74 @@
         }
 
         .results-container h2 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--text-cyan);
         }
 
         .results-container p {
             font-size: 1.2rem;
-            margin-bottom: 2rem;
+            margin-bottom: 30px;
         }
-
-        .restart-btn {
-            background-color: var(--primary);
-            color: var(--bg-dark);
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .restart-btn:hover {
-            background-color: var(--primary-hover);
+        
+        /* Mobile adjustments */
+        @media (max-width: 600px) {
+            .quiz-container { padding: 25px; }
+            .question-text { font-size: 1.1rem; }
+            .option-btn { padding: 15px; font-size: 0.95rem; }
         }
     </style>
 </head>
 <body>
 
-    <nav>
-        <div class="logo">NEXUS QUIZ</div>
-        <button class="hamburger" onclick="toggleMenu()">☰</button>
-        <div class="nav-links" id="navLinks">
-            <a href="#">Home Directory</a>
-            <a href="#">Pumps Quiz</a>
-            <a href="#">Air Compressors Quiz</a>
-            <a href="#">Admin Login</a>
-        </div>
-    </nav>
+    <div class="top-nav">
+        <button class="hamburger" onclick="toggleNav()">☰</button>
+    </div>
+
+    <div class="side-nav" id="sideNav">
+        <div class="nav-title">Question Navigator</div>
+        <div class="grid-container" id="navGrid">
+            </div>
+    </div>
 
     <div class="quiz-container" id="quizBox">
         <div class="quiz-header">
-            <span class="question-number" id="questionCounter">Question 1/100</span>
+            <span class="question-number" id="questionCounter">Q 1 / 100</span>
             <span class="score-tracker">Score: <span id="scoreDisplay">0</span></span>
         </div>
         
+        <div class="divider"></div>
+
         <h2 class="question-text" id="questionText">Loading question...</h2>
         
         <div class="options-grid" id="optionsGrid"></div>
 
-        <div class="controls">
-            <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question ➔</button>
-        </div>
+        <button class="next-btn" id="nextBtn" onclick="nextQuestion()">NEXT QUESTION ➔</button>
     </div>
 
     <div class="quiz-container results-container" id="resultsBox">
         <h2>Quiz Completed!</h2>
-        <p>You scored <strong id="finalScore">0</strong> out of <strong id="totalQuestions">0</strong>.</p>
-        <button class="restart-btn" onclick="startQuiz()">Restart Quiz</button>
+        <p>You scored <strong id="finalScore">0</strong> out of 100.</p>
+        <button class="next-btn" style="display: block; margin-top: 20px;" onclick="location.reload()">RETAKE QUIZ</button>
     </div>
 
     <script>
-        function toggleMenu() {
-            document.getElementById('navLinks').classList.toggle('active');
+        // Toggle Sidebar
+        function toggleNav() {
+            document.getElementById('sideNav').classList.toggle('active');
         }
 
-        // 100 Questions Database
-        const quizData = [
+        // Close sidebar if clicking outside
+        document.addEventListener('click', function(event) {
+            const sideNav = document.getElementById('sideNav');
+            const hamburger = document.querySelector('.hamburger');
+            if (!sideNav.contains(event.target) && !hamburger.contains(event.target) && sideNav.classList.contains('active')) {
+                sideNav.classList.remove('active');
+            }
+        });
+
+        // 100 Questions Raw Data
+        const rawQuizData = [
             { q: "An air compressor is a machine used to:", opts: ["Reduce air pressure", "Increase air pressure by reducing its volume", "Convert air into liquid", "Produce vacuum"], a: 1 },
             { q: "The pressure measured above atmospheric pressure is called:", opts: ["Absolute pressure", "Gauge pressure", "Vacuum pressure", "Static pressure"], a: 1 },
             { q: "Absolute pressure is equal to:", opts: ["Gauge pressure - atmospheric pressure", "Gauge pressure + atmospheric pressure", "Atmospheric pressure - gauge pressure", "Gauge pressure only"], a: 1 },
@@ -366,47 +428,150 @@
             { q: "The most important goal in compressor selection is to achieve:", opts: ["Maximum cost", "Reliable and efficient operation", "High temperature", "Large equipment size"], a: 1 }
         ];
 
+        // System State Variables
+        let activeQuiz = [];
+        let userState = []; // Tracks answered status per question
         let currentQuestionIndex = 0;
         let score = 0;
+        const letterPrefixes = ['A. ', 'B. ', 'C. ', 'D. '];
 
-        const questionText = document.getElementById('questionText');
-        const optionsGrid = document.getElementById('optionsGrid');
-        const nextBtn = document.getElementById('nextBtn');
-        const questionCounter = document.getElementById('questionCounter');
-        const scoreDisplay = document.getElementById('scoreDisplay');
-        const quizBox = document.getElementById('quizBox');
-        const resultsBox = document.getElementById('resultsBox');
+        // --- DOUBLE RANDOMIZER (Fisher-Yates Shuffle) ---
+        function shuffleArray(array) {
+            let curId = array.length;
+            while (0 !== curId) {
+                let randId = Math.floor(Math.random() * curId);
+                curId -= 1;
+                let tmp = array[curId];
+                array[curId] = array[randId];
+                array[randId] = tmp;
+            }
+            return array;
+        }
 
-        function startQuiz() {
-            currentQuestionIndex = 0;
-            score = 0;
-            scoreDisplay.innerText = score;
-            quizBox.style.display = 'block';
-            resultsBox.style.display = 'none';
+        function initQuiz() {
+            // 1. Clone and shuffle the 100 questions
+            let tempQuiz = JSON.parse(JSON.stringify(rawQuizData));
+            tempQuiz = shuffleArray(tempQuiz);
+
+            // 2. Shuffle the options inside EACH question
+            activeQuiz = tempQuiz.map(qObj => {
+                // Attach original index to keep track of the correct answer
+                let optionsWithMeta = qObj.opts.map((opt, i) => ({ text: opt, isCorrect: i === qObj.a }));
+                optionsWithMeta = shuffleArray(optionsWithMeta);
+
+                return {
+                    q: qObj.q,
+                    opts: optionsWithMeta.map(o => o.text),
+                    a: optionsWithMeta.findIndex(o => o.isCorrect) // New correct index
+                };
+            });
+
+            // Initialize tracking state
+            userState = new Array(activeQuiz.length).fill(null);
+            
+            buildNavigationGrid();
             loadQuestion();
         }
 
-        function loadQuestion() {
-            nextBtn.style.display = 'none';
-            optionsGrid.innerHTML = '';
-            
-            const currentData = quizData[currentQuestionIndex];
-            questionCounter.innerText = `Question ${currentQuestionIndex + 1}/${quizData.length}`;
-            questionText.innerText = currentData.q;
-
-            currentData.opts.forEach((option, index) => {
-                const button = document.createElement('button');
-                button.innerText = option;
-                button.classList.add('option-btn');
-                button.onclick = () => selectAnswer(index, button);
-                optionsGrid.appendChild(button);
-            });
+        // --- NAVIGATION GRID BUILDER ---
+        function buildNavigationGrid() {
+            const grid = document.getElementById('navGrid');
+            grid.innerHTML = '';
+            for (let i = 0; i < activeQuiz.length; i++) {
+                const btn = document.createElement('button');
+                btn.innerText = i + 1;
+                btn.classList.add('nav-btn');
+                btn.id = `nav-btn-${i}`;
+                btn.onclick = () => jumpToQuestion(i);
+                grid.appendChild(btn);
+            }
         }
 
-        function selectAnswer(selectedIndex, selectedButton) {
-            const currentData = quizData[currentQuestionIndex];
-            const allButtons = optionsGrid.children;
+        function updateNavGridStyle() {
+            for (let i = 0; i < activeQuiz.length; i++) {
+                const btn = document.getElementById(`nav-btn-${i}`);
+                // Clear active outline
+                btn.classList.remove('active-q');
+                if (i === currentQuestionIndex) {
+                    btn.classList.add('active-q');
+                }
+                
+                // Color code if answered
+                if (userState[i] !== null) {
+                    if (userState[i].isCorrect) {
+                        btn.classList.add('correct-nav');
+                    } else {
+                        btn.classList.add('wrong-nav');
+                    }
+                }
+            }
+        }
 
+        function jumpToQuestion(index) {
+            currentQuestionIndex = index;
+            document.getElementById('sideNav').classList.remove('active');
+            loadQuestion();
+        }
+
+        // --- LOAD QUESTION UI ---
+        function loadQuestion() {
+            updateNavGridStyle();
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('optionsGrid').innerHTML = '';
+            
+            const currentData = activeQuiz[currentQuestionIndex];
+            document.getElementById('questionCounter').innerText = `Q ${currentQuestionIndex + 1} / ${activeQuiz.length}`;
+            document.getElementById('questionText').innerText = `${currentQuestionIndex + 1}. ${currentData.q}`;
+
+            const isAnswered = userState[currentQuestionIndex] !== null;
+
+            // Generate Options
+            currentData.opts.forEach((optionText, index) => {
+                const button = document.createElement('button');
+                // Apply A, B, C, D formatting
+                button.innerText = letterPrefixes[index] + optionText;
+                button.classList.add('option-btn');
+
+                if (isAnswered) {
+                    button.disabled = true;
+                    // Re-apply correct/wrong styles if already answered
+                    if (index === currentData.a) {
+                        button.classList.add('correct');
+                    } else if (index === userState[currentQuestionIndex].selectedIndex) {
+                        button.classList.add('wrong');
+                    }
+                } else {
+                    button.onclick = () => selectAnswer(index, button);
+                }
+
+                document.getElementById('optionsGrid').appendChild(button);
+            });
+
+            // If already answered, show next button
+            if (isAnswered) {
+                document.getElementById('nextBtn').style.display = 'block';
+            }
+        }
+
+        // --- ANSWER LOGIC ---
+        function selectAnswer(selectedIndex, selectedButton) {
+            const currentData = activeQuiz[currentQuestionIndex];
+            const allButtons = document.getElementById('optionsGrid').children;
+            const isCorrect = selectedIndex === currentData.a;
+
+            // Save state
+            userState[currentQuestionIndex] = {
+                selectedIndex: selectedIndex,
+                isCorrect: isCorrect
+            };
+
+            // Update Score
+            if (isCorrect) {
+                score++;
+                document.getElementById('scoreDisplay').innerText = score;
+            }
+
+            // Lock and format buttons
             for (let i = 0; i < allButtons.length; i++) {
                 allButtons[i].disabled = true;
                 if (i === currentData.a) {
@@ -414,34 +579,40 @@
                 }
             }
 
-            if (selectedIndex === currentData.a) {
-                score++;
-                scoreDisplay.innerText = score;
-            } else {
+            if (!isCorrect) {
                 selectedButton.classList.add('wrong');
             }
 
-            nextBtn.style.display = 'block';
+            // Update Side Nav color instantly
+            updateNavGridStyle();
+
+            document.getElementById('nextBtn').style.display = 'block';
         }
 
         function nextQuestion() {
-            currentQuestionIndex++;
-            if (currentQuestionIndex < quizData.length) {
+            if (currentQuestionIndex < activeQuiz.length - 1) {
+                currentQuestionIndex++;
                 loadQuestion();
             } else {
-                showResults();
+                // Check if all questions are answered
+                const unansweredCount = userState.filter(s => s === null).length;
+                if (unansweredCount > 0) {
+                    alert(`You still have ${unansweredCount} unanswered questions! Open the side menu to find them (the grey boxes).`);
+                    document.getElementById('sideNav').classList.add('active');
+                } else {
+                    showResults();
+                }
             }
         }
 
         function showResults() {
-            quizBox.style.display = 'none';
-            resultsBox.style.display = 'block';
+            document.getElementById('quizBox').style.display = 'none';
+            document.getElementById('resultsBox').style.display = 'block';
             document.getElementById('finalScore').innerText = score;
-            document.getElementById('totalQuestions').innerText = quizData.length;
         }
 
-        // Init
-        startQuiz();
+        // Start Quiz on Load
+        initQuiz();
     </script>
 </body>
 </html>
