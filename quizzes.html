@@ -3,445 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Air Compressors Quiz (100 Questions) | NEXUS</title>
+    <title>Quizzes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #00e5ff;
-            --primary-hover: #00b8cc;
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
-            --text-light: #f8fafc;
-            --text-muted: #94a3b8;
-            --correct: #10b981;
-            --wrong: #ef4444;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
+        :root { --primary: #00d2ff; --glass-bg: rgba(255, 255, 255, 0.1); --glass-border: rgba(255, 255, 255, 0.2); --text-light: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a2a6c, #11998e); background-size: 400% 400%; animation: gradientBG 15s ease infinite;
+            color: var(--text-light); min-height: 100vh; padding: 2rem; overflow-x: hidden;
         }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        
+        .back-btn {
+            display: inline-block; background: var(--glass-bg); border: 1px solid var(--glass-border); color: white; padding: 10px 20px;
+            border-radius: 30px; cursor: pointer; text-decoration: none; margin-bottom: 20px; transition: 0.3s; backdrop-filter: blur(10px);
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.2); transform: translateX(-5px); }
 
-        /* --- NAVIGATION / HAMBURGER MENU --- */
-        nav {
-            width: 100%;
-            background-color: var(--bg-card);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-            position: relative;
-            z-index: 100;
+        .container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+        .subject-header { font-size: 2rem; margin: 2rem 0 1.5rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid var(--primary); color: #fff; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; }
+        
+        .category-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 15px; padding: 1.5rem; backdrop-filter: blur(12px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; }
+        .category-card h3 { font-size: 1.5rem; margin-bottom: 1rem; color: #00d2ff; }
+        .quiz-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        
+        .quiz-item a {
+            display: flex; justify-content: space-between; padding: 10px 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;
+            color: var(--text-light); text-decoration: none; font-size: 1rem; transition: all 0.3s ease; border: 1px solid transparent;
         }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary);
-            letter-spacing: 2px;
-        }
-
-        .hamburger {
-            background: none;
-            border: none;
-            color: var(--text-light);
-            font-size: 1.8rem;
-            cursor: pointer;
-        }
-
-        .nav-links {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background-color: var(--bg-card);
-            width: 200px;
-            display: none;
-            flex-direction: column;
-            box-shadow: -2px 4px 6px rgba(0, 0, 0, 0.5);
-        }
-
-        .nav-links.active {
-            display: flex;
-        }
-
-        .nav-links a {
-            color: var(--text-light);
-            text-decoration: none;
-            padding: 1rem 2rem;
-            border-bottom: 1px solid #334155;
-            transition: 0.3s;
-        }
-
-        .nav-links a:hover {
-            background-color: #334155;
-            color: var(--primary);
-        }
-
-        /* --- QUIZ CONTAINER --- */
-        .quiz-container {
-            background-color: var(--bg-card);
-            width: 90%;
-            max-width: 700px;
-            margin: 3rem auto;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-        }
-
-        .quiz-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            border-bottom: 2px solid #334155;
-            padding-bottom: 1rem;
-        }
-
-        .question-number {
-            color: var(--primary);
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .score-tracker {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .question-text {
-            font-size: 1.2rem;
-            margin-bottom: 1.5rem;
-            line-height: 1.5;
-        }
-
-        .options-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .option-btn {
-            background-color: #334155;
-            border: 2px solid transparent;
-            color: var(--text-light);
-            padding: 1rem;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.2s ease;
-        }
-
-        .option-btn:hover:not(:disabled) {
-            background-color: #475569;
-            border-color: var(--primary);
-        }
-
-        .option-btn.correct {
-            background-color: rgba(16, 185, 129, 0.2);
-            border-color: var(--correct);
-            color: var(--correct);
-        }
-
-        .option-btn.wrong {
-            background-color: rgba(239, 68, 68, 0.2);
-            border-color: var(--wrong);
-            color: var(--wrong);
-        }
-
-        .option-btn:disabled {
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-
-        /* --- CONTROLS --- */
-        .controls {
-            margin-top: 1.5rem;
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .next-btn {
-            background-color: var(--primary);
-            color: var(--bg-dark);
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: none;
-            transition: 0.3s;
-        }
-
-        .next-btn:hover {
-            background-color: var(--primary-hover);
-        }
-
-        /* --- RESULTS SCREEN --- */
-        .results-container {
-            display: none;
-            text-align: center;
-        }
-
-        .results-container h2 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: var(--primary);
-        }
-
-        .results-container p {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-        }
-
-        .restart-btn {
-            background-color: var(--primary);
-            color: var(--bg-dark);
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .restart-btn:hover {
-            background-color: var(--primary-hover);
-        }
+        .quiz-item a:hover { background: rgba(0, 210, 255, 0.15); border-color: var(--primary); padding-left: 20px; color: #fff; }
+        .quiz-item a::after { content: '→'; opacity: 0; transform: translateX(-10px); transition: all 0.3s ease; }
+        .quiz-item a:hover::after { opacity: 1; transform: translateX(0); }
+        .new-badge { background: #ff4757; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; margin-left: 10px; font-weight: bold; }
+        @media (max-width: 768px) { body { padding: 1rem; } .subject-header { font-size: 1.5rem; } }
     </style>
 </head>
 <body>
-
-    <nav>
-        <div class="logo">NEXUS QUIZ</div>
-        <button class="hamburger" onclick="toggleMenu()">☰</button>
-        <div class="nav-links" id="navLinks">
-            <a href="#">Home Directory</a>
-            <a href="#">Pumps Quiz</a>
-            <a href="#">Air Compressors Quiz</a>
-            <a href="#">Admin Login</a>
-        </div>
-    </nav>
-
-    <div class="quiz-container" id="quizBox">
-        <div class="quiz-header">
-            <span class="question-number" id="questionCounter">Question 1/100</span>
-            <span class="score-tracker">Score: <span id="scoreDisplay">0</span></span>
-        </div>
+    <div class="container">
+        <a href="index.html" class="back-btn">← Back to Home</a>
         
-        <h2 class="question-text" id="questionText">Loading question...</h2>
-        
-        <div class="options-grid" id="optionsGrid"></div>
+        <h2 class="subject-header">Comprehensive Course 2</h2>
+        <div class="grid-container">
+            <div class="category-card">
+                <h3>Machine Shop</h3>
+                <ul class="quiz-list">
+                    <li class="quiz-item"><a href="handtools.html" target="_blank">1. Hand Tools</a></li>
+                    <li class="quiz-item"><a href="layouttools.html" target="_blank">2. Layout Tools</a></li>
+                    <li class="quiz-item"><a href="measurement.html" target="_blank">3. Measurement</a></li>
+                    <li class="quiz-item"><a href="safety.html" target="_blank">4. Safety</a></li>
+                    <li class="quiz-item"><a href="drilling.html" target="_blank">5. Drilling</a></li>
+                    <li class="quiz-item"><a href="lathe.html" target="_blank">6. Lathe</a></li>
+                    <li class="quiz-item"><a href="milling.html" target="_blank">7. Milling</a></li>
+                    <li class="quiz-item"><a href="shaper.html" target="_blank">8. Shaper</a></li>
+                  <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-1" target="_blank">Elements (1-100)</a></li>
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-2" target="_blank">Elements (101-200)</a></li>
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-3" target="_blank">Elements (201-300)</a></li>
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-4" target="_blank">Elements (301-400)</a></li>
+                    <li class="quiz-item"><a href="https://comfy-heliotrope-087dbc.netlify.app/9-5" target="_blank">Elements (400+)</a></li>
+                </ul>
+            </div>
 
-        <div class="controls">
-            <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question ➔</button>
+            <div class="category-card">
+                <h3>Materials Science and Engineering</h3>
+                <ul class="quiz-list">
+                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials1" target="_blank">Quiz 1: Fundamentals</a></li>
+                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials2" target="_blank">Quiz 2: Properties</a></li>
+                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials3" target="_blank">Quiz 3: Testing</a></li>
+                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials4" target="_blank">Quiz 4: Processing</a></li>
+                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials5" target="_blank">Quiz 5: Selection</a></li>
+                    <li class="quiz-item"><a href="https://melodious-brigadeiros-bd87cb.netlify.app/materials6" target="_blank">Quiz 6: Advanced</a></li>
+                </ul>
+            </div>
+
+            <div class="category-card">
+                <h3>Machine Elements</h3>
+                <ul class="quiz-list">
+                    <li class="quiz-item"><a href="elements.html" target="_blank">Mechanisms & Kinematics </a></li>
+                </ul>
+            </div>
         </div>
+
+        <h2 class="subject-header">Industrial Power Plant</h2>
+        <div class="grid-container">
+            <div class="category-card">
+                <h3>Industrial Topics</h3>
+                <ul class="quiz-list">
+                    <li class="quiz-item"><a href="https://regal-cheesecake-f9775f.netlify.app/air" target="_blank">Air Pollution</a></li>
+                    <li class="quiz-item"><a href="https://regal-cheesecake-f9775f.netlify.app/waterA" target="_blank">Waste Water (Set A)</a></li>
+                    <li class="quiz-item"><a href="https://regal-cheesecake-f9775f.netlify.app/waterB" target="_blank">Waste Water (Set B)</a></li>
+                    <li class="quiz-item"><a href="https://dreamy-gumption-fab1e9.netlify.app/pumps" target="_blank">Pumps</a></li>
+                    <li class="quiz-item"><a href="compressors.html" target="_blank">Air Compressors</a></li>
+                </ul>
+            </div>
+        </div>
+        <div style="height: 50px;"></div>
     </div>
-
-    <div class="quiz-container results-container" id="resultsBox">
-        <h2>Quiz Completed!</h2>
-        <p>You scored <strong id="finalScore">0</strong> out of <strong id="totalQuestions">0</strong>.</p>
-        <button class="restart-btn" onclick="startQuiz()">Restart Quiz</button>
-    </div>
-
-    <script>
-        function toggleMenu() {
-            document.getElementById('navLinks').classList.toggle('active');
-        }
-
-        // 100 Questions Database
-        const quizData = [
-            { q: "An air compressor is a machine used to:", opts: ["Reduce air pressure", "Increase air pressure by reducing its volume", "Convert air into liquid", "Produce vacuum"], a: 1 },
-            { q: "The pressure measured above atmospheric pressure is called:", opts: ["Absolute pressure", "Gauge pressure", "Vacuum pressure", "Static pressure"], a: 1 },
-            { q: "Absolute pressure is equal to:", opts: ["Gauge pressure - atmospheric pressure", "Gauge pressure + atmospheric pressure", "Atmospheric pressure - gauge pressure", "Gauge pressure only"], a: 1 },
-            { q: "The ratio of discharge pressure to suction pressure is known as:", opts: ["Compression ratio", "Pressure drop", "Volumetric ratio", "Density ratio"], a: 0 },
-            { q: "The amount of free air delivered by a compressor is known as:", opts: ["Pump capacity", "Free Air Delivery (FAD)", "Rated pressure", "Displacement volume"], a: 1 },
-            { q: "The efficiency that accounts for leakage and valve losses is:", opts: ["Mechanical efficiency", "Volumetric efficiency", "Thermal efficiency", "Adiabatic efficiency"], a: 1 },
-            { q: "The work done per unit mass of air during compression is called:", opts: ["Compression work", "Flow work", "Shaft work", "Expansion work"], a: 0 },
-            { q: "The clearance volume in a reciprocating compressor refers to:", opts: ["Dead space remaining after piston reaches TDC", "Air intake volume", "Air discharge volume", "Cylinder capacity"], a: 0 },
-            { q: "A compressor that delivers air continuously without pulsation is:", opts: ["Reciprocating compressor", "Rotary compressor", "Diaphragm compressor", "Piston compressor"], a: 1 },
-            { q: "The compressor capacity is usually expressed in:", opts: ["kPa", "m³/min or CFM", "RPM", "kg"], a: 1 },
-            { q: "The process where heat exchange with surroundings is allowed is:", opts: ["Adiabatic", "Isothermal", "Polytropic", "Isochoric"], a: 1 },
-            { q: "Compression without heat transfer is called:", opts: ["Isothermal compression", "Adiabatic compression", "Isobaric compression", "Isentropic expansion"], a: 1 },
-            { q: "The device used to remove moisture from compressed air is called:", opts: ["Air dryer", "Air filter", "Separator", "Intercooler"], a: 0 },
-            { q: "A device used between compressor stages to reduce air temperature is:", opts: ["Aftercooler", "Intercooler", "Condenser", "Evaporator"], a: 1 },
-            { q: "The component that removes oil particles from compressed air is:", opts: ["Oil separator", "Air cooler", "Air tank", "Compressor valve"], a: 0 },
-            { q: "The pressure inside a receiver tank helps to:", opts: ["Stabilize air supply", "Reduce temperature", "Increase motor speed", "Reduce compressor efficiency"], a: 0 },
-            { q: "The term \"CFM\" in compressors stands for:", opts: ["Cubic feet per minute", "Compressed flow mechanism", "Compressor flow meter", "Cooling flow measurement"], a: 0 },
-            { q: "The maximum pressure a compressor can deliver is called:", opts: ["Rated pressure", "Cut-in pressure", "Cut-out pressure", "Discharge pressure"], a: 3 },
-            { q: "The valve that allows air to enter the compressor cylinder is:", opts: ["Suction valve", "Discharge valve", "Pressure valve", "Control valve"], a: 0 },
-            { q: "The valve that releases compressed air is called:", opts: ["Intake valve", "Exhaust valve", "Discharge valve", "Safety valve"], a: 2 },
-            { q: "The device that protects the system from excessive pressure is the:", opts: ["Safety valve", "Flow valve", "Regulator", "Control valve"], a: 0 },
-            { q: "The process of compressing air in multiple stages is called:", opts: ["Compound compression", "Multistage compression", "Sequential compression", "Progressive compression"], a: 1 },
-            { q: "In compressors, intercooling mainly reduces:", opts: ["Air density", "Work of compression", "Pressure", "Motor speed"], a: 1 },
-            { q: "The term \"specific volume\" refers to:", opts: ["Volume per unit mass", "Mass per volume", "Pressure per volume", "Volume per pressure"], a: 0 },
-            { q: "The theoretical compression process requiring minimum work is:", opts: ["Adiabatic compression", "Isothermal compression", "Polytropic compression", "Isobaric compression"], a: 1 },
-            { q: "The mechanical efficiency of a compressor is defined as:", opts: ["Power output / power input", "Indicated power / brake power", "Brake power / indicated power", "Heat input / power output"], a: 1 },
-            { q: "The pressure inside the suction line is usually:", opts: ["Higher than discharge pressure", "Equal to atmospheric pressure", "Lower than discharge pressure", "Zero"], a: 2 },
-            { q: "The compressor component that converts rotary motion to reciprocating motion is:", opts: ["Crankshaft", "Valve", "Rotor", "Impeller"], a: 0 },
-            { q: "The temperature rise during compression occurs because:", opts: ["Heat is absorbed", "Work is done on the air", "Pressure decreases", "Volume increases"], a: 1 },
-            { q: "The efficiency comparing ideal and actual compression work is:", opts: ["Isothermal efficiency", "Mechanical efficiency", "Volumetric efficiency", "Compressor efficiency"], a: 0 },
-            { q: "A compressor delivering air at constant pressure is operating under:", opts: ["Isobaric condition", "Isothermal condition", "Adiabatic condition", "Polytropic condition"], a: 0 },
-            { q: "The ratio of actual intake volume to piston displacement is:", opts: ["Volumetric efficiency", "Mechanical efficiency", "Pressure ratio", "Flow coefficient"], a: 0 },
-            { q: "The device used to control discharge pressure automatically is:", opts: ["Pressure switch", "Thermostat", "Regulator", "Flow meter"], a: 0 },
-            { q: "The unit \"bar\" is used to measure:", opts: ["Flow rate", "Pressure", "Volume", "Temperature"], a: 1 },
-            { q: "The storage tank used in compressed air systems is called:", opts: ["Receiver", "Accumulator", "Separator", "Reservoir"], a: 0 },
-            { q: "Reciprocating compressors are best suited for:", opts: ["High pressure and low flow", "Low pressure and high flow", "Moderate pressure only", "Vacuum systems"], a: 0 },
-            { q: "Rotary screw compressors are widely used because they:", opts: ["Deliver continuous air flow", "Produce high pulsation", "Require large clearance", "Operate at low speed"], a: 0 },
-            { q: "Centrifugal compressors belong to the category of:", opts: ["Positive displacement compressors", "Dynamic compressors", "Reciprocating compressors", "Rotary compressors"], a: 1 },
-            { q: "The main component of a centrifugal compressor is the:", opts: ["Impeller", "Piston", "Crankshaft", "Cylinder"], a: 0 },
-            { q: "The rotor in a screw compressor consists of:", opts: ["Two intermeshing helical rotors", "One piston and cylinder", "Multiple blades", "Radial vanes"], a: 0 },
-            { q: "The primary advantage of multistage compression is:", opts: ["Reduced compression work", "Increased air leakage", "Higher vibration", "Reduced efficiency"], a: 0 },
-            { q: "The cooling of compressed air after final compression is called:", opts: ["Intercooling", "Aftercooling", "Supercooling", "Subcooling"], a: 1 },
-            { q: "The compressor cylinder is usually made of:", opts: ["Cast iron", "Aluminum foil", "Plastic", "Copper"], a: 0 },
-            { q: "The piston rings in a compressor prevent:", opts: ["Heat transfer", "Air leakage", "Air cooling", "Oil circulation"], a: 1 },
-            { q: "In a centrifugal compressor, pressure rise occurs due to:", opts: ["Velocity conversion in diffuser", "Piston motion", "Gear rotation", "Rotor vibration"], a: 0 },
-            { q: "The diffuser in a centrifugal compressor converts:", opts: ["Velocity energy to pressure energy", "Pressure to velocity", "Heat to work", "Flow to rotation"], a: 0 },
-            { q: "The lubrication system of compressors mainly reduces:", opts: ["Pressure", "Friction and wear", "Temperature", "Flow rate"], a: 1 },
-            { q: "A compressor designed for oil-free air usually uses:", opts: ["Teflon rings", "Steel rings", "Aluminum pistons", "Copper valves"], a: 0 },
-            { q: "The crankcase of a compressor houses:", opts: ["Valves", "Crankshaft and bearings", "Receiver tank", "Cooling fan"], a: 1 },
-            { q: "The purpose of compressor cooling is to:", opts: ["Increase density of compressed air", "Prevent overheating", "Improve lubrication", "All of the above"], a: 3 },
-            { q: "In a screw compressor, the compression occurs due to:", opts: ["Piston motion", "Reduction of volume between rotors", "Air heating", "Impeller rotation"], a: 1 },
-            { q: "The typical speed of reciprocating compressors is:", opts: ["Very high", "Moderate", "Extremely low", "Infinite"], a: 1 },
-            { q: "The compressor casing must withstand:", opts: ["Internal pressure and mechanical stress", "Electrical load", "Air humidity only", "Atmospheric pressure only"], a: 0 },
-            { q: "The intake filter in compressors prevents:", opts: ["Moisture", "Dust particles", "Pressure loss", "Heat transfer"], a: 1 },
-            { q: "Compressor vibration is usually caused by:", opts: ["Misalignment", "Loose foundation", "Unbalanced parts", "All of the above"], a: 3 },
-            { q: "The impeller blades in centrifugal compressors are designed to:", opts: ["Increase pressure and velocity", "Reduce flow", "Increase friction", "Decrease temperature"], a: 0 },
-            { q: "Compressor valves usually operate automatically due to:", opts: ["Pressure difference", "Electric motor", "Temperature change", "Manual control"], a: 0 },
-            { q: "The main function of a compressor receiver tank is:", opts: ["Store compressed air", "Increase compressor speed", "Cool air only", "Reduce motor load"], a: 0 },
-            { q: "Water cooling in compressors is used when:", opts: ["Large compressors are used", "Small compressors are used", "Low pressure systems", "Portable compressors"], a: 0 },
-            { q: "Air compressors used in gas turbines are usually:", opts: ["Reciprocating", "Axial flow compressors", "Screw compressors", "Rotary vane compressors"], a: 1 },
-            { q: "The blade angle of compressor impellers affects:", opts: ["Pressure and efficiency", "Motor speed", "Pipe diameter", "Oil viscosity"], a: 0 },
-            { q: "In dynamic compressors, energy transfer occurs due to:", opts: ["Piston displacement", "Rotor kinetic energy", "Chemical reaction", "Thermal expansion"], a: 1 },
-            { q: "Surge in centrifugal compressors occurs when:", opts: ["Flow becomes unstable", "Pressure becomes constant", "Temperature drops", "Motor speed increases"], a: 0 },
-            { q: "Compressor materials for high-temperature operation should have:", opts: ["High strength and heat resistance", "Low density only", "High electrical conductivity", "Low melting point"], a: 0 },
-            { q: "Compressor bearings support the:", opts: ["Piston", "Rotating shaft", "Cylinder", "Receiver tank"], a: 1 },
-            { q: "Air compression generates heat because:", opts: ["Air expands", "Work is done on the gas", "Air velocity decreases", "Air density decreases"], a: 1 },
-            { q: "The compressor frame must provide:", opts: ["Structural support", "Alignment of moving parts", "Vibration stability", "All of the above"], a: 3 },
-            { q: "Intercoolers are placed between stages to:", opts: ["Increase pressure", "Reduce air temperature", "Increase speed", "Increase friction"], a: 1 },
-            { q: "Multistage compressors are more efficient because:", opts: ["Work is distributed across stages", "Air leakage is eliminated", "Pressure ratio decreases", "Speed increases"], a: 0 },
-            { q: "The compressor component responsible for air compression in reciprocating machines is the:", opts: ["Impeller", "Rotor", "Piston", "Diffuser"], a: 2 },
-            { q: "When selecting an air compressor, the first parameter to determine is:", opts: ["Motor color", "Required flow rate and pressure", "Oil type", "Pipe size"], a: 1 },
-            { q: "Reciprocating compressors are preferred when:", opts: ["High pressure is needed", "High flow rate is needed", "Continuous flow is needed", "Low pressure is required"], a: 0 },
-            { q: "Screw compressors are commonly used in:", opts: ["Industrial plants", "Small workshops only", "Home appliances", "Laboratory equipment"], a: 0 },
-            { q: "Centrifugal compressors are best suited for:", opts: ["High pressure small flow", "Large flow low pressure", "Small flow high pressure", "Vacuum systems"], a: 1 },
-            { q: "Compressor efficiency significantly affects:", opts: ["Operating cost", "Pipe diameter", "Motor color", "Air temperature"], a: 0 },
-            { q: "Oversized compressors usually operate:", opts: ["Near BEP", "Inefficiently", "At maximum pressure", "With zero discharge"], a: 1 },
-            { q: "Undersized compressors will:", opts: ["Meet demand easily", "Operate continuously and overheat", "Increase efficiency", "Reduce power consumption"], a: 1 },
-            { q: "Compressors connected in parallel increase:", opts: ["Pressure", "Flow capacity", "Temperature", "Compression ratio"], a: 1 },
-            { q: "Compressors connected in series increase:", opts: ["Flow", "Pressure", "Volume", "Efficiency"], a: 1 },
-            { q: "Oil-free compressors are used when:", opts: ["Air must be contamination-free", "Pressure is low", "Flow is small", "Power is high"], a: 0 },
-            { q: "Portable compressors are commonly used for:", opts: ["Construction work", "Power plants", "Oil refineries", "Chemical reactors"], a: 0 },
-            { q: "Compressor noise reduction is achieved by:", opts: ["Silencers and enclosures", "Increasing pressure", "Increasing speed", "Reducing cooling"], a: 0 },
-            { q: "The compressor motor power depends on:", opts: ["Flow rate and pressure", "Pipe length", "Oil viscosity", "Tank size"], a: 0 },
-            { q: "For medical applications, compressors must be:", opts: ["Oil-free", "Low pressure", "High speed", "Large capacity"], a: 0 },
-            { q: "Air compressors in pneumatic systems must provide:", opts: ["Dry and clean air", "Wet air", "Hot air", "Low-density air"], a: 0 },
-            { q: "The most economical compressor operation occurs near:", opts: ["Maximum speed", "Design operating point", "Zero pressure", "Maximum temperature"], a: 1 },
-            { q: "Compressor maintenance primarily includes:", opts: ["Lubrication and inspection", "Painting", "Speed increase", "Pipe replacement"], a: 0 },
-            { q: "Energy loss in compressors is mainly due to:", opts: ["Heat and friction", "Pressure gain", "Flow increase", "Volume reduction"], a: 0 },
-            { q: "The life of a compressor can be extended by:", opts: ["Proper maintenance", "Increasing speed", "Removing filters", "Increasing pressure"], a: 0 },
-            { q: "The receiver tank capacity is usually:", opts: ["Small", "Moderate to large", "Zero", "Fixed"], a: 1 },
-            { q: "The best compressor selection considers:", opts: ["Efficiency and reliability", "Color and shape", "Pipe material", "Motor brand"], a: 0 },
-            { q: "Compressors for chemical plants must consider:", opts: ["Gas compatibility", "Pipe size", "Motor voltage only", "Tank color"], a: 0 },
-            { q: "Air dryers are necessary when:", opts: ["Moisture must be removed", "Pressure must increase", "Flow must increase", "Temperature must rise"], a: 0 },
-            { q: "Pressure regulators are used to:", opts: ["Maintain constant pressure", "Increase pressure", "Reduce temperature", "Increase flow"], a: 0 },
-            { q: "Compressor filters must be cleaned to:", opts: ["Maintain efficiency", "Increase noise", "Reduce pressure", "Increase temperature"], a: 0 },
-            { q: "A compressor system with excessive leakage will:", opts: ["Waste energy", "Increase efficiency", "Reduce power consumption", "Increase pressure"], a: 0 },
-            { q: "Compressor selection must consider:", opts: ["Environmental conditions", "Temperature", "Altitude", "All of the above"], a: 3 },
-            { q: "A compressor working at very high pressure requires:", opts: ["Stronger materials", "Smaller pipes", "Lower speed", "Less cooling"], a: 0 },
-            { q: "Compressor capacity should include allowance for:", opts: ["Future expansion", "Pipe friction", "Leakage", "All of the above"], a: 3 },
-            { q: "The most important goal in compressor selection is to achieve:", opts: ["Maximum cost", "Reliable and efficient operation", "High temperature", "Large equipment size"], a: 1 }
-        ];
-
-        let currentQuestionIndex = 0;
-        let score = 0;
-
-        const questionText = document.getElementById('questionText');
-        const optionsGrid = document.getElementById('optionsGrid');
-        const nextBtn = document.getElementById('nextBtn');
-        const questionCounter = document.getElementById('questionCounter');
-        const scoreDisplay = document.getElementById('scoreDisplay');
-        const quizBox = document.getElementById('quizBox');
-        const resultsBox = document.getElementById('resultsBox');
-
-        function startQuiz() {
-            currentQuestionIndex = 0;
-            score = 0;
-            scoreDisplay.innerText = score;
-            quizBox.style.display = 'block';
-            resultsBox.style.display = 'none';
-            loadQuestion();
-        }
-
-        function loadQuestion() {
-            nextBtn.style.display = 'none';
-            optionsGrid.innerHTML = '';
-            
-            const currentData = quizData[currentQuestionIndex];
-            questionCounter.innerText = `Question ${currentQuestionIndex + 1}/${quizData.length}`;
-            questionText.innerText = currentData.q;
-
-            currentData.opts.forEach((option, index) => {
-                const button = document.createElement('button');
-                button.innerText = option;
-                button.classList.add('option-btn');
-                button.onclick = () => selectAnswer(index, button);
-                optionsGrid.appendChild(button);
-            });
-        }
-
-        function selectAnswer(selectedIndex, selectedButton) {
-            const currentData = quizData[currentQuestionIndex];
-            const allButtons = optionsGrid.children;
-
-            for (let i = 0; i < allButtons.length; i++) {
-                allButtons[i].disabled = true;
-                if (i === currentData.a) {
-                    allButtons[i].classList.add('correct');
-                }
-            }
-
-            if (selectedIndex === currentData.a) {
-                score++;
-                scoreDisplay.innerText = score;
-            } else {
-                selectedButton.classList.add('wrong');
-            }
-
-            nextBtn.style.display = 'block';
-        }
-
-        function nextQuestion() {
-            currentQuestionIndex++;
-            if (currentQuestionIndex < quizData.length) {
-                loadQuestion();
-            } else {
-                showResults();
-            }
-        }
-
-        function showResults() {
-            quizBox.style.display = 'none';
-            resultsBox.style.display = 'block';
-            document.getElementById('finalScore').innerText = score;
-            document.getElementById('totalQuestions').innerText = quizData.length;
-        }
-
-        // Init
-        startQuiz();
-    </script>
 </body>
 </html>
