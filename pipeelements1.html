@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mechanical Engineering Quiz | NEXUS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #1a3c54;
+            --gradient-light: #228b9c;
+            --gradient-dark: #12283e;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-light: #ffffff;
+            --text-cyan: #38bdf8;
+            --btn-blue: #1da1f2;
+            --btn-blue-hover: #1a8cd8;
+            --correct-bg: rgba(16, 185, 129, 0.15);
+            --correct-border: #10b981;
+            --wrong-bg: rgba(239, 68, 68, 0.15);
+            --wrong-border: #ef4444;
+            --nav-bg: rgba(18, 40, 62, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 40%, var(--gradient-light), var(--gradient-dark) 80%);
+            background-attachment: fixed;
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- HAMBURGER & TOP NAV --- */
+        .top-nav {
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: flex-start;
+            position: relative;
+            z-index: 100;
+        }
+
+        .hamburger {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-light);
+            font-size: 1.8rem;
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .hamburger:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* --- SIDE NAVIGATION (QUESTION GRID) --- */
+        .side-nav {
+            position: fixed;
+            top: 0;
+            left: -350px; /* Hidden by default */
+            width: 320px;
+            height: 100vh;
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            padding: 80px 20px 20px 20px;
+            transition: 0.4s ease-in-out;
+            z-index: 99;
+            overflow-y: auto;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+        }
+
+        .side-nav.active {
+            left: 0;
+        }
+
+        .nav-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            text-align: center;
+            color: var(--text-cyan);
+            font-weight: 600;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            color: var(--text-light);
+            padding: 10px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-btn.active-q {
+            border: 2px solid var(--text-cyan);
+            background: rgba(56, 189, 248, 0.2);
+        }
+
+        .nav-btn.correct-nav {
+            background: var(--correct-border);
+            color: #fff;
+            border: none;
+        }
+
+        .nav-btn.wrong-nav {
+            background: var(--wrong-border);
+            color: #fff;
+            border: none;
+        }
+
+        /* --- QUIZ CONTAINER (GLASSMORPHISM) --- */
+        .quiz-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto 40px auto;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            position: relative;
+            z-index: 10;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .question-number {
+            color: var(--text-light);
+            font-weight: 500;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+
+        .score-tracker {
+            color: var(--text-cyan);
+            font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+
+        .divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-light);
+            padding: 18px 25px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 400;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .option-btn.correct {
+            background: var(--correct-bg);
+            border: 1px solid var(--correct-border);
+        }
+
+        .option-btn.wrong {
+            background: var(--wrong-bg);
+            border: 1px solid var(--wrong-border);
+        }
+
+        .option-btn:disabled {
+            cursor: default;
+        }
+
+        /* --- NEXT BUTTON --- */
+        .next-btn {
+            background-color: var(--btn-blue);
+            color: #fff;
+            border: none;
+            width: 100%;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: none; 
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .next-btn:hover {
+            background-color: var(--btn-blue-hover);
+            box-shadow: 0 4px 15px rgba(29, 161, 242, 0.4);
+        }
+
+        /* --- RESULTS SCREEN --- */
+        .results-container {
+            display: none;
+            text-align: center;
+        }
+
+        .results-container h2 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--text-cyan);
+        }
+
+        .results-container p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        
+        /* Mobile adjustments */
+        @media (max-width: 600px) {
+            .quiz-container { padding: 25px; }
+            .question-text { font-size: 1.1rem; }
+            .option-btn { padding: 15px; font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP NAVIGATION -->
+    <div class="top-nav">
+        <button class="hamburger" onclick="toggleNav()">☰</button>
+    </div>
+
+    <!-- SIDE NAVIGATION (QUESTION GRID) -->
+    <div class="side-nav" id="sideNav">
+        <div class="nav-title">Question Navigator</div>
+        <div class="grid-container" id="navGrid">
+            <!-- Buttons dynamically generated -->
+        </div>
+    </div>
+
+    <!-- QUIZ INTERFACE -->
+    <div class="quiz-container" id="quizBox">
+        <div class="quiz-header">
+            <span class="question-number" id="questionCounter">Q 1 / 100</span>
+            <span class="score-tracker">Score: <span id="scoreDisplay">0</span></span>
+        </div>
+        
+        <div class="divider"></div>
+
+        <h2 class="question-text" id="questionText">Loading question...</h2>
+        
+        <div class="options-grid" id="optionsGrid"></div>
+
+        <button class="next-btn" id="nextBtn" onclick="nextQuestion()">NEXT QUESTION ➔</button>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div class="quiz-container results-container" id="resultsBox">
+        <h2>Quiz Completed!</h2>
+        <p>You scored <strong id="finalScore">0</strong> out of 100.</p>
+        <button class="next-btn" style="display: block; margin-top: 20px;" onclick="location.reload()">RETAKE QUIZ</button>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+        // Toggle Sidebar
+        function toggleNav() {
+            document.getElementById('sideNav').classList.toggle('active');
+        }
+
+        // Close sidebar if clicking outside
+        document.addEventListener('click', function(event) {
+            const sideNav = document.getElementById('sideNav');
+            const hamburger = document.querySelector('.hamburger');
+            if (!sideNav.contains(event.target) && !hamburger.contains(event.target) && sideNav.classList.contains('active')) {
+                sideNav.classList.remove('active');
+            }
+        });
+
+        // The 100 Questions Data Base
+        const rawQuizData = [
+            { q: "The measure of the ability of a goal to withstand exposure to the environment elements without excessive crumbling", opts: ["crumbling coefficient", "weatherability", "cohensiveness", "attrition coefficient"], a: 1 },
+            { q: "A type of coal that tends to break apart as it burns thereby exposing the unburned coal to the combustion air.", opts: ["loose coal", "free burning coal", "non-cohensive coal", "aggregate"], a: 1 },
+            { q: "A type of coal that produced a fused coal mass as it burns.", opts: ["plastic coal", "caking coal", "soft coal", "high-moisture coal"], a: 1 },
+            { q: "A combustible coal content that produces a major atmospheric pollutant consequently, it is important that coal has a low percentage of this component.", opts: ["nitrogen", "sulfur", "carbon", "hydrogen"], a: 1 },
+            { q: "Which of the following statement is/are true regards to the first law of thermodynamics for a change in state of a control mass", opts: ["since heat and work are path function Q-W must also be a path function", "Q-W is an inexact differential", "A and B", "Q-W is a point function"], a: 3 },
+            { q: "Which of the following statements is/are true with regards to heat and work.", opts: ["heat and work are both transient phenomena", "both heat and work are boundary phenomena", "both heat and work are path function", "all of the above"], a: 3 },
+            { q: "The height of the surface of the water above the gage point", opts: ["pressure head", "velocity head", "dynamic head", "static head"], a: 3 },
+            { q: "The head required to produced a flow of the water.", opts: ["static head", "pressure head", "velocity head", "dynamic head"], a: 2 },
+            { q: "The sum of the pressure head and velocity head.", opts: ["static head", "pressure head", "velocity head", "dynamic head"], a: 3 },
+            { q: "The dynamic pressure of the liquid at pump section less the corresponding to the temperature at the same point, converted to liquid.", opts: ["NPSH", "specific head", "pump operating head", "suction head"], a: 0 },
+            { q: "The algebraic difference of the discharge and suction heads.", opts: ["pump operating head", "TDH", "A and B", "NPSH"], a: 2 },
+            { q: "The transfer of the heat energy from exhaust gases to compressed air flowing between the compressor and combustion chamber.", opts: ["intercooling", "convection", "regeneration", "economics"], a: 2 },
+            { q: "The removal of heat from compressed air between stages of compression.", opts: ["regeneration", "exhaustion", "heat evacuation", "intercooling"], a: 3 },
+            { q: "As a general rule, the cooling water side of the condenser should be schedule for inspection for every:", opts: ["month", "3 months", "6 months", "year"], a: 1 },
+            { q: "If the compressor runs continually, the cause might be the:", opts: ["high-pressure cutout switch is jammed shut", "low pressure switch is jammed shut", "thermal bulb is not operating properly", "scale trap is clogged"], a: 1 },
+            { q: "If the temperature in the icebox is too high, the trouble could be:", opts: ["a clogged scale trap", "air in the system", "automatic controls not functioning properly", "insufficient cooling water to the condenser"], a: 2 },
+            { q: "If frost forms on the cylinders, the cause would be:", opts: ["expansion valve not open wide enough", "charging valve open too wide", "expansion valve open too wide", "dehydrator not working properly"], a: 2 },
+            { q: "The most likely cause of high superheat would be:", opts: ["too much refrigerant", "expansion valve open too wide", "expansion valve closed in too much", "back-pressure valve set too high"], a: 2 },
+            { q: "Short-cycling means that the machine:", opts: ["grounds out frequently", "stops and starts frequently", "runs too fast", "runs too slow"], a: 1 },
+            { q: "If the cooling water to the condenser should suddenly fail:", opts: ["the solenoid valve will close", "the compressor will shut down", "the expansion valve will close", "an alarm will ring to notify the engineer"], a: 1 },
+            { q: "Which of the following regions in a multi-stage turbine where efficiency a highest?", opts: ["High pressure region above 200 psi", "Intermediate pressure region", "Low pressure most region", "A and B"], a: 1 },
+            { q: "Calculate the use factor of a 135 MW plant with a load facetor of 0.8 and a peak load of 120 MW if its operation is limited to 8500 hrs in a year", opts: ["0.90", "0.73", "0.70", "0.78"], a: 1 },
+            { q: "Calculate the net radiation heat flux exchange of two bodies with surface temperature of 25 deg C. The radiation heat transfer coefficient is 7.0 W/m2-k", opts: ["700 w/sq m", "750 w/sq m", "665 w/sq m", "650 w/sq m"], a: 2 },
+            { q: "Calculate the reserve factor for a power plant with a load factor of 0.7 average load of 50 MW and rated capacity of 80 MW", opts: ["2", "1.5", "1.12", "1.6"], a: 2 },
+            { q: "Maximum demand of 30 MW and 10 MW are connected to a power plant with a peak load of 70 MW. What is the diversity factor of the plant?", opts: ["0.50", "0.70", "0.65", "0.86"], a: 2 },
+            { q: "A gas in piston-cylinder set-up undergoes an expansion of such rate that PV 1.2 =constant. Before the expansion process the pressure of the gas is 300 kpa and the volume is 0.50 m3. If the final volume of the gas is 0.1 m3, calculate the work done by the gas", opts: ["9.71 KJ", "11.0 KJ", "12 KJ", "8 KJ"], a: 0 },
+            { q: "The phenomenon in which air enters a submerged suction pipe from the water surface is called a:", opts: ["whirlpool", "vacuum", "vortex", "thixotropic"], a: 2 },
+            { q: "Where groundwater ( wells and springs) or surface water (streams and takes) are used for feedwater, water hardness of ___ and alkalinity of pH 10 to be ph should be considered", opts: ["0-10 ppm", "10-20 ppm", "20-30 ppm", "30-40 ppm"], a: 0 },
+            { q: "Which of the following is not a solid fuel?", opts: ["peat", "briquettes", "tar", "coke"], a: 2 },
+            { q: "The memory lost when the operating power is removed", opts: ["power memory", "volatile memory", "initial memory", "quick data"], a: 1 },
+            { q: "Canisters of helmets shall be removed immediately after having been used or Seal broken and is unused, must be renewed at least once every:", opts: ["1 year", "2 years", "3 years", "4 years"], a: 1 },
+            { q: "Pump whose purpose is to increase the effective water pressure by sucking water from a public service main or private-use water system", opts: ["horizontal split case pump", "vertical shaft turbine pump", "booster pump", "submersible pump"], a: 2 },
+            { q: "A small fitting with a double offset, or shaped like the letter U with the ends turned out", opts: ["elbow tee", "expansion loop", "spigot joint", "cross-over"], a: 3 },
+            { q: "The condition in which droplets of water are carried by steam in the boiler", opts: ["priming", "breeching", "carryover", "condensation"], a: 0 },
+            { q: "At the start of the compression process of an air-standard diesel power cycle the pressure is 100kpa and the temp is 15 deg C. for a mean effective pressure of 1362 kpa and compression ratio of 18 the heat of combustion developed is 1800 kj/kg. what is the thermal efficiency of the cycle?", opts: ["65 %", "59 %", "55%", "68%"], a: 1 },
+            { q: "A circular chip ( k= 150 w/ mk) with a diameter d=10mm and thickness t= 4 mm is embedded in a circuit board. Its surface is exposed to the flow of a coolant (h = 250 W/m2k, T = 10 degrees C) while its side and back surface and perfectly insulated. If any point in the chip the temp must not exceed 90 degrees C, what is the steady state heat dissipation of the chip?", opts: ["2.5 W", "1.6 W", "2.0 W", "1.8 W"], a: 1 },
+            { q: "A 3 cm layer asbestos [k=20 W/m degrees C] is used for a pipe [k=20 W/m degrees C] with 15 cm inside diameter and 12 cm outer diameter. The inside wall temperature of the pipe is maintained at 500 deg C while the outside surface of asbestos at 90 deg C. Calculate the heat loss per meter length", opts: ["1265 w/m", "1500 w/m", "1400 w/m", "1100 w/m"], a: 0 },
+            { q: "A 5m thick flat plane ( k=60 w/ m k) is well insulated on its sides, while the top and bottom surfaces are maintained at 150 deg. Assuming a steady state heat conduction, calculate the temperature 4 m below the top surface.", opts: ["100 deg c", "120 deg c", "94 deg c", "80 deg c"], a: 2 },
+            { q: "A solid of diameter D=0.5 m and surface emissivity of 0.8 contains electrons that dissipate 100 W of heat. If it does not receive radiation from the surroundings, what is the surface temp?", opts: ["300 deg C", "280 deg C", "230 deg C", "270 deg C"], a: 2 },
+            { q: "Which of the following is basically a jet engine that exhausts into a turbine generator?", opts: ["aeroderivative gas turbine", "brayton engine", "industrial gas turbine", "joule turbine"], a: 0 },
+            { q: "It is referred to as the maximum continous power available from a hydroelectric power plant even under the most adverse hydraulic condition", opts: ["primary power", "continuous base power", "continuous peak power", "firm power"], a: 3 },
+            { q: "Working fluids used in refrigeration cycle decreases in temperature as they pass through the throttle valve. The Joule- Thompson coefficient of these fluids is", opts: ["negative", "zero", "positive", "none of the above"], a: 2 },
+            { q: "The interaction that occurs between a system and its surroundings as the system executes a process, which is the result of the system being at the temperature different from the surrounding is", opts: ["mass transfer", "heat transfer", "work transfer", "none of the above"], a: 1 },
+            { q: "Exergy is always", opts: ["being produced", "being destroyed", "not changing", "none of the above"], a: 1 },
+            { q: "Exergy destruction is a result of", opts: ["heat transfer", "work production", "process irreversibility", "none of the above"], a: 2 },
+            { q: "An air pollutant which is the result of burning fuels oils", opts: ["ferrous oxide", "hydrogen nitride", "sulfur dioxide", "aluminum oxide"], a: 2 },
+            { q: "Analysis of solid fuel to determine moisture, volatile matter, fixed carbon, and ash expressed as percentage of the total weight of the sample", opts: ["viscometer", "proximate analysis", "ultimate", "pour point"], a: 1 },
+            { q: "A gas analysis apparatus in which the percentage of oxygen, carbon dioxide and neonoxide in the gas measured by absorption in separate chemical solutions", opts: ["orsat", "proximate", "ultimate", "pour point"], a: 0 },
+            { q: "The water added to boiler feed to compensate for the water lost through blowdown, leakage, etc", opts: ["condensate", "make-up", "sulfur", "economizer"], a: 1 },
+            { q: "Gas flow caused by boiler’s pressure being less than boiler’s furnace pressure", opts: ["induced draft", "infrared", "injector", "inhibitor"], a: 0 },
+            { q: "An automatic pressure-relieving device that opens in proportion to the increase in pressure over its opening pressure", opts: ["pressure gauge", "relieve valve", "ammeter", "calorimeter"], a: 1 },
+            { q: "A rotating device used to convert kinetic energy into mechanical energy", opts: ["turbine", "generator", "pump", "vacuum"], a: 0 },
+            { q: "Air can be prevented from getting into the system by:", opts: ["keeping all gland and stuffing boxes on the high pressure side tight", "keeping the dehydrator clean at all times", "keeping all glands and stuffing boxes on the low pressure side tightr", "running the refrigerant through an aerator"], a: 2 },
+            { q: "An excessively high head pressure could be caused by", opts: ["solenoid valve shut off", "insufficient cooling water to the condenser", "insufficient cooling water to the evaporator coils", "too much cooling water to the condenser"], a: 1 },
+            { q: "The solenoid valve is controlled by", opts: ["the amount of liquid in the system", "the amount of gas in the system", "the temperature in the condenser", "the thermal switch operated by the icebox temperature"], a: 3 },
+            { q: "If the discharge side of the thermal expansion valve is warmer than the", opts: ["expansion valve is working normally", "expansion valve is not working normally", "solenoid valve is not working normally", "scale trap is dirty"], a: 1 },
+            { q: "If the pressure is too high", opts: ["the relief valve should open before the high pressure output", "the relief valve should open and let excess refrigerant go to receiver", "the high pressure output switch should operate before the relief valve", "close in on the suction valve"], a: 2 },
+            { q: "If a pressurized water reactor (PWR)", opts: ["the coolant water is pressurized to work as moderator", "the coolant water boils in the core of the reactor", "the coolant water is pressurized to prevent boiling of water in the core", "no moderator is used"], a: 2 },
+            { q: "Which of the following property of coal has major influence on the design and operation of a steam power plant", opts: ["density of coal", "carbon content of coal", "ash content of coal", "shape and size of coal"], a: 2 },
+            { q: "A boiler horsepower is equal to the evaporation of 3405lbs of 100 degrees c water per hr. how much steam in lb per hour a 700 horsepower boiler can generate?", opts: ["24150 lb / hr", "21000 lb/ hr", "18000 lb/hr", "30000 lb/hr"], a: 1 },
+            { q: "___ is obtained by mixing and burning precisely the right amount of fuel and oxygen so that products are left once combustion is complete", opts: ["perfect combustion", "burning combustion", "firing combustion", "burning combustion"], a: 0 },
+            { q: "What type of boiler commonly used in industrial and heavy commercial application due to less expensive to make low pressure, easier to maintain and repair", opts: ["water tube boiler", "fire tube boiler", "air tube boiler", "marine water"], a: 1 },
+            { q: "During the emergency operation of the boiler, when there is no water in the gauge glass and steam comes out of the bottom trycock, the water level cannot be determined. What preventive measure the operator does to save the boiler", opts: ["shutdown the boiler and do not add water", "add water to compensate the water losss", "increase the firing rate", "continue to operate the boiler and add water"], a: 0 },
+            { q: "The most important valve in the boiler operation and the last line of defense against disaster is known as", opts: ["pressure gauge", "compound gauge", "safety valve", "gate valve"], a: 2 },
+            { q: "A common test and very important when a boiler is being repaired and or replaced before being back in operation or in service is known as", opts: ["hydrostatic test", "water level test", "test clamp", "acid test"], a: 0 },
+            { q: "In heat transfer by conduction, due to symmetry the heat flow as a point is perpendicular to the isothermal surface through the point. This mode of conduction is a characteristic of", opts: ["non-isotropic", "isotropic solid", "insulators", "conductors"], a: 1 },
+            { q: "Why should you avoid bending or twisting of fan blades in an air conditioning unit?", opts: ["it will not cause ice build up", "it will wear out the motor bearings &cause noise", "it may not slice suction line", "it decrease the volume flow of refrigerant"], a: 1 },
+            { q: "The heat transferred radially across insulated pipe per unit area", opts: ["remain constant", "inversely proportional to the thermal conductivity", "decrease from pipe wall to insulated surface", "increase form pipe wall to insulated surface"], a: 2 },
+            { q: "Under normal operating conditions, when a solid material to be dried is placed inside a batch tray dryer, the material is usually subjected", opts: ["under constant drying conditions", "under variable drying conditions", "under high temperature drying", "under low temperature drying"], a: 0 },
+            { q: "A change of phase directly from vapor to solid without passing through the liquid state is called as", opts: ["sublimation", "vaporization", "solidification", "deposition"], a: 3 },
+            { q: "In terms of heat transfer, the use of a cooling tower is said to be more efficient and more economical compared to an ordinary heat exchanger since", opts: ["large vol of air is available and free", "temperature profiles of air and water can cross each other", "large amount of water can be processed", "a cooling tower is much smaller and cheaper than a heat heat exchanger"], a: 1 },
+            { q: "It is a form of oxygen photochemicallly produced in nature", opts: ["ozone", "oxidizing agent", "oxidation", "C02"], a: 0 },
+            { q: "What is the chemical formula of ozone", opts: ["O3", "D3O", "O2", "O1"], a: 0 },
+            { q: "In the upper atmosphere, ozone is nade by ultraviolet light reacting with", opts: ["oxygen", "nitrogen", "hydrogen", "water vapor"], a: 0 },
+            { q: "The ozone concentration of parts per million(ppm) is generally considered maximum permissible for how many hours of exposure?", opts: ["8 hrs", "7 hrs", "4 hrs", "3hrs"], a: 0 },
+            { q: "How may moisture be removed from air?", opts: ["condensation", "adsorption", "A and B", "none of these"], a: 2 },
+            { q: "In cooling cycle, the dry bulb temp (db) of the air is lowered, what will happens to the relative humidity", opts: ["increased", "decreases", "remains constant", "increases or decreases depending on the temperature at which it is cooled"], a: 0 },
+            { q: "What is the effect of superheating the refrigerant?", opts: ["it increases the coefficient of performance", "it decreases the coefficient of performance", "it lowers the boiling point of the refrigerant", "it increases the suction pressure of the refrigerant"], a: 0 },
+            { q: "A turbine setting where one disadvantage is the difficulty of lubricating the operating mechanism, with consequent relatively rapid water", opts: ["siphon setting", "open fume setting", "cast setting", "capacity setting"], a: 1 },
+            { q: "A patented device combining expansion and compression function in a single rotor permitting higher cycle temperatures", opts: ["comprex", "compressor", "expander", "single-shaft"], a: 0 },
+            { q: "A rough measure of the physical size of the equipment which must handle the specified quantity of the fluid", opts: ["pressure ratio", "fuel rate", "thermal efficiency", "air ratio"], a: 3 },
+            { q: "The ratio of the highest main compressor discharge pressure as the lower main compressor inlet pressure", opts: ["cycle pressure ratio", "cycle pressure level", "work ratio", "air ratio"], a: 0 },
+            { q: "The ratio of the maximum pressure in the cycle to the atmospheric pressure", opts: ["cycle pressure ratio", "cycle pressure level", "regenerator effectiveness", "thermal efficiency"], a: 1 },
+            { q: "The ratio of the actual partial pressure exerted by tge water vapor in any volume of air to the partial pressure that would be exerted by the water vapor in the air is saturated at the temperature of the air", opts: ["relative humidity", "absolute humidity", "humidity ratio", "saturation ratio"], a: 0 },
+            { q: "In sensible heating the absolute humidity remains constant but the relative humidity", opts: ["increases", "remains constant", "decreases", "zero"], a: 2 },
+            { q: "The relative humidity becomes 100% and where the water vapor start to condense", opts: ["dew point", "saturated point", "cloud point", "critical point"], a: 0 },
+            { q: "A type of refrigerant that will not damage the ozone layer.", opts: ["Hydrofluorocarbons (HCF’s)", "R-22", "Hydrochlorofluorocarbons (HCHF’s)", "R-12"], a: 0 },
+            { q: "Which of the following is the type of refrigerant that damages Ozone layer?", opts: ["Hydrocholorofluorocarbons (HCHF’s)", "R-22", "R-12", "All of these"], a: 3 },
+            { q: "Large-bulb alcohol thermometer used to measure air speed or atmospheric condition by means of cooling.", opts: ["Kata thermometer", "JJ Thompson Thermometer", "Kelvin Thermometer", "Wet Bulb Thermometer"], a: 0 },
+            { q: "The phenomenon that warm air rise and cold air settle is called", opts: ["Stratification", "Setting Due", "Sedimentation", "Ventilation"], a: 0 },
+            { q: "Which of the following components of the window air conditioning system cleaned annually?", opts: ["Evaporator and condenser", "Fan blades and fan motor", "Motor and compressor", "All of these"], a: 2 },
+            { q: "A cooled heat exchanger that transfer heat from compressed air to cooler air.", opts: ["Intercooler", "Refrigerator", "Economizer", "Aftercooler"], a: 3 },
+            { q: "All the control stand, pitch of the turbine blades must be adjusted manually by a.", opts: ["Sensor", "Float valve", "Gate", "Switch"], a: 0 },
+            { q: "The most commonly used adjustable-blade propeller turbine.", opts: ["Francis turbine", "Kaplan turbine", "Impulse turbine", "Pelton wheel"], a: 1 },
+            { q: "Runner blades are adjusted automatically in synchronism with turbine wicker gates by a/an.", opts: ["Control valve", "Governor", "Oil servomotor", "Manual operation"], a: 2 },
+            { q: "What is supplied to the servomotor from the turbine governor oil system through the generator shaft and through a control valve.", opts: ["Water", "Air", "Steam", "Oil"], a: 3 },
+            { q: "Used to exhaust air from the casing for starting.", opts: ["Ejectors", "Dearator", "Injector", "Blower"], a: 0 },
+            { q: "Advantage for propeller turbines of all types", opts: ["open flumes setting", "siphon setting", "cost setting", "capacity setting"], a: 1 },
+            { q: "An office air conditioning system drew in a quantitity of hot air from outside, cooled it to 1 deg C, and mixed it with the internal air of a building. Care was taken to supply enough fresh air to eliminate objectionable odors. The temperature of the space was maintained constant, and yet some people became uncomfortable in the afternoon, why?", opts: ["The relative humidity had dropped", "When a person spends a long time at a constant temperature that person becomes uncomfortable", "Radiant heat from others in the office made the space uncomfortable", "The complainers were not really uncomfortable, they were just bored"], a: 0 },
+            { q: "A large paper plant uses its own cogeneration power plant to generate its electricity because.", opts: ["It permits the use of a more efficient generator", "The company can better control the voltage", "It does away with high power lines leading to the plant", "It provides a more efficient conversion of fuel"], a: 3 },
+            { q: "The volumetric output of a centrifugal pump is reduced by closing a valve part way on the intake side of the pump, throttling the intake. The reduction of flow is accompanied by “popping” noises which seem to come from inside the case. What is the probable cause?", opts: ["The impeller has broken", "Dirt particles have got into the pump intake", "The intake valve flow seal is loose and vibrates", "The fluid is cavitating"], a: 3 },
+            { q: "If a man touches two metals which were kept together at room temperature, why would one metal feel colder that the other?", opts: ["One has a high temperature coefficient", "One has a lower temperature", "One has a high thermal conductivity", "One has a high temperature"], a: 2 },
+            { q: "The ratio of the internal thermal resistance of a solid to the boundary layer thermal resistance is described by:", opts: ["Biot number", "Nusselt number", "Prandtl number", "Reynolds number"], a: 0 },
+            { q: "An instrument which is commonly used to measure the most important characteristics of fuel oil which is viscosity is known as;", opts: ["Saybolt Viscosimeter", "Ph-meter", "Acid Testmeter", "Gravuty meter"], a: 0 },
+            { q: "Equipment designed to reduce the amount of water vapor in the ambient atmosphere;", opts: ["Blower", "Condenser", "Dehumidifier", "Cooling tower"], a: 2 },
+            { q: "In a refrigerator, this is a chamber for storing low-side liquid refrigerant in a system, which also serves as a surge drum.", opts: ["Condenser", "Evaporator", "Compressor", "Accumulator"], a: 3 },
+            { q: "The measure of a fluids resistance to flow(the internal friction of a fluid) as temperature increase.", opts: ["Density", "Viscosity", "Specific gravity", "Temperature"], a: 1 },
+            { q: "A mechanical device used to burn solid fuel specifically used in coal power palnt.", opts: ["Stroker", "Boiler", "Staybolt", "Condenser"], a: 0 },
+            { q: "The chemically correct ratio of air fuel a mixture capable of perfect combustion with no unused air or fuel,", opts: ["Fuel point", "Pour point", "Stoichiometric ratio", "Stack"], a: 2 },
+            { q: "When a solid material is said to be “dry” it means that", opts: ["The solid does not contain any moisture", "The solid still contains very small amount of moisture", "The solid contains equilibrium moisture", "The weight of the solid is the same as the bone dry weight"], a: 1 },
+            { q: "A hot block is cooled by blowing cool air over its top surface. The heat that is first transferred to the air layer close to the block is by conduction. It is eventually carried away from the surface by:", opts: ["Convection", "Radiation", "Conduction", "Thermal"], a: 0 },
+            { q: "When drying banana chips under the sun, the rate of drying is faster", opts: ["On a slightly breezy day", "On a calm day", "On a cloudy day", "On a hot and windy day"], a: 3 },
+            { q: "Reflector of a nuclear reactor are made up of", opts: ["Boron", "Cast iron", "Beryllium", "Steel"], a: 2 },
+            { q: "The function of a moderator in a nuclear reactor is", opts: ["To slow down the fast moving electrons", "To speed up the slow moving electrons", "To start the chain reaction", "To transfer the heat produced inside the reactor to a heat exchanger"], a: 0 },
+            { q: "Which of the following is the most commonly used moderator?", opts: ["Graphite", "Sodium", "Deuterium", "Heavy water"], a: 0 },
+            { q: "Ammonia leaks in the condenser can be detected by:", opts: ["Smelling the discharge water", "Applying litmus paper to the circulating water discharge", "Adding oil of peppermint to the system and tracing the small", "Applying a scapy mixture to the condenser heads and looking for bubbles"], a: 1 },
+            { q: "Air arrangement of headwater tubes located in the boiler", opts: ["Economizer", "Condenser", "Evaporator", "Boiler"], a: 0 },
+            { q: "Scale in boiler can.", opts: ["Create low steam quality", "Cause foaming", "Over blow-off line", "Inhibit circulation and heat transfer"], a: 3 },
+            { q: "The effectiveness of a body as a thermal radiator at a given temperature.", opts: ["Absorptivity", "Emissivity", "Conductivity", "Reflectivity"], a: 1 },
+            { q: "In a cooling tower, the water is cooled mainly by;", opts: ["Condensation", "Evaporation", "Convection", "Conduction"], a: 2 },
+            { q: "A temperature above which a given gas cannot be liquefied;", opts: ["Cryogenic Temperature", "Absolute Temperature", "Vaporization", "Critical Temperature"], a: 3 },
+            { q: "What part of heat exchangers that are classified as radiant convection and placed at the near of the furnace, where they receive the bulk of the radiation from the flame.", opts: ["Radiant superheaters", "Condenser", "Radiator", "Evaporators"], a: 0 },
+            { q: "Which of the following is the major consideration while selecting the nuclear power plant?", opts: ["Safety", "Load center", "Disposal of waste", "Availability of water"], a: 2 },
+            { q: "A moderator is used to:", opts: ["Slow down neutrons", "Slow down electrons", "Accelerate neutrons", "Direct flow of electron"], a: 0 },
+            { q: "Which of the following material is not used as moderator?", opts: ["Graphite", "Beryllium", "Aluminum", "Light water"], a: 2 },
+            { q: "In nuclear power plant which of the following is used to slow down the fast neutron?", opts: ["Reflector", "Shield", "Control rod", "Moderator"], a: 3 },
+            { q: "Control rods for nuclear reactors are made of", opts: ["Graphite", "Concrete", "Cadmium", "Lead"], a: 2 },
+            { q: "The reactor in which fissionable fuel produced is more than the fuel consumed is known as", opts: ["Fast reactor", "Breeder reactor", "Thermal reactor", "None of the above"], a: 1 },
+            { q: "Heavy duty gas turbines typically have", opts: ["Double shaft", "Triple shaft", "Single shaft", "Quadruple shaft"], a: 2 },
+            { q: "Which of the following statements is not a key feature of fourier’s heat conduction.", opts: ["It is phenomenological", "It defines an important material property called thermal conductance", "It is vector expression indicating that the heat flux is normal and the direction of decreasing temperature.", "Assume that the thermal conductivity is constant with repect to temperature of the material"], a: 3 },
+            { q: "What is the color code of steam line in geothermal power plant?", opts: ["Green", "Blue", "Silver Gray", "Red"], a: 2 },
+            { q: "What is absorbed by sulphites in boiler water treatment?", opts: ["Carbon dioxide", "Oxygen", "Carbon monoxide", "Impurities settled in mud drums"], a: 3 },
+            { q: "A flow volume in which the fluids flow upward through a tapered tube lifting a shaped weight to a position where the upward force just balances to weight.", opts: ["Rotameter", "Thermometer", "Viscometer", "Ammeter"], a: 0 },
+            { q: "An instrument that register total pressure and static pressure in a used to determine velocity.", opts: ["Ammeter", "Rotameter", "Pitot tube", "Pour point"], a: 2 },
+            { q: "A heat engine whose thermodynamic efficiency is greater than that of a Carnot device using the same energy reservoir is known as:", opts: ["A perpetual machine of the zeroth kind", "A perpetual machine of the second kind", "A perpetual machine of the first kind", "A perpetual machine of the third kind"], a: 1 },
+            { q: "The degrees of power interval in 4-stroke cycle of a six-cylinder engine is", opts: ["60 degrees", "180 degrees", "90 degrees", "120 degrees"], a: 3 },
+            { q: "The portion of sunlight, rich in ultraviolet rays, which has a strong effect on photographic plate.", opts: ["Gamma rays", "X-rays", "Beta rays", "Actinic rays"], a: 3 },
+            { q: "Which of the following does not illustrate the effect of temperature or pressure on gas solubility?", opts: ["Air bubbles from on the sides of a warm glass of water", "Soda pop is bottle under pressure", "Boiling frees water gases", "Air is more humid on rainy days"], a: 3 },
+            { q: "Among the effluents that may be released from the hydrothermal reservoir which one is the most toxic?", opts: ["Carbon dioxide", "Hydrogen sulfide", "Methane", "Ammonia"], a: 1 },
+            { q: "Newton said that a projectile if given enough horizontal velocity will not fail to the earth. Instead, it moves along a path around the earth. The 1st artificial satellite that verified Newton’s statement is", opts: ["Apollo 1", "Houston 1", "Sputnik 1", "None of these"], a: 2 },
+            { q: "A refrigerant control valve that maintains a constant pressure in a evaporator", opts: ["Bleed valve", "Angle valve", "Automatic expansion valve", "Ball check valve"], a: 2 },
+            { q: "A rigid contains gas a 100 kpa and 10 degrees C. the gas is heated until the temperature reaches 100 degree C. Calculate the work done by the system.", opts: ["2", "0", "1", "1.5"], a: 1 },
+            { q: "The compression ratio in an air-standard Otto cycle is 10. At the beginning of the compression stroke the pressure is 120 kpa and the temperature is 15 degree C. Calculate the pressure and the temperature at the end of the compression process.", opts: ["4,000 kPa", "3,500 kPa", "3,014 kPa", "3,200 kPa"], a: 2 },
+            { q: "Find the thermal efficiency of an air-standard Otto power cycle with a compression ratio of 7.", opts: ["60%", "50%", "65%", "54%"], a: 3 },
+            { q: "At the beginning of the compression stroke in an standard Otto cycle. The pressure is 100 kPa and the temperature is 15 degree C. the compression ratio is 8 and work is 1,017.7 kj/kg. Determine the mean effective pressure.", opts: ["1,406 kPa", "1,500 kPa", "1,350 kPa", "1,550 kPa"], a: 0 },
+            { q: "The compression ratio in an air standard diesel cycle is 20. At the beginning of the compression process the pressure and the temperature are 0.12 Mpa and 15 degree C respectively. What is the pressure at the end of the compression process?", opts: ["8,500 kPa", "7,955 kPa", "8,300 kPa", "8,200 kPa"], a: 1 },
+            { q: "The accounting of all energy units involved in a system a cycle of an piece of equipment", opts: ["Thermodynamic solution", "Equilibrium condition", "Summation of energy units", "Heat Balance"], a: 3 },
+            { q: "It refers to any arrangement whereby steam is bled from a turbine more pressure for any purpose whatsoever", opts: ["Regeneration", "Extraction", "Bled-off cycle", "Regenerative extraction cycle"], a: 1 },
+            { q: "Any arrangement whereby steam is bled from a turbine for a purpose of thermal regeneration of the condensate to a temperature level approaching that of the boiler water.", opts: ["Regenerative", "Extraction cycle", "Bled-off steam cycle", "Regenerative extraction cycle"], a: 0 },
+            { q: "The steam extracted from the turbine", opts: ["Bled steam", "Extraction", "Extracted steam", "A and C"], a: 3 },
+            { q: "The point of particular pressure where the steam is extracted", opts: ["Bleeder point", "Extraction point", "Bleeder", "A and B"], a: 3 },
+            { q: "Vapor pumps that raise the pressure of the refrigeration to a level that permits sufficient heat rejection to the condensing medium.", opts: ["Fans", "Blower", "Compressor", "Suction"], a: 2 },
+            { q: "Low temperature heat exchanger that is used to absorb heat from the refrigerated space and transfer it to the refrigerant in its tubes so that it can be transported to another and released.", opts: ["Condenser", "Evaporator", "Capillary tube", "Compressor"], a: 1 },
+            { q: "The substance employed as cooling effect to absorb heat from the refrigerated space in called", opts: ["Condensate", "Feedwater", "Refrigerant", "Moisture"], a: 2 },
+            { q: "It is inversely proportional to the power required to grind the coal to certain fitness", opts: ["Pulverizing index", "Fireness index", "Grindability index", "Inverse power coefficient"], a: 2 },
+            { q: "The temperature where the ash becomes very plastic, somewhat below the melting point of the ash.", opts: ["Ash- softening temperature", "Ash- plasticity temperature", "Ash – fluidity temperature", "Ash – liquefaction temperature"], a: 0 },
+            { q: "The amount of chemical energy in a given mass or volume of fuel.", opts: ["Heating value", "Energy storage", "Calorific value", "A and C"], a: 3 }
+        ];
+
+        // System State Variables
+        let activeQuiz = [];
+        let userState = []; 
+        let currentQuestionIndex = 0;
+        let score = 0;
+        const letterPrefixes = ['A. ', 'B. ', 'C. ', 'D. '];
+
+        // --- DOUBLE RANDOMIZER (Fisher-Yates Shuffle) ---
+        function shuffleArray(array) {
+            let curId = array.length;
+            while (0 !== curId) {
+                let randId = Math.floor(Math.random() * curId);
+                curId -= 1;
+                let tmp = array[curId];
+                array[curId] = array[randId];
+                array[randId] = tmp;
+            }
+            return array;
+        }
+
+        function initQuiz() {
+            // 1. Clone and shuffle the 100 questions
+            let tempQuiz = JSON.parse(JSON.stringify(rawQuizData));
+            tempQuiz = shuffleArray(tempQuiz);
+
+            // 2. Shuffle the options inside EACH question
+            activeQuiz = tempQuiz.map(qObj => {
+                // Attach original index to keep track of the correct answer
+                let optionsWithMeta = qObj.opts.map((opt, i) => ({ text: opt, isCorrect: i === qObj.a }));
+                optionsWithMeta = shuffleArray(optionsWithMeta);
+
+                return {
+                    q: qObj.q,
+                    opts: optionsWithMeta.map(o => o.text),
+                    a: optionsWithMeta.findIndex(o => o.isCorrect) // New correct index
+                };
+            });
+
+            // Initialize tracking state
+            userState = new Array(activeQuiz.length).fill(null);
+            
+            buildNavigationGrid();
+            loadQuestion();
+        }
+
+        // --- NAVIGATION GRID BUILDER ---
+        function buildNavigationGrid() {
+            const grid = document.getElementById('navGrid');
+            grid.innerHTML = '';
+            for (let i = 0; i < activeQuiz.length; i++) {
+                const btn = document.createElement('button');
+                btn.innerText = i + 1;
+                btn.classList.add('nav-btn');
+                btn.id = `nav-btn-${i}`;
+                btn.onclick = () => jumpToQuestion(i);
+                grid.appendChild(btn);
+            }
+        }
+
+        function updateNavGridStyle() {
+            for (let i = 0; i < activeQuiz.length; i++) {
+                const btn = document.getElementById(`nav-btn-${i}`);
+                // Clear active outline
+                btn.classList.remove('active-q');
+                if (i === currentQuestionIndex) {
+                    btn.classList.add('active-q');
+                }
+                
+                // Color code if answered
+                if (userState[i] !== null) {
+                    if (userState[i].isCorrect) {
+                        btn.classList.add('correct-nav');
+                    } else {
+                        btn.classList.add('wrong-nav');
+                    }
+                }
+            }
+        }
+
+        function jumpToQuestion(index) {
+            currentQuestionIndex = index;
+            document.getElementById('sideNav').classList.remove('active');
+            loadQuestion();
+        }
+
+        // --- LOAD QUESTION UI ---
+        function loadQuestion() {
+            updateNavGridStyle();
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('optionsGrid').innerHTML = '';
+            
+            const currentData = activeQuiz[currentQuestionIndex];
+            document.getElementById('questionCounter').innerText = `Q ${currentQuestionIndex + 1} / ${activeQuiz.length}`;
+            document.getElementById('questionText').innerText = `${currentQuestionIndex + 1}. ${currentData.q}`;
+
+            const isAnswered = userState[currentQuestionIndex] !== null;
+
+            // Generate Options
+            currentData.opts.forEach((optionText, index) => {
+                const button = document.createElement('button');
+                // Apply A, B, C, D formatting
+                button.innerText = letterPrefixes[index] + optionText;
+                button.classList.add('option-btn');
+
+                if (isAnswered) {
+                    button.disabled = true;
+                    // Re-apply correct/wrong styles if already answered
+                    if (index === currentData.a) {
+                        button.classList.add('correct');
+                    } else if (index === userState[currentQuestionIndex].selectedIndex) {
+                        button.classList.add('wrong');
+                    }
+                } else {
+                    button.onclick = () => selectAnswer(index, button);
+                }
+
+                document.getElementById('optionsGrid').appendChild(button);
+            });
+
+            // If already answered, show next button
+            if (isAnswered) {
+                document.getElementById('nextBtn').style.display = 'block';
+            }
+        }
+
+        // --- ANSWER LOGIC ---
+        function selectAnswer(selectedIndex, selectedButton) {
+            const currentData = activeQuiz[currentQuestionIndex];
+            const allButtons = document.getElementById('optionsGrid').children;
+            const isCorrect = selectedIndex === currentData.a;
+
+            // Save state
+            userState[currentQuestionIndex] = {
+                selectedIndex: selectedIndex,
+                isCorrect: isCorrect
+            };
+
+            // Update Score
+            if (isCorrect) {
+                score++;
+                document.getElementById('scoreDisplay').innerText = score;
+            }
+
+            // Lock and format buttons
+            for (let i = 0; i < allButtons.length; i++) {
+                allButtons[i].disabled = true;
+                if (i === currentData.a) {
+                    allButtons[i].classList.add('correct');
+                }
+            }
+
+            if (!isCorrect) {
+                selectedButton.classList.add('wrong');
+            }
+
+            // Update Side Nav color instantly
+            updateNavGridStyle();
+
+            document.getElementById('nextBtn').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < activeQuiz.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                // Check if all questions are answered
+                const unansweredCount = userState.filter(s => s === null).length;
+                if (unansweredCount > 0) {
+                    alert(`You still have ${unansweredCount} unanswered questions! Open the side menu to find them (the grey boxes).`);
+                    document.getElementById('sideNav').classList.add('active');
+                } else {
+                    showResults();
+                }
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quizBox').style.display = 'none';
+            document.getElementById('resultsBox').style.display = 'block';
+            document.getElementById('finalScore').innerText = score;
+        }
+
+        // Start Quiz on Load
+        initQuiz();
+    </script>
+</body>
+</html>
