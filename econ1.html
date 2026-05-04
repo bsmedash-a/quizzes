@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Economics | Quiz #3</title>
+    <!-- MathJax for rendering equations -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --main-color: #ffffff;
+            --text-color: #2c3e50;
+            --accent-color: #3498db;
+            --hover-color: #2980b9;
+            --correct-color: #27ae60;
+            --wrong-color: #e74c3c;
+            --nav-bg: #2c3e50;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--main-color);
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-color);
+            margin-right: 20px;
+            transition: color 0.2s;
+        }
+
+        .hamburger:hover { color: var(--accent-color); }
+
+        .top-bar h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: var(--nav-bg);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            width: 320px;
+            background-color: var(--nav-bg);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            position: fixed;
+            height: calc(100% - 60px);
+            top: 60px;
+            z-index: 99;
+            transform: translateX(-100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        #sidebar.open { transform: translateX(0); }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background-color: #1a252f;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .nav-grid {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .nav-item {
+            background-color: #34495e;
+            color: white;
+            border: none;
+            padding: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover { background-color: #7f8c8d; }
+        .nav-item.active { background-color: var(--accent-color); box-shadow: inset 0 0 0 2px white; }
+        .nav-item.completed { background-color: var(--correct-color); }
+
+        /* Main Content */
+        #main-content {
+            flex: 1;
+            margin-top: 60px;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .quiz-card {
+            background-color: var(--main-color);
+            width: 100%;
+            max-width: 850px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            height: fit-content;
+            margin-bottom: 40px;
+        }
+
+        .question-header {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #2c3e50;
+            word-wrap: break-word;
+        }
+
+        /* Options */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background-color: #f8f9fa;
+            border: 2px solid #bdc3c7;
+            padding: 16px 20px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            color: #2c3e50;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #ebf5fb;
+            border-color: var(--hover-color);
+        }
+
+        .option-btn.correct {
+            background-color: #e8f8f5;
+            border-color: var(--correct-color);
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .option-btn.wrong {
+            background-color: #fdedec;
+            border-color: var(--wrong-color);
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .option-letter {
+            font-weight: bold;
+            margin-right: 15px;
+            color: var(--accent-color);
+        }
+
+        .feedback-message {
+            padding: 20px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .feedback-message.success {
+            background-color: #e8f8f5;
+            color: #27ae60;
+            border-left: 5px solid var(--correct-color);
+        }
+
+        .feedback-message.error {
+            background-color: #fdedec;
+            color: #c0392b;
+            border-left: 5px solid var(--wrong-color);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            border-top: 2px solid #ecf0f1;
+            padding-top: 20px;
+        }
+
+        .control-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-transform: uppercase;
+        }
+
+        .control-btn:hover:not(:disabled) { background-color: var(--hover-color); }
+        .control-btn:disabled { background-color: #bdc3c7; color: #ffffff; cursor: not-allowed; }
+
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 98;
+            display: none;
+        }
+        #overlay.show { display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h2>Engineering Economics Reviewer</h2>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header">100 Problems Navigator</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div id="main-content">
+        <div class="quiz-card" id="quizCard">
+            <div class="question-header">
+                <span id="qHeader">Initializing...</span>
+                <span id="scoreTracker" style="color: var(--accent-color);">Score: 0</span>
+            </div>
+            
+            <div class="question-text" id="qText">Extracting problem set...</div>
+            <div class="options-container" id="optionsGrid"></div>
+            <div class="feedback-message" id="feedbackMessage"></div>
+            
+            <div class="controls" id="controls" style="display:none;">
+                <button class="control-btn" id="prevBtn" onclick="prevQuestion()">&#8592; Previous</button>
+                <button class="control-btn" id="nextBtn" onclick="nextQuestion()">Next &#8594;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Raw Data Embed (Do not modify formatting) -->
+    <script id="raw-data" type="text/plain">
+1. The worth of a property which is equal to the original cost less depreciation.
+A. earning value
+B. scrap value
+C. book value
+D. face value
+2. That kind of obligation which has no condition attached?
+A. analytical
+B. gratuitous
+C. private
+D. pure
+3. The difference between sales revenue and the cost of goods sold.
+A. rate of return
+C. gross profit
+B. net income
+D. gross national product
+4. The first cost of any property includes
+A. installation expenses
+B. original purchase price and freight and transportation charges
+C. initial taxes and permits' fee
+D. all of the above
+5. A type of annuity where the payments are made at the start of each period, beginning from the first period.
+A. annuity due
+B. ordinary annuity
+C. deferred annuity
+D. perpetuity
+6. The value of the stock as stated on the stock certificate.
+A. par value
+B. market value
+C. book value
+D. scrap value
+7. Which of the following terms is not related to ethics?
+A. honesty
+B. morality
+C. profitability
+D. integrity
+8. The exclusive right of a company to provide a specific product/service in a given region of the country.
+A. outlet
+B. franchise
+C. branch
+D. extension
+9. A condition where only few individuals produce a certain product that action of one will lead almost the same action by the other.
+A. oligopoly
+B. semi monopoly
+C. monopoly
+D. cartel
+10. The length of time during which it is capable of performing the function for which it was designed and manufactured.
+A. business life
+B. economic life
+C. physical life
+D. insular life
+11. The personnel required for a mechanical plant with 500 kW capacities is
+A. RME
+B. CPM
+C. PME
+D. MPE
+13. A situation in which rival firms drive prices down through attempts to undercut each other prices is called
+A. price war
+B. price control
+C. price maneuver
+D. oligopoly
+14. The place where currency traded in a foreign exchange market for which the demand is consistently high in relation to its supply.
+A. money market
+B. foreign bill
+C. treasury bill
+D. hard currency
+15. A form of fixed-interest security issued by central or local governments, companies, banks and other institutions. They are usually
+formed of long-term security, but maybe irredeemable, incurred or unsecured.
+A. bonds
+B. T-bill
+C. cash deposit
+D. all of these
+16. The amount of the company's profit that the Board of Directors of the corporation decides to distribute to ordinary shareholders.
+A. dividend
+B. par value
+C. share stock
+D. return
+17. A document that shows proof of legal ownership of a financial security.
+A. coupon
+B. bond
+C. bank note
+D. check
+18. Decrease in value of physical property due to the passage of time.
+A. depreciation
+B. inflation
+C. recession
+D. depletion
+19. It is a series of equal payment occurring at equal interval of time where the first payment is delayed after several periods, after
+the beginning of the payment
+A. deferred annuity
+B. delayed annuity
+C. progressive annuity 
+D. simple annuity
+20. Under the law is the ability of a person to take a recognized legal action. Also, it is natural power or competency to perform an
+act, as capacity to contract and ete.
+A. supra
+B. surety
+C. capacity
+D. vendee
+21. The interest-earning fund in which equal deposits are made at equal intervals of time for the purpose of gradually accumulating a
+specific sum of money required at same future date.
+A. amortization
+B. sinking fond
+C. annuity
+D. capitalized cost
+22. These are products or services that are required to support human life and activities that will be purchased in somewhat the
+same quantity even though the price varies considerably.
+A. utilities
+C. luxuries
+B. necessities
+D. product good and services
+23. The amount earned by one unit of principal during a unit of time.
+A. rate of interest
+B. cash
+C. Rate of Return
+D. receivables
+24. A method of depreciation whereby the amount to recover is spread over the estimated life of
+the asset in terms of the periods or units of output is called
+A. SOYD Method
+C. Straight Line Method
+B. Declining Balance Method
+D. Sinking Fund Method
+25. Funds supplied by others on which a fixed rate of interest must be paid and the debt be repaid at a specific place and time.
+A. discount
+B. cash flow
+C. working capital
+D. borrowed capital
+26. What must two investments with the same present worth and unequal lives have?
+A. Different salvage returns
+C. Identical tax consequences
+B. Different equivalent uniform annual cash flows
+D. Identical salvage values
+27. Total amount spent on a physical property until the property is put in operation.
+A. First cost
+B. marginal cost
+C. sunk cost
+D. increment cost
+28. Gross, profit, sales less cost of goods sold as a percentage of sales called
+A. gross margin
+B. ROI (Rate Of Return) 
+C. profit margin 
+D. price earnings
+29. The acquisition of all or a greater part of stock and fixtures of a business in a manner other than in the ordinary course of its
+business.
+A. tenement
+B. appeal
+C. chattel
+D. bulk sale
+30. A general term for various analytical measurements of profitability related to the input resources. Rate earned on average
+common stock holders equity and Rate earned on average total assets.
+A. lease
+C. Return on Investment (ROI)
+B. bill of exchange
+D. breach
+31. To render void or null, reduce to nothing, cancel, invalid
+A delict
+B. ejectment
+C. duress
+D. annulment
+32. The act of charging two or more buyers or sellers of different prices for the same product where the elasticity of supply or
+demand at each price level differs among market is known as
+A. price optimization
+B. price discrimination
+C. price manipulation
+D. price war
+33. A type of bond where the corporation pledges and are secured by assets which it owns (i.e. stocks, bonds of its subsidiaries).
+A mortgage bond
+B. collateral trust bond 
+C. debenture bond
+D. register bond
+34. A situation whereby payment is made for work net done. The term also applies to the case where more workers are used than
+are a reasonable requirement for efficient operation.
+A. feather bedding
+C. check-in pay
+B. downtime pay
+D. moon lighting
+35. It is where buyers and sellers come together.
+A. business
+B. market
+C. recreation center
+D. mall
+36. Method of paying a debt by installment usually, but not necessarily. by equal payments and by equal periods of time.
+A. amortization
+B. interest due
+C. annuity due
+D. balance due
+37. A financial summary showing the relationship among assets, liabilities and ownership in the corporation on a specific date.
+A. audit statement
+C. income statement
+B. balance sheet statement
+D. credit-debit statement
+38. The difference between the present worth and the worth at some time in the future.
+A. discount
+B. investment
+C. amortization
+D. depletion
+39. The output or sales at which income is sufficient to equal the operating cost.
+A. cash flow
+B. break even
+C. investment 
+D. depreciation
+40. An accounting book where the original record of all transactions are on its content.
+A. journal
+B. ledger
+C. income statement
+D. balance sheet
+41. Occurs when one of the parties fails to satisfy all of its obligations under a contract
+A. breach of contract 
+B. negligence
+C. tort
+D. force majeure
+42. An index of short term paying ability is called
+A. cash index
+B. maturity index 
+C. current ratio
+D. cut off index
+43. What is the acid test ratio?
+A. The ratio of owner's equity to total current liabilities.
+B. The ratio of current assets (exclusive of inventory) to total current liabilities.
+C. The ratio of all assets to total liabilities.
+D. The ratio of gross margin to operating sales, and administrative expenses.
+44. Type of annuity in which the schedule of payments is postponed, that is, the first payment is made after several periods.
+A. deferred annuity 
+B. annuity due
+C. ordinary annuity
+D. perpetuity
+45. The span of life of an equipment during which it produces a product and it is designed to produce at a profit
+A. economic life
+B. write-off period 
+C. physical life
+D. maturity life
+46. The price that can be obtained from the sale of the property after it has been used.
+A scrap value
+B. interest
+C. book value
+D. salvage value
+47. Parties whose consent or signature in a contract is not considered intelligent.
+A. minors
+B. dead persons 
+C. senior citizens 
+D. demented persons
+48. The ratio of the output power in Watts and the product of Volts and Amperes.
+A. capacity factor
+B. power factor
+C. load factor
+D. demand factor
+49. A foreign Mechanical Engineer will be allowed to practice in the Philippines if the country where he is a citizen or subject also
+allows Filipino engineers to practice, this is called
+A foreign repatriation
+C. foreign policy
+B. foreign exchange
+D. foreign reciprocity
+50. A system used to record historical financial transactions, the resultant records of which are used for product costing, satisfaction
+of statutory requirements, reporting of profit for income tax purposes, and general company management
+A. bookkeeping system
+C. cash and accrual system
+B. cost accounting system
+D. periodic inventory system
+51. The decrease in value of property due to the gradual extraction of its contents.
+A. depletion
+B. depreciation
+C. amortization
+D. asset
+52. A depreciation model where the value of an asset decreases at a decreasing rate.
+A. SOYD
+C. Straight line depreciation
+B. Sinking fund
+D. Declining balance
+53. Which of the following methods of advertising is most likely to violate ethical standard for engineering design firms?
+A. Yellow pages (phone book) advertising
+B. Radio or television advertising
+C. Company brochures using self-laudatory language
+D. Distribution of company calendars to clients
+54. The ratio of kilowatt rating of a motor to its kilowatt ampere rating.
+A. generator efficiency
+C. power factor
+B. motor efficiency
+D. capacity factor
+55. The annual change that is made for the maintenance of investments in wasting assets.
+A. maintenance cost
+C. depreciation
+B. depletion
+D. annual cost
+56. The interest charges under the condition that interest in any time is charged only to the capital
+A. compound interest
+C. declining balance
+B. simple interest
+D. rate of return
+57. Maximum plant capacity in which a CPM is allowed to operate, tend or maintain.
+A. 100 kW
+B. 300 kW
+C. 200 kW
+D. 500 kW
+58. All funds which are required to make a business enterprise a going concern.
+A. working capital 
+B. investment
+C. sales
+D. interest
+59. Under the Code of Ethics, the mechanical engineer should recognize as one of the major resources of our country.
+A. people
+B. labor
+C. machine
+D. technology
+59. The length of time during the property may be operated at a profit
+A. length of time
+B. economic life 
+C. physical life
+D. life
+60. A situation where a commonly service is supplied by a number of vendors and there is nothing to prevent additional vendors
+entering the market
+A. perfect competition 
+B. anarchy
+C. monopoly
+D. oligopoly
+61. A court writ issued to compel the performance of a public or official duty owed by the person to whom the order is directed.
+A. arrest
+B. mandamus
+C. bail
+D. payee
+62. A formal written promise to pay a certain amount of money at a specified future date.
+A. letter
+B. promissory note
+C. summons
+D. payor
+63. Association of two or more individuals for the purpose of operating a business as co-owners of a profit
+A organization
+B. partnership
+C. company
+D. corporation
+64. An index of short-term paying ability is called
+A. receivable turnover
+B. profit margin ratio
+C. current ratio
+D. acid-test ratio
+65. What is the work in-process classified as?
+A. an asset
+B. a revenue
+C. a liability
+D. an expense
+66. Indicates that a person does not have the ability, due to his mental condition, to know the nature of his act
+A. emancipation
+B. injunction
+C. non compos mentis
+D. estate
+67. A collateral agreement in a transaction, which gives one of the parties, or both, the right to choose a course of action. Example,
+option to buy a thing within a specific period.
+A. executed
+B. inventory
+C. option
+D. interest
+68. Statute limiting the time period in which a lawsuit may be brought
+A. stipulation
+R tender of payment
+C. statute of limitations 
+D. nullity
+69. It is the return of the land or property to the state if there is no person legally entitled to inherent it
+A. asset
+B. liability
+C. escheat
+D. cash
+70. Consist of the totality of property belonging to a deceased person, which must be administered and distributed in accordance
+with a last will and testament and/or the laws on succession
+A. payee
+B. title
+C. tax
+D. estate
+71. Used in sales or ordinary contracts, describes any person who requires property or negotiable instruments in good faith and for
+valuable consideration.
+A. liability
+C. asset
+B. bonafide purchaser for value
+D. owner
+72. A fixed sum agreed upon, at the outset of a contractual arrangement, as a proper compensation to be paid to the injured party in
+the event of breach.
+A. capacity
+C. depreciation
+B. liability
+D. liquidated damages
+73. The ability of a company to meet it's obligations as they come due.
+A. due Process
+B. liquidity
+C. auction
+D. lien
+74. Periodic allocation of the cost of tangible noncurrent operating assets over the periods benefit by use of the asset.
+A. asset
+B. ownership
+C. liability
+D. depreciation
+75. A depreciation method providing decreasing periodic charges for depreciation by applying a constant percentage to a declining
+asset book value.
+A. declining-balance methods
+C. replacement cost
+B. Sinking fund Method
+D. Double declining balance method
+76. Penal provision of a contract to compensate for the losses incurred by one party due to the failure to comply with the
+contract provisions,
+A decision page
+B. liquidated damages 
+C. force majeure
+D. quasi-effects
+77. Consists of the actual counting or determination of the actual quantity of the materials on hand as of a given date.
+A. physical inventory 
+B. material update
+C. material assessment 
+D. material count
+78. To be binding and enforceable written contract: documents must satisfy the best requirements, thus, there must be clear, specific
+and definite offer with no room for misunderstandings; there must be some form of conditional future consideration (i.e. payment);
+A. there must be a third party
+C. there must be a bond
+B. there must be an acceptance of the offer
+D. there must be an arbitrator
+79. The Economic Order Quantity (EOQ) is defined as the order quantity which minimizes the inventory cost per unit time. Which of
+the following is not an assumption of the basic (EOQ) with no shortages?
+A. The demand rate is uniform and constant,
+B. There is a positive cost on each unit invention.
+C. There is no upper bound on the quantity ordered.
+D. The entire recorder quantity is delivered instantaneously.
+80. What is the acid test ratio?
+A the ratio of owner's equity to total current liabilities
+B. the ratio of all assets to total liabilities
+C. the ratio of gross margin to operating sales and administrative expenses
+D. the ratio of current assets (exclusive of inventory) to total current liabilities
+81. When using net present worth calculations to compare two projects, which of the following could invalidate the calculations?
+A. Mutually exclusive projects
+B. Evaluation over different time periods
+C. Non-conventional cash flows
+D. Difference in the magnitude of the projects
+82. Liquid assets such as cash and other assets that can be converted quickly into cash, such as accounts receivable and
+merchandise are called
+A. current assets
+B. fixed assets
+C. total assets
+D. variable assets
+83. A situation whereby payment is made for work not done. The term also applies to the case where more workers are used than
+are a reasonable requirement for efficient operation.
+A check-in pay
+B. feather bedding
+C. downtime pay
+D. moon lighting
+84. In a business environment, balancing the books means reconciling checkbooks and bank statements and posting all accounting
+entries in such a way as to maintain the equality of the basic accounting equation.
+A Plant, property and equipment and other assets
+B. assets = current liabilities + owner's equity
+C. owner's and stockholder's equity and liability
+D. assets = liabilities + owner's equity
+85. Grand total of the assets and operational capability of a corporation.
+A. authorized capital
+B. investment
+C. earning value 
+D. money market
+86. A tax on imports.
+A. import tariff
+B. import quote
+C. value added tax
+D. capital account
+87. The difference between the starting and ending inventory valuations, a term that represents an inventory account adjustments is
+called
+A. cost of goods sold 
+B. perpetual inventory 
+C. physical inventory
+D. periodic inventory
+88. A term used to describe payment of an employee from time spent on the property of the employer though not actually
+working at the job, e.g. time spent changing clothes to get ready for work or time spent traveling from the plant entrance to the
+place of work.
+A. portal-to-portal pay 
+B. downtime pay
+C. call pay
+D. lost time pay
+89. How is the material purchase price variance defined?
+A. (quantity issued - standard quantity) (standard price)
+B. (actual price- standard price) (quantity used)
+C. (quantity purchased quantity used) (actual price)
+D. (quantity purchased x actual price) - (quantity purchased x standard price)
+90. Those funds that are required to make the enterprise or project a going concern.
+A. circulating capital
+C. banking
+B. accumulated amount
+D. principal or present worth
+91. Additional information to prospective bidders on contract documents issued prior to bidding date.
+A. delicta
+B. escalatory clause
+C. technological info
+D. bid bulletin
+92. A diagram drawn to help visualize and simplify problem having diverse receipts and disbursements.
+A. budget
+B. investment
+C. year-end chart 
+D. cash flow
+93. A legally binding environment or promise to exchange goods or services.
+A. contract
+B. barter
+C. memorandum 
+D. pro-forma
+94. The peso amount as earned from investment or project is called
+A. ROI
+B. surplus
+C. interest
+D. ROR
+95. The present worth of all depreciation over the economic life of the item is called
+A maintenance
+B. capital recovery
+C. depreciation recovery 
+D. annuity
+96. Modes of extinguishing obligations when creditor abandons his right to collect
+A. condonation
+B. forfeiture
+C. debt cancellation
+D. not liquidated
+97. A provision in the contract that indicates the possible adjustment of material cost and labor cost.
+A. secondary clause
+C. escalatory clause
+B. specification
+D. general provision
+98. Instead of the profits being paid out to the stockholders or owners as dividends, they are retained in the business and used to
+finance expansion. This is called
+A. retained earnings
+B. flow back
+C. bond
+D. deposit
+99. Fall after the increase reaches a certain variable amount
+A. inflation
+C. Law of diminishing returns
+B. Law of supply and demand
+D. process factor
+100. Ratio of annual revenues to the annual expenses.
+A. benefit ratio
+B. rate of return 
+C. benefit cost ratio
+D. income ratio
+    </script>
+
+    <script>
+        // Manually coded answer mapping for the 100 questions of Engineering Economics
+        const answers = [
+            "c", "d", "c", "d", "a", "a", "c", "b", "a", "c", 
+            "b", "a", "d", "a", "a", "b", "a", "a", "c", "b", 
+            "b", "a", "c", "d", "b", "a", "a", "d", "c", "d", 
+            "b", "b", "a", "b", "a", "b", "a", "b", "a", "a", 
+            "c", "b", "a", "a", "d", "d", "b", "d", "a", "a", 
+            "d", "c", "c", "c", "b", "b", "a", "a", "b", "a", 
+            "b", "b", "b", "c", "a", "c", "c", "c", "c", "d", 
+            "b", "d", "b", "d", "a", "b", "a", "b", "c", "d", 
+            "b", "a", "b", "d", "a", "a", "a", "a", "d", "a", 
+            "d", "d", "a", "c", "c", "a", "c", "a", "c", "c"
+        ];
+
+        const rawTextData = document.getElementById('raw-data').textContent || "";
+        const blocks = rawTextData.split(/(?:^|\n|\r\n)(?=\d+\.\s)/).map(b => b.trim()).filter(b => b.length > 0);
+        
+        const quizData = [];
+        let totalScore = 0;
+
+        blocks.forEach((block) => {
+            const optStartMatch = block.match(/\n\s*[A-Da-d][\.\)]\s/);
+            if (!optStartMatch) return; 
+            
+            const optIndex = optStartMatch.index;
+            let questionPart = block.substring(0, optIndex).trim();
+            const optionsStr = block.substring(optIndex).trim();
+            
+            const numMatch = questionPart.match(/^(\d+)\.\s+/);
+            if (!numMatch) return;
+            
+            const qText = questionPart.substring(numMatch[0].length).trim();
+            
+            const optRegex = /(?:^|\n)\s*([A-Da-d])[\.\)]\s/g;
+            let match;
+            let indices = [];
+            while ((match = optRegex.exec(optionsStr)) !== null) {
+                indices.push({ letter: match[1].toLowerCase(), index: match.index, matchLength: match[0].length });
+            }
+
+            const options = [];
+            
+            // Assign the correct answer sequentially from the pre-mapped array
+            const expectedAnsLetter = answers[quizData.length] || "a";
+            let ansIdx = 0;
+
+            for (let i = 0; i < indices.length; i++) {
+                let start = indices[i].index + indices[i].matchLength;
+                let end = (i + 1 < indices.length) ? indices[i+1].index : optionsStr.length;
+                let text = optionsStr.substring(start, end).trim();
+                
+                if (indices[i].letter === expectedAnsLetter) {
+                    ansIdx = i;
+                }
+                options.push({ letter: indices[i].letter.toUpperCase(), text: text });
+            }
+            
+            if (options.length > 0) {
+                quizData.push({
+                    num: quizData.length + 1, // Fix visual numbering 1 to 100 perfectly
+                    q: qText, 
+                    options: options, 
+                    ansIdx: ansIdx, 
+                    userAnswered: false,
+                    isCorrect: false
+                });
+            }
+        });
+
+        let currentIndex = 0;
+
+        function initApp() {
+            if (quizData.length === 0) {
+                document.getElementById('qHeader').innerHTML = "<span class='error-message'>Parse Error</span>";
+                document.getElementById('qText').innerHTML = "Could not parse questions. Check raw text format.";
+                return;
+            }
+            document.getElementById('controls').style.display = "flex";
+            buildNav();
+            loadQuestion(currentIndex);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            grid.innerHTML = '';
+            quizData.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-item';
+                btn.id = `nav-btn-${idx}`;
+                btn.innerText = q.num; 
+                btn.onclick = () => { loadQuestion(idx); toggleSidebar(); };
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateNavStyles() {
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-btn-${currentIndex}`).classList.add('active');
+            
+            quizData.forEach((q, idx) => {
+                const btn = document.getElementById(`nav-btn-${idx}`);
+                if (q.userAnswered) btn.classList.add('completed');
+            });
+        }
+
+        function updateScore() {
+            document.getElementById('scoreTracker').innerText = `Score: ${totalScore} / ${quizData.length}`;
+        }
+
+        function loadQuestion(index) {
+            currentIndex = index;
+            const q = quizData[currentIndex];
+            
+            document.getElementById('qHeader').innerHTML = `Problem ${q.num} of ${quizData.length}`;
+            document.getElementById('qText').innerHTML = q.q;
+            
+            const optionsGrid = document.getElementById('optionsGrid');
+            optionsGrid.innerHTML = '';
+            
+            const feedbackMsg = document.getElementById('feedbackMessage');
+            feedbackMsg.style.display = 'none';
+
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span class="option-letter">${opt.letter}.</span> ${opt.text}`;
+                
+                if (q.userAnswered) {
+                    btn.disabled = true;
+                    if (i === q.ansIdx) {
+                        btn.classList.add('correct');
+                    } else if (i === q.userSelectedIdx) {
+                        btn.classList.add('wrong');
+                    }
+                } else {
+                    btn.onclick = () => selectAnswer(i, btn);
+                }
+                optionsGrid.appendChild(btn);
+            });
+
+            if (q.userAnswered) {
+                showFeedback(q.isCorrect, q);
+            }
+
+            document.getElementById('prevBtn').disabled = (currentIndex === 0);
+            document.getElementById('nextBtn').disabled = (currentIndex === quizData.length - 1);
+            
+            updateNavStyles();
+            updateScore();
+
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('quizCard')]);
+            }
+        }
+
+        function selectAnswer(selectedIndex, selectedBtn) {
+            const q = quizData[currentIndex];
+            q.userAnswered = true;
+            q.userSelectedIdx = selectedIndex;
+            q.isCorrect = (selectedIndex === q.ansIdx);
+
+            if (q.isCorrect) totalScore++;
+
+            const buttons = document.getElementById('optionsGrid').children;
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true;
+                if (i === q.ansIdx) buttons[i].classList.add('correct');
+            }
+
+            if (!q.isCorrect) selectedBtn.classList.add('wrong');
+
+            showFeedback(q.isCorrect, q);
+            updateNavStyles();
+            updateScore();
+        }
+
+        function showFeedback(isCorrect, q) {
+            const feedbackMsg = document.getElementById('feedbackMessage');
+            feedbackMsg.className = 'feedback-message ' + (isCorrect ? 'success' : 'error');
+            
+            const correctOpt = q.options[q.ansIdx];
+            
+            if (isCorrect) {
+                feedbackMsg.innerHTML = "Correct! The answer is <br><br><strong>" + correctOpt.letter + ". " + correctOpt.text + "</strong>";
+            } else {
+                feedbackMsg.innerHTML = "Incorrect! The correct answer is <br><br><strong>" + correctOpt.letter + ". " + correctOpt.text + "</strong>";
+            }
+            feedbackMsg.style.display = "block";
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise([feedbackMsg]);
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIndex < quizData.length - 1) loadQuestion(currentIndex + 1);
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) loadQuestion(currentIndex - 1);
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
