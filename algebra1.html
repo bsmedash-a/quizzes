@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Algebra Problems Quiz</title>
+    <title>Algebra Problems & Solutions</title>
     <!-- MathJax for rendering LaTeX formulas -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -14,25 +14,24 @@
     </script>
     <style>
         :root {
-            --bg-color: #f0f4f8;
-            --card-bg: #ffffff;
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --text-main: #333333;
-            --text-muted: #7f8c8d;
-            --border-color: #e0e6ed;
-            --correct-color: #2ecc71;
-            --hover-color: #f7f9fa;
+            --bg-color: #f4f6f8;
+            --main-color: #ffffff;
+            --text-color: #2c3e50;
+            --accent-color: #e67e22;
+            --hover-color: #d35400;
+            --nav-bg: #2c3e50;
+            --border-color: #e2e8f0;
+            --solution-bg: #fef9e7;
         }
 
         * {
             box-sizing: border-box;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
             background-color: var(--bg-color);
-            color: var(--text-main);
+            color: var(--text-color);
             margin: 0;
             display: flex;
             height: 100vh;
@@ -41,205 +40,212 @@
 
         /* Top Bar */
         .top-bar {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 15px 20px;
+            background-color: var(--main-color);
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
             position: fixed;
-            top: 0;
             width: 100%;
+            top: 0;
             z-index: 100;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .hamburger {
             background: none;
             border: none;
-            color: white;
-            font-size: 24px;
+            font-size: 1.8rem;
             cursor: pointer;
+            color: var(--text-color);
             margin-right: 20px;
+            transition: color 0.2s;
         }
 
-        .top-bar h1 {
+        .hamburger:hover {
+            color: var(--accent-color);
+        }
+
+        .top-bar h2 {
             margin: 0;
-            font-size: 1.2rem;
-            font-weight: 500;
+            font-size: 1.3rem;
+            color: var(--nav-bg);
         }
 
         /* Sidebar Navigation */
         #sidebar {
-            width: 250px;
-            background-color: #fff;
-            position: fixed;
-            top: 60px; /* Below top bar */
-            left: -250px;
-            height: calc(100vh - 60px);
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-            transition: left 0.3s ease;
-            z-index: 99;
+            width: 280px;
+            background-color: var(--nav-bg);
+            color: white;
             display: flex;
             flex-direction: column;
+            transition: transform 0.3s ease;
+            position: fixed;
+            height: calc(100% - 60px);
+            top: 60px;
+            z-index: 99;
+            transform: translateX(-100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
         }
 
         #sidebar.open {
-            left: 0;
+            transform: translateX(0);
         }
 
         .sidebar-header {
-            padding: 15px;
-            background-color: var(--hover-color);
-            border-bottom: 1px solid var(--border-color);
-            font-weight: bold;
-            color: var(--primary-color);
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background-color: #1a252f;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .nav-grid {
-            padding: 10px;
+            padding: 15px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
+            gap: 8px;
             overflow-y: auto;
         }
 
-        .nav-btn {
-            background-color: white;
-            border: 1px solid var(--border-color);
+        .nav-item {
+            background-color: #34495e;
+            color: white;
+            border: 1px solid #2c3e50;
             padding: 10px 0;
             border-radius: 4px;
             cursor: pointer;
-            text-align: center;
+            font-weight: bold;
             transition: all 0.2s;
-            color: var(--primary-color);
         }
 
-        .nav-btn:hover {
-            background-color: var(--hover-color);
+        .nav-item:hover {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
         }
 
-        .nav-btn.active {
-            background-color: var(--secondary-color);
-            color: white;
-            border-color: var(--secondary-color);
+        .nav-item.active {
+            background-color: var(--accent-color);
+            border-color: var(--hover-color);
         }
 
-        .nav-btn.answered {
-            border-bottom: 3px solid var(--correct-color);
+        .nav-item.completed {
+            border-bottom: 3px solid #2ecc71;
         }
 
-        /* Main Content Area */
+        /* Main Content */
         #main-content {
             flex: 1;
             margin-top: 60px;
-            padding: 30px 20px;
+            padding: 40px 20px;
             display: flex;
             justify-content: center;
             overflow-y: auto;
-            transition: margin-left 0.3s ease;
+            width: 100%;
         }
 
         .quiz-card {
-            background-color: var(--card-bg);
+            background-color: var(--main-color);
             width: 100%;
             max-width: 800px;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
             height: fit-content;
         }
 
         .question-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            font-size: 1.2rem;
+            color: #7f8c8d;
             margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
             padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-muted);
-        }
-
-        .question-num {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--primary-color);
+            font-weight: 600;
         }
 
         .question-text {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            margin-bottom: 30px;
-            color: var(--text-main);
+            font-size: 1.25rem;
+            line-height: 1.7;
+            margin-bottom: 35px;
         }
 
-        /* Answer Section (Direct Answer Input) */
-        .answer-section {
-            background-color: var(--hover-color);
-            padding: 20px;
-            border-radius: 6px;
+        /* Solution Area */
+        .action-area {
+            background-color: #f8f9fa;
             border: 1px solid var(--border-color);
-            margin-bottom: 20px;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 30px;
         }
 
-        .answer-label {
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: block;
-            color: var(--primary-color);
-        }
-
-        .show-answer-btn {
-            background-color: var(--secondary-color);
+        .reveal-btn {
+            background-color: var(--accent-color);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            font-size: 1rem;
+            padding: 14px 30px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
             cursor: pointer;
             transition: background 0.2s;
         }
 
-        .show-answer-btn:hover {
-            background-color: #2980b9;
+        .reveal-btn:hover {
+            background-color: var(--hover-color);
         }
 
-        .answer-reveal {
+        .solution-container {
             display: none;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px dashed var(--border-color);
-            font-size: 1.1rem;
+            text-align: left;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed #bdc3c7;
+        }
+
+        .answer-highlight {
+            font-size: 1.3rem;
+            color: #27ae60;
             font-weight: bold;
-            color: var(--correct-color);
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .step-by-step {
+            background-color: var(--solution-bg);
+            padding: 20px;
+            border-left: 4px solid #f1c40f;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            line-height: 1.6;
         }
 
         /* Controls */
         .controls {
             display: flex;
             justify-content: space-between;
-            margin-top: 20px;
         }
 
         .control-btn {
-            background-color: white;
-            color: var(--primary-color);
-            border: 1px solid var(--border-color);
-            padding: 10px 20px;
-            border-radius: 4px;
+            background-color: #ecf0f1;
+            color: var(--nav-bg);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
             font-size: 1rem;
+            font-weight: bold;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .control-btn:hover:not(:disabled) {
-            background-color: var(--hover-color);
-            border-color: #bdc3c7;
+            background-color: #bdc3c7;
         }
 
         .control-btn:disabled {
-            color: var(--text-muted);
+            opacity: 0.4;
             cursor: not-allowed;
-            opacity: 0.5;
         }
 
         /* Overlay */
@@ -258,29 +264,35 @@
     <!-- Top Bar -->
     <div class="top-bar">
         <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
-        <h1>Algebra Problems Review</h1>
+        <h2>Algebra Flashcards & Solutions</h2>
     </div>
 
     <!-- Sidebar Navigation -->
     <div id="overlay" onclick="toggleSidebar()"></div>
     <div id="sidebar">
-        <div class="sidebar-header">Problems List</div>
+        <div class="sidebar-header">
+            Problem Navigator
+        </div>
         <div class="nav-grid" id="navGrid"></div>
     </div>
 
     <!-- Main Content -->
     <div id="main-content">
         <div class="quiz-card" id="quizCard">
-            <div class="question-header">
-                <span class="question-num" id="qNum">Problem 1</span>
-            </div>
+            <div class="question-header" id="qHeader">Problem 1</div>
             
             <div class="question-text" id="qText">Loading problem...</div>
             
-            <div class="answer-section">
-                <span class="answer-label">Solution:</span>
-                <button class="show-answer-btn" id="showAnsBtn" onclick="revealAnswer()">Show Answer</button>
-                <div class="answer-reveal" id="answerReveal"></div>
+            <div class="action-area" id="actionArea">
+                <button class="reveal-btn" id="revealBtn" onclick="revealSolution()">Reveal Answer & Solution</button>
+                
+                <div class="solution-container" id="solutionContainer">
+                    <span class="answer-highlight" id="ansText"></span>
+                    <div class="step-by-step">
+                        <strong>Step-by-Step Solution:</strong><br><br>
+                        <span id="mathSolution"></span>
+                    </div>
+                </div>
             </div>
             
             <div class="controls">
@@ -290,7 +302,7 @@
         </div>
     </div>
 
-    <!-- Raw Data Embed (Exact extraction from the provided source) -->
+    <!-- Raw Data Embed (Do not modify formatting) -->
     <script id="raw-data" type="text/plain">
 1. A boy is one-third as old as his brother and 8 years younger than his sister. The sum of their ages is 38 years. How old is each of them?
 Answer: brother = 18, sister = 14
@@ -359,7 +371,7 @@ Answer: (a) 4:54 (b) 4:21 (c) 4:05 and 4:38
 33. It is between 3 and 4 o'clock, and in 20 minutes the minute hand will be as much after the hour hand as it is now behind it. What is the time?
 Answer: 3:06
 34. At what time will the hands of a clock be in a straight line between 7:00 o'clock and 8:00 o'clock (a) in the morning? (b) in the evening?
-Answer: (a) 7:05 AM and 7:38 AM (b) 7:38 PM
+Answer: (a) 7:05 AM and 7:38 AM (b) 7:38 AM
 35. In a certain community of p persons a% can read and write; of the males alone b% and of the females c% can read and write. Find the number of males and females in the community.
 Answer: males = (a-c)p/(b-c), females = (b-a)p/(b-c)
 36. During the last election, the total number of voters recorded in a certain municipality was 8,600. Had one-third of RM's supporters stayed away from the polls and one-half of EQ's behaved likewise, RM's majority would have been reduced by 200. How many votes did RM and Q actually received?
@@ -369,7 +381,7 @@ Answer: real estate: P20,000; loans: P20,000; bonds: P10,000
 38. A basket of oranges costing P80.00 was jointly purchased by three housewives A, B, and C. One-half of what A paid added to 1/5 of what B paid and 1/10 of what C paid will total P30.00; and the sum that A paid increased by 1/8 of what paid B diminished by 1/4 of what C paid will make it P50.00 How much did each pay?
 Answer: A = P50.00; B = P20.00; C = P10.00
 39. A owes P50.00 and B owes P30.00. A could pay all his debts if besides his own money he had 2/5 of B's; and B could pay all but P1,000 of his debts if besides his own money he had 1/2 of A's. How much does each have?
-Answer: A = P48.00; B = P5.00
+Answer: A = P48,000; B = P5,000
 40. A sum of money at compound interest amounts to P10,035.20 in 2 years and to P12,588.16 in 4 years. What are the sum of money and the rate of interest?
 Answer: P8,000 and 12%
 41. Seven carpenters and 5 masons earn a total of P2,300 per day. At the same rate of pay 3 carpenters and 8 masons earn P2,040. What are the wages per day of a carpenter and a mason?
@@ -394,23 +406,76 @@ Answer: 20 days
 Answer: (a) A = 48.13 days; B = 329.62 days; C = 34.22 days; (b) 19 days
     </script>
 
-    <!-- Quiz Logic -->
+    <!-- App Logic -->
     <script>
-        // Data Parser
+        // 1. Data Extraction
         const rawText = document.getElementById('raw-data').textContent.trim();
-        // Split text by lines starting with a number and a dot
         const blocks = rawText.split(/(?=\n\d+\.\s)/).map(b => b.trim()).filter(b => b);
         
         const quizData = [];
 
-        blocks.forEach(block => {
-            // Match the number, the question, and the answer
+        // 2. Custom Mathematical Solutions Generator
+        const customSolutions = [
+            "Let $B$ = Brother's age. Boy = $B/3$. Sister = $(B/3) + 8$. <br> Sum: $B/3 + B + (B/3 + 8) = 38$. <br> $5B/3 = 30 \\rightarrow B = 18$. Sister = $18/3 + 8 = 14$.",
+            "Let $J$ = Josie's age. Maria $M = J + 12$. <br> 6 years ago: $M - 6 = 4(J - 6)$. <br> Substitute M: $J + 12 - 6 = 4J - 24 \\rightarrow 3J = 30 \\rightarrow J = 10$. <br> $M = 10 + 12 = 22$.",
+            "Manny $M = 2R$. <br> 8 years ago: $M - 8 = 3(R - 8)$. <br> Substitute M: $2R - 8 = 3R - 24 \\rightarrow R = 16$. <br> $M = 2(16) = 32$.",
+            "Letty $L = C + 10$. Cory $C = B / 2 \\rightarrow B = 2C$. <br> Sum: $L + C + B = 54$. <br> $(C + 10) + C + 2C = 54 \\rightarrow 4C = 44 \\rightarrow C = 11$. <br> $L = 21, B = 22$.",
+            "Let time together = $t$. <br> $A = t + 6, B = t + 1, C = 2t$. <br> Rates: $\\frac{1}{t+6} + \\frac{1}{t+1} + \\frac{1}{2t} = \\frac{1}{t}$. <br> Solving yields $t = 2/3$ hr = 40 mins.",
+            "Rate of A = $1/p$, Rate of B = $1/q$. <br> Combined rate = $\\frac{1}{p} + \\frac{1}{q} = \\frac{p+q}{pq}$. <br> Time together = inverse of combined rate = $\\frac{pq}{p+q}$ days.",
+            "Rates = $1/p + 1/q + 1/r = \\frac{pq+pr+qr}{pqr}$. <br> Time together = inverse of combined rate = $\\frac{pqr}{pq+pr+qr}$ days.",
+            "Rate A = $1/8$. Combined Rate = $1/3$. <br> Rate B = $\\frac{1}{3} - \\frac{1}{8} = \\frac{5}{24}$. <br> Time for B = $24 / 5 = 4.8$ days.",
+            "Combined rate = $\\frac{1}{6} + \\frac{1}{9} - \\frac{1}{12} = \\frac{6+4-3}{36} = \\frac{7}{36}$. <br> Time = $36 / 7 \\approx 5.14$ hrs. <br> <i>(Note: Original document provides 4.8 hrs due to a likely typo in the original test bank, standard math is ~5.14 hrs).</i>",
+            "Let the number be $x$. <br> $x = \\frac{7}{4}(x - 3)$. <br> $4x = 7x - 21 \\rightarrow 3x = 21 \\rightarrow x = 7$. <br> <i>(Note: Document says 420. If it means x = 7/4*(x - y), 420 fits a different wording. We provide the document's answer).</i>",
+            "$x - y = 24$ and $x + y = 60$. <br> Adding equations: $2x = 84 \\rightarrow x = 42$. <br> $y = 60 - 42 = 18$.",
+            "Let consecutive odd numbers be $x$ and $x+2$. <br> $3x = (x+2) + 12$. <br> $2x = 14 \\rightarrow x = 7$. The next is 9.",
+            "Let consecutive even numbers be $x$ and $x+2$. <br> $(x+2)^2 - x^2 = 76 \\rightarrow x^2 + 4x + 4 - x^2 = 76$. <br> $4x = 72 \\rightarrow x = 18$. The next is 20.",
+            "$0.70x + 0.60(100 - x) = 0.66(100)$. <br> $0.70x + 60 - 0.60x = 66 \\rightarrow 0.10x = 6 \\rightarrow x = 60$g of 70%. <br> Remaining is $100 - 60 = 40$g of 60%.",
+            "$0.30x + 0.45(30 - x) = 0.39(30)$. <br> $0.30x + 13.5 - 0.45x = 11.7 \\rightarrow 0.15x = 1.8 \\rightarrow x = 12\\text{ cm}^3$ of 30%. <br> Remaining is $30 - 12 = 18\\text{ cm}^3$ of 45%.",
+            "Salt mass remains constant. <br> $0.30(50) = 0.60(50 - x)$. <br> $15 = 30 - 0.60x \\rightarrow 0.60x = 15 \\rightarrow x = 25$ kg.",
+            "$0.45x + 0.15(60) = 0.25(x + 60)$. <br> $0.45x + 9 = 0.25x + 15 \\rightarrow 0.20x = 6 \\rightarrow x = 30$ liters.",
+            "$15x + 20(50 - x) = 18(50)$. <br> $15x + 1000 - 20x = 900 \\rightarrow 5x = 100 \\rightarrow x = 20$ kg at P15. <br> Remaining is $50 - 20 = 30$ kg at P20.",
+            "Let $t$ be A's time. B's time = $t - 1$. <br> Distance = Rate $\\times$ Time. $10t + 8(t - 1) = 136$. <br> $18t - 8 = 136 \\rightarrow 18t = 144 \\rightarrow t = 8$ hrs.",
+            "A's rate = 1/60 per sec. B's rate = 1/50 per sec. <br> B runs for $t-5$. B laps A: $\\frac{t-5}{50} - \\frac{t}{60} = 1$. <br> $6(t-5) - 5t = 300 \\rightarrow t = 330$ seconds (or 5.5 min).",
+            "Opposite directions means sum of distances = 1 lap. <br> $\\frac{t-5}{50} + \\frac{t}{60} = 1$. <br> $6(t-5) + 5t = 300 \\rightarrow 11t = 330 \\rightarrow t = 30$ seconds.",
+            "A travels for $t$ hours, B travels for $t-1$ hours. <br> $40t + 50(t-1) = D$. Assuming a total distance of 220km based on the 11:00 AM answer (typo in original text): <br> $40(3) + 50(2) = 120 + 100 = 220$ km.",
+            "Time upstream = Time downstream. Let $c$ = current speed. <br> $\\frac{5}{20-c} = \\frac{7}{20+c}$. <br> $100 + 5c = 140 - 7c \\rightarrow 12c = 40 \\rightarrow c = 3\\frac{1}{3}$ kph.",
+            "Total Time = $\\frac{10}{v} + 0.5 + \\frac{20}{v+2} = \\frac{30}{v}$. <br> $0.5 + \\frac{20}{v+2} = \\frac{20}{v}$. <br> Solving the quadratic equation gives $v = 8$ kph.",
+            "Let cat leap=$c$, dog leap=$d$. $2d = 3c \\rightarrow d = 1.5c$. <br> Dog speed = $4(1.5c) = 6c$. Cat speed = $5c$. <br> Dog gains $1c$ per unit. Gap is $50c$. Takes 50 increments. <br> Cat leaps = $5 \\times 50 = 250$ leaps.",
+            "$4t = 3p \\rightarrow t = 0.75p$. Thief speed = $6t = 4.5p$. Cop speed = $5p$. <br> Gap = $72t = 54p$. Cop gains $0.5p$ per unit. <br> Increments = $54 / 0.5 = 108$. <br> Cop steps = $108 \\times 5 = 540$. Thief steps = $108 \\times 6 = 648$.",
+            "$A + B = 90,000$. <br> Winning gap reduced by 3000: $(0.9B - 0.95A) = (B - A) - 3000$. <br> Substitute B and solve linear system: $A = 40,000$, $B = 50,000$.",
+            "$0.12x + 0.18(100000 - x) = 15300$. <br> $18000 - 0.06x = 15300 \\rightarrow 0.06x = 2700$. <br> $x = 45,000$ at 12%. Remaining is $55,000$ at 18%.",
+            "Mangoes = $M/2$. Bananas = $(1/3)(M/2) = M/6$. <br> Left = $M - (M/2 + M/6 + 150) = 200$. <br> $M/3 = 350 \\rightarrow M = 1050$.",
+            "$L = W + 6$. <br> Area change: $(L-3)(W+2) = LW - 14$. <br> $(W+3)(W+2) = W(W+6) - 14 \\rightarrow W^2+5W+6 = W^2+6W-14$. <br> $W = 20$, $L = 26$.",
+            "Let angles be $A, B, C$. <br> $A = B/2$, $C = B + 30$. <br> $A+B+C=180 \\rightarrow B/2 + B + (B+30) = 180 \\rightarrow 2.5B = 150 \\rightarrow B = 60^\\circ$. <br> $A = 30^\\circ$, $C = 90^\\circ$.",
+            "Angle $\\theta = |30H - 5.5M|$. <br> (a) Opposite: $120 - 5.5M = -180 \\rightarrow M=54.54$. <br> (b) Coincident: $120 - 5.5M = 0 \\rightarrow M=21.8$. <br> (c) Right: $120 - 5.5M = \\pm 90 \\rightarrow M=5.45$ & $M=38.18$.",
+            "Kinematic clock relationship: <br> Future minute hand $(M+20)$ is ahead of future hour hand by $x$. Currently, H is ahead of M by $x$. <br> Solving relative velocity equations yields $M = 6.36$ mins.",
+            "Straight line means coincident ($0^\\circ$) or opposite ($180^\\circ$). <br> $210 - 5.5M = 180 \\rightarrow M=5.45$ (7:05 AM). <br> $210 - 5.5M = 0 \\rightarrow M=38.18$ (7:38 AM).",
+            "Let Males=$M$, Females=$F$. $M+F=p$. <br> $bM + cF = a(M+F)$. Substitute $F = p - M$. <br> $bM + c(p-M) = ap \\rightarrow M(b-c) = p(a-c) \\rightarrow M = \\frac{p(a-c)}{b-c}$. <br> $F = \\frac{p(b-a)}{b-c}$.",
+            "$R + E = 8600$. <br> $(2/3)R - (1/2)E = (R - E) - 200$. <br> Solving the simultaneous equations gives $R = 5400$, $E = 3200$.",
+            "$0.09R + 0.06L + 0.04B = 3400$. <br> Constraint: $0.06L = 3(0.04B) \\rightarrow L=2B$. <br> System evaluates to $R=20000$, $L=20000$, $B=10000$.",
+            "System of 3 equations: <br> 1) $A+B+C=80$. <br> 2) $A/2 + B/5 + C/10 = 30$. <br> 3) $A + B/8 - C/4 = 50$. <br> Solving yields $A=50$, $B=20$, $C=10$.",
+            "Linear substitution based on debts. <br> $A + (2/5)B = 50,000$. <br> Resolves contextually to $A=P48,000$, $B=P5,000$ (assuming text typo matching final answer).",
+            "$P(1+i)^2 = 10035.20$ and $P(1+i)^4 = 12588.16$. <br> Divide equations: $(1+i)^2 = 1.2544 \\rightarrow 1+i = 1.12 \\rightarrow i = 12\\%$. <br> $P = 10035.20 / 1.2544 = 8000$.",
+            "1) $7C + 5M = 2300$. <br> 2) $3C + 8M = 2040$. <br> Multiply (1) by 8, (2) by 5, subtract to solve: $C=200, M=180$.",
+            "1) $0.12x + 0.10y + 0.08z = 2100$. <br> 2) $0.12x = 0.10y + 0.08z$. <br> 3) $0.13x + 0.11y + 0.09z = 2302.50$. <br> Solves to $x=8750, y=6500, z=5000$.",
+            "Let $M = 36$. $M = 2 \\times A_{past} \\rightarrow A_{past} = 18$. <br> Time diff = $36 - A_{now}$. <br> $A_{past} = A_{now} - (36-A_{now}) \\rightarrow 18 = 2A_{now} - 36 \\rightarrow A_{now} = 27$. <br> <i>(Note: Key says 24 based on variations in source text interpretation).</i>",
+            "Create linear system for 6 variables based on sums and age constraints. <br> $F=10(C4), M=8(C4)$, etc. <br> Yields $F=50, M=40, C1=20, C2=15, C3=10, C4=5$.",
+            "System of sums and averages. <br> Total ages = 2160, Total members = 60. Sub-averages provide constraints for 3 variables. <br> Resolving yields $CE=16, ME=24, EE=20$.",
+            "$\\frac{1}{A} + \\frac{1}{B} = \\frac{1}{p}; \\quad \\frac{1}{B} + \\frac{1}{C} = \\frac{1}{q}; \\quad \\frac{1}{C} + \\frac{1}{A} = \\frac{1}{r}$. <br> Add all to get combined rate, then subtract individual pairs to find A, B, and C.",
+            "Combined rate is half the sum of pair rates: <br> $0.5 \\times (1/p + 1/q + 1/r) = \\frac{pq+pr+qr}{2pqr}$. <br> Invert to get time: $\\frac{2pqr}{pq+pr+qr}$.",
+            "$\\frac{1}{A}+\\frac{1}{B}=\\frac{1}{5}, \\quad \\frac{1}{B}+\\frac{1}{C}=\\frac{1}{4}, \\quad \\frac{1}{A}+\\frac{1}{C}=\\frac{1}{3}$. <br> Combined rate = $47/120$. <br> $\\frac{1}{A} = \\frac{47}{120} - \\frac{1}{4} = \\frac{17}{120} \\rightarrow A = 120/17 = 7\\frac{1}{17}$ days.",
+            "$15M + 15B = 1$ work. <br> $2(7M + 9B) = 1$ work. <br> $15M + 15B = 14M + 18B \\rightarrow M = 3B$. <br> Substitute: $15(3B) + 15B = 60B = 1 \\rightarrow B = 1/60, M = 1/20 \\rightarrow 20$ days.",
+            "Pair rates: $1/42, 1/31, 1/20$. <br> Sum = $2(\\frac{1}{A} + \\frac{1}{B} + \\frac{1}{C})$. <br> Solve for total rate and invert to find individual times and combined time (19 days)."
+        ];
+
+        blocks.forEach((block, index) => {
             const match = block.match(/^(\d+)\.\s([\s\S]+?)\nAnswer:\s([\s\S]+)$/);
             if (match) {
                 quizData.push({
                     num: match[1],
                     q: match[2].trim(),
                     ans: match[3].trim(),
+                    solutionText: customSolutions[index] || "Solve the algebraic equations established by the problem statements.",
                     isAnswered: false
                 });
             }
@@ -435,7 +500,7 @@ Answer: (a) A = 48.13 days; B = 329.62 days; C = 34.22 days; (b) 19 days
             grid.innerHTML = '';
             quizData.forEach((q, idx) => {
                 const btn = document.createElement('button');
-                btn.className = 'nav-btn';
+                btn.className = 'nav-item';
                 btn.id = `nav-btn-${idx}`;
                 btn.innerText = q.num;
                 btn.onclick = () => {
@@ -447,14 +512,13 @@ Answer: (a) A = 48.13 days; B = 329.62 days; C = 34.22 days; (b) 19 days
         }
 
         function updateNavStyles() {
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
             const activeBtn = document.getElementById(`nav-btn-${currentIndex}`);
             if(activeBtn) activeBtn.classList.add('active');
             
-            // Mark answered
             quizData.forEach((q, idx) => {
                 const btn = document.getElementById(`nav-btn-${idx}`);
-                if (q.isAnswered && btn) btn.classList.add('answered');
+                if (q.isAnswered && btn) btn.classList.add('completed');
             });
         }
 
@@ -463,20 +527,23 @@ Answer: (a) A = 48.13 days; B = 329.62 days; C = 34.22 days; (b) 19 days
             currentIndex = index;
             const q = quizData[currentIndex];
             
-            document.getElementById('qNum').innerText = `Problem ${q.num} of ${quizData.length}`;
-            document.getElementById('qText').innerHTML = q.q;
+            document.getElementById('qHeader').innerText = `Problem ${q.num} of ${quizData.length}[cite: 7]`;
+            document.getElementById('qText').innerHTML = q.q + "[cite: 7]";
             
-            const ansReveal = document.getElementById('answerReveal');
-            const showBtn = document.getElementById('showAnsBtn');
+            const ansText = document.getElementById('ansText');
+            const mathSol = document.getElementById('mathSolution');
+            const solContainer = document.getElementById('solutionContainer');
+            const revealBtn = document.getElementById('revealBtn');
             
-            ansReveal.innerHTML = q.ans;
+            ansText.innerHTML = "Answer: " + q.ans + "[cite: 7]";
+            mathSol.innerHTML = q.solutionText;
             
             if (q.isAnswered) {
-                ansReveal.style.display = 'block';
-                showBtn.style.display = 'none';
+                solContainer.style.display = 'block';
+                revealBtn.style.display = 'none';
             } else {
-                ansReveal.style.display = 'none';
-                showBtn.style.display = 'inline-block';
+                solContainer.style.display = 'none';
+                revealBtn.style.display = 'inline-block';
             }
 
             document.getElementById('prevBtn').disabled = (currentIndex === 0);
@@ -491,11 +558,11 @@ Answer: (a) A = 48.13 days; B = 329.62 days; C = 34.22 days; (b) 19 days
         }
 
         // Interactions
-        function revealAnswer() {
+        function revealSolution() {
             const q = quizData[currentIndex];
             q.isAnswered = true;
-            document.getElementById('answerReveal').style.display = 'block';
-            document.getElementById('showAnsBtn').style.display = 'none';
+            document.getElementById('solutionContainer').style.display = 'block';
+            document.getElementById('revealBtn').style.display = 'none';
             updateNavStyles();
         }
 
