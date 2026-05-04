@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Economics Final Coaching | Quiz</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --main-color: #ffffff;
+            --text-color: #1c1e21;
+            --accent-color: #ff6b1a; /* Tiger Orange */
+            --hover-color: #ffa502;
+            --correct-color: #2ed573;
+            --wrong-color: #ff4757;
+            --nav-bg: #2f3542;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        .top-bar {
+            background-color: var(--main-color);
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex; align-items: center; position: fixed; width: 100%; top: 0; z-index: 100;
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        .hamburger { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-color); margin-right: 20px; }
+        .top-bar h2 { margin: 0; font-size: 1.2rem; color: var(--nav-bg); text-transform: uppercase; letter-spacing: 1px; }
+
+        #sidebar {
+            width: 320px; background-color: var(--nav-bg); color: white;
+            display: flex; flex-direction: column; transition: transform 0.3s ease;
+            position: fixed; height: calc(100% - 60px); top: 60px; z-index: 99;
+            transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+        #sidebar.open { transform: translateX(0); }
+        .sidebar-header { padding: 20px; font-weight: bold; background-color: #1e272e; text-align: center; border-bottom: 1px solid #57606f; }
+        .nav-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; flex: 1; }
+        .nav-item { background-color: #57606f; color: white; border: none; padding: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
+        .nav-item.active { background-color: var(--accent-color); box-shadow: inset 0 0 0 2px white; }
+        .nav-item.completed { background-color: var(--correct-color); color: white; }
+
+        #main-content { flex: 1; margin-top: 60px; padding: 40px 20px; display: flex; justify-content: center; overflow-y: auto; }
+        .quiz-card { background-color: var(--main-color); width: 100%; max-width: 800px; padding: 40px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: fit-content; }
+        .question-header { font-size: 1.1rem; color: #747d8c; margin-bottom: 15px; font-weight: 700; border-bottom: 2px solid #f1f2f6; padding-bottom: 10px; }
+        .question-text { font-size: 1.3rem; line-height: 1.5; margin-bottom: 25px; color: #2f3542; }
+
+        .options-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
+        .option-btn {
+            background-color: #f1f2f6; border: 2px solid #ced6e0; padding: 15px 20px; border-radius: 6px;
+            font-size: 1.1rem; cursor: pointer; text-align: left; transition: all 0.2s; display: flex; align-items: center;
+        }
+        .option-btn:hover:not(:disabled) { background-color: #eccc68; border-color: #ffa502; }
+        .option-btn.correct { background-color: #e8f8f5; border-color: var(--correct-color); color: #27ae60; font-weight: bold; }
+        .option-btn.wrong { background-color: #ffefea; border-color: var(--wrong-color); color: #c0392b; font-weight: bold; }
+        .option-letter { font-weight: bold; margin-right: 15px; color: var(--accent-color); }
+
+        .feedback { display: none; padding: 20px; border-radius: 6px; margin-bottom: 20px; font-weight: bold; font-size: 1.1rem; text-align: center; }
+        .feedback.show { display: block; }
+        .feedback.success { background-color: #e8f8f5; color: #27ae60; border: 1px solid var(--correct-color); }
+        .feedback.error { background-color: #ffefea; color: #c0392b; border: 1px solid var(--wrong-color); }
+
+        .controls { display: flex; justify-content: space-between; border-top: 2px solid #f1f2f6; padding-top: 20px; }
+        .ctrl-btn { background-color: var(--accent-color); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .ctrl-btn:disabled { background-color: #ced6e0; cursor: not-allowed; }
+
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 98; display: none; }
+        #overlay.show { display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h2>Tiger's Review Center | Economics Coaching</h2>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header">185 Problems Navigator</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div id="main-content">
+        <div class="quiz-card">
+            <div class="question-header" id="qIdx">Problem 1 of 185</div>
+            <div class="question-text" id="qText">Loading questions...</div>
+            <div class="options-container" id="optionsGrid"></div>
+            <div class="feedback" id="feedback"></div>
+            <div class="controls">
+                <button class="ctrl-btn" id="prevBtn" onclick="prev()">Previous</button>
+                <button class="ctrl-btn" id="nextBtn" onclick="next()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script id="raw-data" type="text/plain">
+1|A type of bond issued jointly by two or more corporations.|A. Joint bond|B. Debenture bond|C. Registered bond|D. Collateral trust bond|A
+2|A type of bond whose guaranty is in lien on railroads equipments.|A. Equipment obligation bond|B. Debenture bond|C. Registered bond|D. Insfrastructure band|A
+3|If the security of the bond is a mortgage on certain specified asset of a corporation, this bond is classified as|A. Registered bond|B. Mortgage bond|C. Coupon bond|D. Joint bond|B
+4|A type of bond where the corporation's owners name are recorded and the interest is paid periodically to the owners with their asking for it.|A. Registered bond|B. Preferred bond|C. Incorporators bond|D. All of these|A
+5|Bond to which are attached coupons indicating the interest due and the date when such interest is to be paid.|A. Registered bond|B. Coupon bond|C. Mortgage bond|D. Collateral trust bond|B
+6|An amount of money invested at 12% interest per annum will double in approximately|A. 4 years|B. 5 years|C. 6 years|D. 7 years|C
+7|The 72 rule is used to determine|A. How many years money will triple|B. How many years money will double|C. How many years to amass 1 million|D. How many years to quadruple the money|B
+8|To triple the principal one must use|A. Integration|B. Derivatives|C. Logarithms|D. Implicit functions|C
+9|A currency traded in a foreign exchange market to which the demand is consistently high in relation to its supply.|A. Money market|B. Hard currency|C. Treasury bill|D. Certificated of deposit|B
+10|Everything a company owns to which has a money value is classified as an asset. Which of the following is classified as an asset?|A. Intangible asset|B. Fixed asset|C. Trade investments|D. All of these|D
+11|Which is the example of an intangible asset?|A. Cash|B. Investment in subsidiary companies|C. Furnitures|D. Patents|D
+12|Land buildings, plants and machinery are examples of|A. Current assets|B. Trade investments|C. Fixed assets|D. Intangible assets|C
+13|An increase in the value of a capital asset is called|A. Profit|B. Capital gain|C. Capital expenditure|D. Capital stock|B
+14|The reduction in the money value of a capital asset is called|A. Capital expenditure|B. Capital loss|C. Loss|D. Deficit|B
+15|It is negotiable claim issued by bank in lieu of a team deposit.|A. Time deposit|B. Bond|C. Capital gain|D. Certificate of deposit|D
+16|Any particular raw materials or primary product (e.g. cloth, wool, flour, coffee..)|is called|A. Utility|B. Necessity|C. Commodity|D. Stock|C
+17|If denotes the fall in the exchange rate of one currency in terms of others. The term usually applies to floating exchange rates.|A. Currency appreciation|B. Currency devaluation|C. Currency float|D. Currency depreciation|D
+18|The deliberate lowering of the price of a nation's currency in terms of the accepted standard (Gold, American dollar or the British pound).|A. Currency appreciation|B. Currency float|C. Currency devaluation|D. Currency depreciation|C
+19|The residual value of a company's assets after all outside liabilities (shareholders excluded) m have been allowed for.|A. Divided|B. Equity|C. Return|D. Par value|B
+20|A saving which takes place because good are not available for consumption rather than the consumer really want to save.|A. Compulsory saving|B. Consumer saving|C. Forced saving|D. All of these|C
+21|A document that shows proof of legal ownership of a financial security.|A. Bond|B. Bank note|C. Coupon|D. Check|C
+22|Defined as the capacity of commodity to satisfy human want.|A. Discount|B. Necessity|C. Luxuries|D. Utility|B
+23|It is the profit obtained by selling stocks at a higher price than its original purchase price.|A. Debenture|B. Goodwill|C. Capital gain|D. Internal rate of return|C
+24|The quantity of a certain commodity that is offered for sale at a certain price at a given time and place.|A. Demand|B. Supply|C. Utility|D. Market|B
+25|The quantity of a certain commodity that is bought at a certain price at a given time and place.|A. Demand|B. supply|C. market|D. Utility|A
+26|"When free competition exists, the price of a product will be that value where supply is equal to the demand"|A. Law of diminishing return|B. Law of supply|C. Law of demand|D. Law of supply and demand|D
+27|"When one of the factors of production is fixed in quantity or is difficult to increase, increasing the others factors of production will result in a less than proportionate increase in output."|A. Law of diminishing return|B. Law of supply|C. Law of demand|D. Law of supply and demand|A
+28|An accounting term that represents an inventory account adjustments.|A. Cost of goods sold|B. Variance|C. Overhead|D. Payback|A
+29|The simplest economic order quantity (EOQ) model is based on which of the following assumptions.|A. Shortages are not allowed.|B. Demand is constant with respect to time.|C. Reordering is instantaneous. The time between order placement and receipt is zero.|D. All of the choices|D
+30|In economics, a "short term" transaction usually has a lifetime of|A. 3 months or less|B. 1 year or less|C. 5 years or less|D. 10 years or less|C
+31|In the cash flow, expenses incurred before time = 0 is called|A. Receipts|B. Disbursements|C. Sunk costs|D. Firsts costs|C
+32|An imaginary cost representing what will not be received if a particular strategy is rejected.|A. Sunk cost|B. Opportunity cost|C. Replacement cost|D. Initial cost|B
+33|In replacement studies, the existing process or piece of equipment is known as|A. Challenger|B. Defender|C. Liability|D. Asset|B
+34|In replacement studies, the new process or piece of equipment being considered for purchase is known as.|A. Challenger|B. Defender|C. Asset|D. Liability|A
+35|____ means that the cost of the asset is divided into equal or unequal parts, and only one of these parts is taken as an expense each year.|A. Capitalizing the asset|B. Expensing the asset|C. Depreciating the asset|D. Artificial expense|A
+36|Indicate the CORRECT statement about depreciation.|A. The depreciation is not the same each year in straight line method.|B. The declining balance method can be used even if the salvage calue is zero.|C. The sum-of-years' digit method (SYD), the digits 1 to (n+1) is summed.|D. Double declining balance depreciation is independent of the salvage value.|D
+37|An artificial deductible operating expense designated to compensate mining organizations for decreasing mineral reserves.|A. Deflation|B. Reflation|C. Depletion|D. Inflation|C
+38|The change in cost per unit variable change is known as|A. Sunk cost|B. Incremental cost|C. Fixed cost|D. Semi-variable cost|B
+39|What type of cost increases step-wise?|A. Supervision cost|B. Direct labor cost|C. Semi-variable cost|D. Operating and maintenance cost|C
+40|Which of the following is NOT a variable cost?|A. Cost of miscellaneous supplies|B. Income taxes|C. Payroll benefit costs|D. Insurance costs|D
+41|Which of the following is Not a fixed cost?|A. Rent|B. Janitorial service expenses|C. Supervision costs|D. Depreciation expenses|C
+42|The annual costs that are incurred due to the functioning of a piece of equipment is known as|A. General expenses|B. Prime cost|C. Operating and maintenance costs|D. Total cost|C
+43|The sum of the direct labor cost and the direct material cost is known as|A. Prime cost|B. Total cost|C. Indirect manufacturing expenses|D. Total factory cost|A
+44|Research and development costs and administrative expenses are added to the factory cost to give the ____ of the product.|A. Total cost|B. Marketing cost|C. Manufacturing cost|D. Prime cost|C
+45|The sum of the prime cost and the indirect manufacturing cost is known as|A. Factory cost|B. Research and development cost|C. Manufacturing cost|D. Total cost|A
+46|The manufacturing cost plus selling expenses equals|A. Total cost|B. Indirect production cost|C. Administrative cost|D. Miscellaneous cost|A
+47|Which of the following is NOT a direct labor expense?|A. Inspection|B. Testing|C. Supervision|D. Assembly|C
+48|All are administrative expenses EXCEPT:|A. Marketing|B. Accounting|C. Data processing|D. Office supplies|A
+49|One of the following is NOT a selling or marketing expense. Which one?|A. Advertising|B. Commission|C. Insurance|D. Transportation|C
+50|Research and development expenses includes all EXCEPT one. Which one?|A. Testing|B. Drafting|C. Prototype|D. Laboratory|D
+51|Which is not a factory overhead expense?|A. Pension, medical, vacation benefits|B. Expediting|C. Quality control and inspection|D. Testing|D
+52|Bookkeeping consists of two steps, namely recording the transactions and categorization of transactions. Where are the transactions (receipts and disbursements) Recorded?|A. Journal|B. Ledger|C. Columnar|D. Statement of account|A
+53|The following are ledger accounts EXCEPT:|A. Asset accounts|B. Bank accounts|C. Liability accounts|D. Owner's equity accounts|B
+54|The journal and the ledger together are known simply as ____ of the company.|A. Accounting system|B. The books|C. Bookkeeping system|D. Balance sheet|B
+55|The basic accounting equation is|A. Assets = Liability + Owner's equity|B. Liability = Assets + Owner's equity|C. Owner's equity = Assets + Liability|D. Owner's equity = Liability - Assets|A
+56|The ability to convert assets to cash quickly is known as|A. Solvency|B. Liquidity|C. Leverage|D. Insolvency|B
+57|The ability to meet debts as they become due is known as|A. Solvency|B. Leverage|C. Insolvency|D. Liquidity|A
+58|What is considered as an index of short-term paying ability?|A. Current ratio|B. Acid test ratio|C. Gross margin|D. Return of investment|A
+59|An acid test ratio is a ratio of|A. Gross profit to net sales|B. Net income before taxes to net sales|C. Quick assets to current liabilities|D. Net income to owner's liabilities|C
+60|The ratio of the net income to the owner's equity is known as|A. Price-earning ratio|B. Profit margin ratio|C. Return of investment|D. Gross margin|C
+61|Payback period is the ratio of|A. Initial investment to net annual profit|B. Cost of goods sold to average inventory|C. gross profit to net sales|D. net income before taxes to net sales|A
+62|A secondary book of accounts the information of which is obtained from the journal|A. Balance sheet|B. Ledger|C. Worksheet|D. Trial balance|B
+63|The present worth of cost associated with an asset for an infinite period of time is referred to as|A. Annual cost|B. Capitalized cost|C. Increment cost|D. Operating cost|B
+64|A stock of a product which is held by a trade body or government as a means of regulating the price of that product.|A. Stock pile|B. Hoard stock|C. Buffer stock|D. Withheld stock|C
+65|A negotiable claim issued by a bank in lieu of a term deposit is called|A. Cheque|B. T-bills|C. Currency|D. Certificate of deposit|D
+66|A form of business firm which is owned and run by a group of individuals for their mutual benefit|A. Cooperative|B. Corporation|C. Enterprise|D. Partnership|A
+67|A document which shows the legal ownership of financial security and entitled to payments thereon.|A. Coupon|B. Contract|C. Bond|D. Consol|A
+68|A government bond which have an indefinite life rather than a specific maturity|A. Coupon|B. T-bill|C. Debenture|D. Consol|D
+69|Refers to the orders quantity that minimizes the inventory cost per unit time.|A. Economic order quantity|B. Social order quantity|C. Public order quantity|D. Private order quantity|A
+70|What is referred to as an individual who organizes factors of production to undertake a venture with a view to profit?|A. Agent|B. Entrepreneur|C. Salesman|D. Commissioners|B
+71|The money that is inactive and does not contribute to productive effort in an economy is known as|A. Idle money|B. Hard money|C. Soft currency|D. Frozen asset|A
+72|In counting the number of days when computing simple interest,|A. The first day is included|B. The last day is excluded|C. The first day is included and the last day is excluded|D. The first day is excluded and the last day is included|D
+73|In the so-called "Banker's Rule",|A. The number of days in 1 year is 360 days|B. The number of days in 1 year is 365 days|C. The number of days in each month is 30 days|D. The number of days in 1 year is 366 days|A
+74|To discount an amount F for n conversion periods means|A. To find the present value on a day which is n periods after F is due|B. To find the present value on a day which is n periods before F is due|C. To find the present value on a day which is (n-1) periods before Fis due|D. To find the present value on a day which is (n+1) periods before Fis due|B
+75|In the formula for compound interest, F = P(1+i)n, the value (1+i)n is called|A. Discount factor|B. Interest factor|C. Accumulation factor|D. Increase factor|C
+76|To find the present worth of a future amount in compound interest, we use the formula P = F(1+i)^-n. What do you call the factor (1+i)^-n?|A. Discount factor|B. Accumulation factor|C. Interest factor|D. Reduction factor|A
+77|What refers to an equation stating that the sum of the values, on a certain comparison date, of one set of obligations is equal to the sum of the value of another set of this date?|A. Equality of value|B. Equation of value|C. Equality equation|D. Similarity equation|B
+78|What is an annuity whose payments extend over a period of time whose length cannot be foretold accurately?|A. Annuity certain|B. Annuity uncertain|C. Incremental annuity|D. Contingent annuity|D
+79|What do you call the time between successive payment dates of an annuity?|A. Period interval|B. Annuity period|C. Payment interval|D. Annuity term|C
+80|The time from the beginning of the first payment interval to the need of the last one is called the ____ of the annuity.|A. Period|B. Term|C. Nature|D. Type|B
+81|What refers to the extinction of the debt by any satisfactory set of payments?|A. Liquidation|B. Liability discharge|C. Discharging debt|D. Amortization of debt|D
+82|What do you call a fund, usually by periodic deposits, to insure the accumulation of money to provide for possible large payments?|A. Escrow fund|B. Sinking fund|C. Mutual fund|D. Corporate fund|B
+83|What is the term for the borrowed principal usually mentioned in a typical bond?|A. Bond rate|B. Face value|C. Coupon rate|D. Coupon value|B
+84|Any date on which a coupon of a bond becomes due will be referred to as a|A. Maturity date|B. Term of the bond|C. Coupon date|D. Due date|C
+85|If P is the price of a bond and V is its redemption value, what do you call the value P-V?|A. Par value|B. Face value|C. Premium|D. Bond discount|C
+86|When can we say that the bond is purchased at a discount?|A. When the price of the bond is greater than the redemption value.|B. When the price of the bond is less than the redemption value.|C. When the price of the bond is equal than the redemption value.|D. When the price of the bond is either equal to or greater than the redemption value.|B
+87|When can we say that the bond is purchased at a premium?|A. When the price of the bond is greater than the redemption value.|B. When the price of the bond is less than the redemption value.|C. When the price of the bond is equal than the redemption value.|D. When the price of the bond is either equal to or greater than the redemption value.|A
+88|Which of the following will happen if bond is bought at a discount?|A. Each coupon payment is too small to pay all interest due on the investor's principal.|B. Each coupon payment is greater than the interest due on the investor's principal.|C. The unpaid interest on each coupon date will not be considered as a new investment in the bond.|D. The difference between the coupon payment and the interest due is a partial repayment of principal.|A
+89|In the sale of a bond, the actual purchase price on any day is called|A. Face value.|B. Quoted price|C. Accrued price|D. Flat price|D
+90|What do you call the difference between the flat price of the bond and the quoted price of the bond?|A. Par value|B. Accrued interest|C. Bond rate|D. And-interest price|B
+91|The quoted price of a bond is sometimes called|A. Par value|B. Face value|C. An-interest price|D. Coupon price|C
+92|The yield of a bond is obtained by which of the following formulas:|A. Average annual interest / Average investment|B. Par value / Flat value|C. Par value / Flat price|D. Average annual interest / Par value|A
+93|What term is usually used by the banks to represent the effective interest rate per period?|A. Yield|B. Nominal rate|C. Fixed rate|D. Net rate|A
+94|What is a bond whose face value is redeemable in installments, with interest payable periodically as due on outstanding principal?|A. Annuity bond|B. Serial bond|C. Treasury bond|D. Government bond|B
+95|What is the term for the sum of depreciation charges to date?|A. Accrued depreciation|B. Applied depreciation|C. Accumulated depreciation|D. All of the above|C
+96|The difference between the value of an asset and its salvage or scrap value at the end of the year is called|A. Depreciation|B. Accrued value|C. Book value|D. Wearing value|D
+97|What is a life annuity?|A. A sequence of payment for a certain person which stops when person dies.|B. A sequence of payment intended for a life insurance of a person.|C. A sequence of payment for a certain person which continues indefinitely.|D. It is the same as perpetuity.|A
+98|The acid test ratio is also known as quick ratio. Which one represents the quick ratio?|A. Quick assets / Current liabilities|B. Net credit sales / Average net receivables|C. Gross profit / Current liabilities|D. Gross profit / Net sales|A
+99|Which of the following represents the gross margin?|A. Net income / Owner's equity|B. Net credit sales / Average net receivables|C. Gross profit / Current liabilities|D. Gross profit / Net sales|D
+100|A receivable turnover is calculated using which of the following formulas?|A. Net income / Owner's equity|B. Net credit sales / Average net receivables|C. Gross profit / Current liabilities|D. Gross profit / Net sales|B
+101|The percentage of each peso of sales that is net income is called|A. Price-earning ratio|B. Profit margin|C. Profit margin ratic|D. Return of investment ratio|B
+102|Which one represents that price-earnings ratio?|A. Market price per share / Earnings per share|B. Earnings per share / Market price per share|C. Net credit sales / Average net receivables|D. Gross profit / Current liabilities|A
+103|The book value per share of common stock is the ratio of the common shareholders' equity to|A. Average shared|B. Number of outstanding shares|C. Total subscribed shared|D. Authorized capital stock|B
+104|What refers to the price at which the quantity demanded of a good is exactly equal to the quantity supplied?|A. Equilibrium market price|B. Fair market price|C. Real market price|D. Exact market price|A
+105|A principle that states that consumers will tend to spend an increasing proportion of any additional income upon luxury goods and a smaller proportional on staple goods, so that a rise in income will lower the overall share of consumer expenditures spent on stable goods (such as basic foodstuffs) and increase the share of consumer expenditures on luxury goods (such as motor cars).|A. Placibo effect|B. Luxury effect|C. Engel's law|D. Staple law|C
+106|What is the disciple within economics that attempts to measure and estimate statistically the relationship between two or more economic variables?|A. Theory of values|B. Econometrics|C. Economatics|D. Econoscience|B
+107|What refers to the fall in the general price level, frequently accompanied by a reduction in the level of national income?|A. Inflationary gap|B. Dissavings|C. Disinflation|D. Inflation|C
+108|A price for a product just covers its production and distribution costs with no profit margin added.|A. Cost price|B. Actual price|C. Real price|D. Original price|A
+109|A market where new entrants face cost similar to those of established firms and where, on leaving, firms are able to recoup their capital costs, less depreciation.|A. Free market|B. Competitive market|C. Limited market|D. Contestable market|D
+110|What refers to a temporary grouping of independent firms, organization and governments, brought together to pool their resources and skills in order to undertake a particular project?|A. Consortium|B. Cartel|C. Cooperative|D. Union|A
+111|What refers to a market for buying and selling of raw materials such as tea, coffee, iron ore, etc.?|A. Commodity market|B. Raw market|C. Natural market|D. National market|A
+112|The paper currency issued by the central bank which forms the part of the country's money supply|a. T-bills|b. Bank note|c. Check|d. Coupon|b
+113|Reduction in the national income and output usually accompanied by the fall in the general proce level|a. Devaluatio|b. Deflation|c. inflation|d. Depreciation|b
+114|It is a series of equal payment occurring at equal interval of time|a. Annuity|b. Debt|c. Amortization|d. Deposit|a
+115|The place and buyers come together|a. Market|b. Business|c. Recreational center|d. Buy and sell of section|a
+116|A market where by there is only one buyer of an item for which there are no good substitute|a. Monopsony|b. Oligopoly|c. Monopoly|d. Oligopsony|a
+117|It is a series of equal payment occurring at equal interval of time where the first payment is made after several periods, after the beginning of the payment|a. Perpetuity|b. Ordinary Annuity|c. Annuity due|d. Deferred annuity|d
+118|The total income equals the total operating cost.|a. Balance sheet|b. In-place value|c. Check and balance|d. Break even-no gain no loss|d
+119|Kind of obligation which has no condition attached.|a. Analytic|b. Pure|c. Gratuitous|d. Private|b
+120|Direct labor costs incurred in the factory and direct material costs are the costs of all materials that go into production. The sum of these two direct costs is known as|a. GS and A expenses|b. Operating and maintenance costs|c. Prime cost|d. O and M costs|c
+121|An index of short term paying ability is called|a. Receivable turn-over|b. Profit margin ratio|c. Current ratio|d. Acid-test ratio|d
+122|An artificial expenses that spreads the purchase price of an assets or another property over a number of years.|a. Depreciation|b. Sinking Fund|c. Amnesty|d. Bond|a
+123|Estimate value at the end of the useful life.|a. Market value|b. Fair value|c. Salvage value|d. Book value|c
+124|Consists of the actual counting or determinination of the actual quantity of the materials on hand as of a given date.|a. Physical inventory|b. Material update|c. Technological assessment|d. Material count|a
+125|Additional information of prospective bidders on contract documents issued prior to bidding date.|a. Delict|b. Escalatory|c. Technological assessment|d. Bid bulletin|d
+126|A series of uniform accounts over an infinite period of time.|a. Depreciation|b. Annuity|c. Perpetuity|d. Inflation|c
+127|The quantity of a certain commodity that is offered for sale at a certain price at a given place and time.|a. Demand|b. Supply|c. Stocks|d. Goods|b
+128|Work-in process is classified as|a. An assets|b. A liability|c. An expenses|d. An owner's equity|a
+129|What is the highest position in the corporation?|a. President|b. Board of directors|c. Chairman of the board|d. Stockholders|c
+130|Type of ownership in business where individuals exercise and enjoy the right in their own interest.|a. Equitable|b. Public|c. Private|d. Pure|c
+131|Decrease in the value of a physical property due to the passage of time.|a. Inflation|b. Depletion|c. Recession|d. Depreciation|d
+132|An association of two or more individuals for the purpose of operating a business as co-owners for profit.|a. Sole proprietorship|b. Company|c. Partnership|d. Corporation|c
+133|We may classify an interest rate, which specifies the actual rate of interest on the principal for one year as|a. Nominal rate|b. Rate of return|c. Exact interest rate|d. Effective rate|d
+134|It is defined to be the capacity of a commodity to satisfy human want..|a. Discount|b. Luxury|c. Necessity|d. Utility|d
+135|It is the amount which a willing buyer will pay to a willing seller or a property where each has equal advantage and is under no compulsion to buy or sell.|a. Fair value|b. Market value|c. Book value|d. Salvage value|b
+136|This occurs in a situation where a commodity or service is supplied by a number of vendors and there is nothing to prevent additional vendors entering the market.|a. Perfect competition|b. Oligopoly|c. Monopoly|d. Elastic demand|a
+137|These are product or service that are desired by human and will be purchased if money is a available after the required necessities have been obtained.|a. Utilities|b. Necessities|c. Luxuries|d. Product goods and service|c
+138|These are product or services that are required to support human life ad activities that will be purchased in somewhat the same quantity even though the price varies considerably.|a. Utilities|b. Necessities|c. Luxuries|d. Product goods and services|b
+139|A condition where only few individuals produce a certain product and that any action of one will lead to almost the same action of the others.|a. Oligopoly|b. Semi-monopoly|c. Monopoly|d. Perfect competition|a
+140|Grant total of the assets and operational capability of a corporation.|a. Authorized capital|b. Investment|c. Subscribed capital|d. Money market|a
+141|The worth of the property equals to the original cost less depreciation.|a. Scrap value|b. Face value|c. Market value|d. Book value|d
+142|Money paid for the use of borrowed capital.|a. Discount|b. Credit|c. Interest|d. Profit|c
+143|Liquid assets such as cash and other assets that can be converted quickly into cast such as accounts receivable and merchandise are called|a. Total assets|b. Fixed assets|c. Current assets|d. None of the above|c
+144|The length of time which the property may be operated at a profit.|a. physical life|b. Economic life|c. Operating life|d. All of the above|b
+145|The provision in the contract that indicates the possible adjustment of material cost and labor cost.|a. Secondary clause|b. Esclatory clause|c. Contingency clause|d. Main clause|b
+146|The present worth of all depreciation over the economic life of the item is called|a. Book value|b. Capital recovery|c. Depreciation recovery|d. Sinking fund|c
+147|Gross profit, sales less cost of goods sold, as a percentage of sales is called|a. Profit margin|b. Gross margin|c. Net income|d. Rate of return|b
+148|Worth of the property as shown in the accounting records of an enterprise.|a. Fair value|b. Market value|c. Salvage value|d. Book value|d
+149|Those funds that are required to make the enterprise or project a going concern.|a. Initial investment|b. Current accounts|c. Working capital|d. Subscribed capital|c
+150|A market situation where there are one seller and many buyers.|a. Monopoly|b. Monopsony|c. Oligopoly|d. Oligopsony|a
+151|A market situation where there are few sellers and few buyers.|a. Oligopoly|b. Oligopsony|c. Bilateral oligopoly|d. Bilateral oligopsony|c
+152|A market situation where there is one seller and one buyer.|a. Monopoly|b. Monopsony|c. Bilateral monopoly|d. Bilateral monopsony|c
+153|A market situation where there are only two buyers with many sellers.|a. Duopoly|b. Oligopoly|c. Duopsony|d. Oligopsony|c
+154|The cumulative effect of elapsed time on the money value of an event, based on the earning power of equivalent investment funds capital should or will earn.|a. Present worth factor|b. Interest rate|c. Time value of money|d. Yield|c
+155|Defined as the future value minus the present value.|a. Interest|b. Rate of return|c. Discount|d. Capital|c
+156|The flow back of profit plus depreciation from a given project is called.|a. Capital recovery|b. Cash flow|c. Economic flow|d. Earning value|b
+157|The profit derived from a project or business enterprise whithout consideration of obligations to financial contribution or claims of other based on profit.|a. Economic life|b. Yield|c. Earning value|d. Expected yield|a
+158|The payment for the use of borrowed money is called|a. Loan|b. Maturity value|c. Interest|d. Principal|c
+159|The interest rate at which the present work of the cash flow on a project is zero of the interest earned by an investment.|a. Effective rate|b. Nominal rate|c. Rate of return|d. Yield|c
+160|The ratio of the interest payment to the principal for a given unit of time and usually expressed as a percentage of the principal.|a. Interest|b. Interest rate|c. Investment|d. All of the above|b
+161|The true value of interest rate computed by equations for compound interest for a 1 year period is known as|a. Expected return|b. Interest|c. Nominal interest|d. Effective interest|d
+162|The intangible item of value from the exclusive right of a company to provide a specific product or service in a stated region of the country.|a. Market value|b. Book value|c. Goodwill value|d. Franchise value|d
+163|The recorded current value of an asset is known as|a. Scrap value|b. Salvage value|c. Book value|d. Present wort|c
+164|Scrap value of an asset is sometimes known as.|a. Book value|b. Salvage value|c. Replacement value|d. Future value|b
+165|What is sometimes called second hand value?|a. Scrap value|b. Salvage value|c. Book value|d. Going value|b
+166|An intangible value which is actually operating concern has due to its operation.|a. Book value|b. Fair value|c. Goodwill value|d. Going value|d
+167|The value which a disinterested third party, different from the buyer and seller, will determine in order to establish a price acceptable to both parties.|a. Market value.|b. Good value|c. Fair value|d. Franchise value|c
+168|A type annuity where the payments are made at the end of each payment period starting from the first period.|a. Ordinary annuity|b. Annuity due|c. Deferred annuity|d. Perpetuity|a
+169|It is a series of time where the first payment is made after several periods, after the beginning of the payment.|a. Deferred annuity|b. Delayed annuity|c. Progressive annuity|d. Simple annuity|a
+170|A type of annuity where the payments are made at the start of each period from the first period.|a. Ordinary annuity|b. Annuity due|c. Deferred annuity|d. Perpetuity|b
+171|Which is not an essential element of an ordinary annuity?|a. The amounts of all payments are equal.|b. The payments are made at equal interval of time|c. The first payment is made at the beginning of each period|d. Compound interest is paid on all amounts in the annuity|c
+172|A is a periodic payment and I is the interest rate, then present worth of a perpetuity =|a. Ai|b. Ai^n|c. A^n/ i|d. A/i|d
+173|A mathematical expression also known as the present value of one is called|a. Load factor|b. Demand facetor|c. Sinking fund factor|d. Present worth factor|d
+174|As applied to a capitalized asset, the distribution of the initial cost by a periodic changes to operation as in depreciation or reduction of a debt by either periodic or irregular prearranged program is called|a. Annuity|b. Capital recovery|c. Annuity factor|d. Amortization|d
+175|The reduction of the value of an asset due to constant use and passage of time.|a. Scrap value|b. Depletion|c. Depreciation|d. Book value|c
+176|A method of computing depreciation in which the annual charge is a fixed percentage of the depreciated book value at the beginning of the year to which the depreciation applies.|a. Straight line method|b. Sinking fund method|c. SYD method|d. Declining balance method|d
+177|A method of depreciation whereby the amount to recover is spread uniformly over the estimated life of the asset in terms of the periods or units of output.|a. Straight line method|b. Sinking fund method|c. Declining balance method.|d. SYD method|a
+178|Which of the following depreciation methods cannot have a salvage value of zero?|a. Declining balance method|b. Sinking fund method|c. Straight line method|d. SYD method|a
+179|A method of depreciation where a fixed sum of money is regularly deposited at compound interest in a real or imaginary fund in order to accumulate an amount equal to the total depreciation of an asset at the end of the asset's estimated life.|a. Straight line method|b. Sinking fund method|c. Declining balance method|d. SYD method|b
+180|The function of interest rate and time determines the cumulative amount of a sinking fund resulting from specific deposits.|a. Sinking fund factor|b. Present worth factor|c. Capacity|d. Demand factor|a
+181|an association of two or more person for a purpose of engaging in a profitable business|a. sole proprietorship|b. enterprise|c. partnership.|d. corporation|c
+182|a distinct legal entity which can practically transact any business transaction which a real person could do.|a. Sole proprietorship|b. Enterprise|c. Partnership|d. Corporation|d
+183|Double taxation is disadvatange of which business organization|a. Sole proprietorship|b. Partnership|c. Corporation|d. Enterprise|c
+184|Which is NOT a type of business organization?|a. Sole proprietorship|b. Corporation|c. Enterprise|d. Partnership|c
+185|A type of bond where the corporation pledges securities which it owns (i.e. stock, bonds of its subsidiaries)|a. Mortgage bond|b. Register bond|c. Coupon Bond|d. Collateral trust bond|d
+    </script>
+
+    <script>
+        const rawData = document.getElementById('raw-data').textContent.trim();
+        const questions = rawData.split('\n').map(line => {
+            const [num, text, a, b, c, d, ans] = line.split('|');
+            return {
+                num, text, options: [a, b, c, d], ansLetter: ans.toUpperCase().trim(), answered: null
+            };
+        });
+
+        let currentIdx = 0;
+        let score = 0;
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            questions.forEach((q, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-item';
+                btn.innerText = q.num;
+                btn.id = `nav-${i}`;
+                btn.onclick = () => { currentIdx = i; loadQuestion(); toggleSidebar(); };
+                grid.appendChild(btn);
+            });
+        }
+
+        function loadQuestion() {
+            const q = questions[currentIdx];
+            document.getElementById('qIdx').innerText = `Problem ${q.num} of 185`;
+            document.getElementById('qText').innerText = q.text;
+            
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+            
+            const fb = document.getElementById('feedback');
+            fb.className = 'feedback';
+            fb.innerText = '';
+
+            q.options.forEach((opt, i) => {
+                const letter = String.fromCharCode(65 + i);
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span class="option-letter">${letter}</span> ${opt}`;
+                
+                if (q.answered) {
+                    btn.disabled = true;
+                    if (letter === q.ansLetter) btn.classList.add('correct');
+                    if (letter === q.answered && letter !== q.ansLetter) btn.classList.add('wrong');
+                } else {
+                    btn.onclick = () => select(letter);
+                }
+                grid.appendChild(btn);
+            });
+
+            if (q.answered) {
+                fb.classList.add('show', q.answered === q.ansLetter ? 'success' : 'error');
+                fb.innerText = q.answered === q.ansLetter ? 'CORRECT!' : `WRONG! Correct Answer: ${q.ansLetter}`;
+            }
+
+            document.getElementById('prevBtn').disabled = currentIdx === 0;
+            document.getElementById('nextBtn').disabled = currentIdx === questions.length - 1;
+            
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(`nav-${currentIdx}`).classList.add('active');
+        }
+
+        function select(letter) {
+            const q = questions[currentIdx];
+            q.answered = letter;
+            if (letter === q.ansLetter) {
+                score++;
+                document.getElementById('score').innerText = `Score: ${score}`;
+            }
+            document.getElementById(`nav-${currentIdx}`).classList.add('completed');
+            loadQuestion();
+        }
+
+        function next() { if (currentIdx < questions.length - 1) { currentIdx++; loadQuestion(); } }
+        function prev() { if (currentIdx > 0) { currentIdx--; loadQuestion(); } }
+
+        window.onload = () => { buildNav(); loadQuestion(); };
+    </script>
+</body>
+</html>
