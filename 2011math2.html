@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EM Board Exam 2011 Quiz</title>
-    <!-- MathJax for rendering LaTeX formulas -->
+    <title>EM Board Exam 2011 | Fixed Edition</title>
+    <!-- MathJax for rendering equations -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>
-        window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
-        };
+        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
     </script>
     <style>
         :root {
@@ -59,20 +57,13 @@
             cursor: pointer;
             color: var(--text-color);
             margin-right: 20px;
-            transition: color 0.2s;
-        }
-
-        .hamburger:hover {
-            color: var(--accent-color);
         }
 
         .top-bar h2 {
             margin: 0;
             font-size: 1.3rem;
             color: var(--nav-bg);
-            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         /* Sidebar Navigation */
@@ -91,9 +82,7 @@
             box-shadow: 2px 0 10px rgba(0,0,0,0.2);
         }
 
-        #sidebar.open {
-            transform: translateX(0);
-        }
+        #sidebar.open { transform: translateX(0); }
 
         .sidebar-header {
             padding: 20px;
@@ -125,19 +114,9 @@
             transition: all 0.2s;
         }
 
-        .nav-item:hover {
-            background-color: #747d8c;
-        }
-
-        .nav-item.active {
-            background-color: var(--accent-color);
-            box-shadow: inset 0 0 0 2px white;
-        }
-
-        .nav-item.completed {
-            background-color: #2ed573;
-            color: #2f3542;
-        }
+        .nav-item:hover { background-color: #747d8c; }
+        .nav-item.active { background-color: var(--accent-color); box-shadow: inset 0 0 0 2px white; }
+        .nav-item.completed { background-color: #2ed573; color: #2f3542; }
 
         /* Main Content */
         #main-content {
@@ -169,7 +148,6 @@
             font-weight: 700;
             display: flex;
             justify-content: space-between;
-            text-transform: uppercase;
         }
 
         .question-text {
@@ -227,11 +205,24 @@
         }
 
         .feedback-message {
+            padding: 20px;
+            border-radius: 6px;
             font-size: 1.2rem;
             font-weight: bold;
-            text-align: center;
             margin-bottom: 20px;
             display: none;
+        }
+
+        .feedback-message.success {
+            background-color: #e8f8f5;
+            color: #27ae60;
+            border-left: 5px solid #2ecc71;
+        }
+
+        .feedback-message.error {
+            background-color: #ffefea;
+            color: #c0392b;
+            border-left: 5px solid #ff4757;
         }
 
         /* Controls */
@@ -251,21 +242,12 @@
             font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s;
             text-transform: uppercase;
         }
 
-        .control-btn:hover:not(:disabled) {
-            background-color: var(--hover-color);
-        }
+        .control-btn:hover:not(:disabled) { background-color: var(--hover-color); }
+        .control-btn:disabled { background-color: #ced6e0; color: #747d8c; cursor: not-allowed; }
 
-        .control-btn:disabled {
-            background-color: #ced6e0;
-            color: #747d8c;
-            cursor: not-allowed;
-        }
-
-        /* Overlay */
         #overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -274,23 +256,18 @@
             display: none;
         }
         #overlay.show { display: block; }
-        
-        .error-message {
-            color: #ff4757;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
         <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
-        <h2>EM Board Exam 2011 | Sequential Quiz</h2>
+        <h2>Board Exam 2011 | Sequential Reviewer</h2>
     </div>
 
     <div id="overlay" onclick="toggleSidebar()"></div>
     <div id="sidebar">
-        <div class="sidebar-header">Problems Navigator</div>
+        <div class="sidebar-header">100 Problems Navigator</div>
         <div class="nav-grid" id="navGrid"></div>
     </div>
 
@@ -302,9 +279,7 @@
             </div>
             
             <div class="question-text" id="qText">Extracting problem set...</div>
-            
             <div class="options-container" id="optionsGrid"></div>
-            
             <div class="feedback-message" id="feedbackMessage"></div>
             
             <div class="controls" id="controls" style="display:none;">
@@ -824,26 +799,33 @@ D. cohesion
     </script>
 
     <script>
-        // Data Extraction
+        // Data Extraction Engine
         const rawTextData = document.getElementById('raw-data').textContent || "";
-        // Match numbers at start of line
+        
+        // Find question boundaries dynamically without relying on strictly ascending numbers
         const blocks = rawTextData.split(/(?:^|\n|\r\n)(?=\s*\d+\.\s)/).map(b => b.trim()).filter(b => b.length > 0);
         
         const quizData = [];
         let totalScore = 0;
 
         blocks.forEach((block) => {
-            // Find the question boundary (stops before A. or a.)
-            const qMatch = block.match(/^(\d+)\.\s([\s\S]*?)(?=(?:a|A|\.a)\.?\s|\n(?:a|A)\.)/);
-            if (!qMatch) return;
+            // Locate where options begin (A., B., C., D., a., b., c., d.)
+            const optStartMatch = block.match(/\n\s*[A-Da-d][\.\)]\s/);
+            if (!optStartMatch) return; 
             
-            const num = qMatch[1];
-            const qText = qMatch[2].trim();
+            const optIndex = optStartMatch.index;
+            const questionPart = block.substring(0, optIndex).trim();
+            const optionsStr = block.substring(optIndex).trim();
             
-            const optionsStr = block.substring(qMatch[0].length);
+            // Extract the question number and text
+            const numMatch = questionPart.match(/^(\d+)\.\s+/);
+            if (!numMatch) return;
             
-            // Highly robust split to catch A., B., C., D. or a), b), c), d)
-            const optRegex = /(?:^|\n)([A-Da-d])[\.\)]\s/g;
+            const numText = numMatch[1];
+            const qText = questionPart.substring(numMatch[0].length).trim();
+            
+            // Extract Options
+            const optRegex = /(?:^|\n)\s*([A-Da-d])[\.\)]\s/g;
             let match;
             let indices = [];
             while ((match = optRegex.exec(optionsStr)) !== null) {
@@ -851,7 +833,7 @@ D. cohesion
             }
 
             const options = [];
-            let ansIdx = 0; // Default fallback
+            let ansIdx = 0; // Default
 
             for (let i = 0; i < indices.length; i++) {
                 let start = indices[i].index + indices[i].matchLength;
@@ -868,7 +850,8 @@ D. cohesion
             
             if (options.length > 0) {
                 quizData.push({
-                    num: num, 
+                    num: parseInt(numText, 10), // Use integer for stable sequencing
+                    originalNum: numText,
                     q: qText, 
                     options: options, 
                     ansIdx: ansIdx, 
@@ -877,6 +860,9 @@ D. cohesion
                 });
             }
         });
+
+        // Ensure perfect sequential 1 to 100 ordering (Fixes the out-of-order '29' in the raw text)
+        quizData.sort((a, b) => a.num - b.num);
 
         let currentIndex = 0;
 
@@ -903,7 +889,7 @@ D. cohesion
                 const btn = document.createElement('button');
                 btn.className = 'nav-item';
                 btn.id = `nav-btn-${idx}`;
-                btn.innerText = q.num; // Uses actual question number from text
+                btn.innerText = idx + 1; // Display 1 to 100 clearly
                 btn.onclick = () => { loadQuestion(idx); toggleSidebar(); };
                 grid.appendChild(btn);
             });
@@ -927,7 +913,7 @@ D. cohesion
             currentIndex = index;
             const q = quizData[currentIndex];
             
-            document.getElementById('qHeader').innerHTML = `Question ${index + 1} of ${quizData.length} (ID: ${q.num})`;
+            document.getElementById('qHeader').innerHTML = `Problem ${index + 1} of ${quizData.length}`;
             document.getElementById('qText').innerHTML = q.q;
             
             const optionsGrid = document.getElementById('optionsGrid');
@@ -955,7 +941,7 @@ D. cohesion
             });
 
             if (q.userAnswered) {
-                showFeedback(q.isCorrect);
+                showFeedback(q.isCorrect, q);
             }
 
             document.getElementById('prevBtn').disabled = (currentIndex === 0);
@@ -985,21 +971,27 @@ D. cohesion
 
             if (!q.isCorrect) selectedBtn.classList.add('wrong');
 
-            showFeedback(q.isCorrect);
+            showFeedback(q.isCorrect, q);
             updateNavStyles();
             updateScore();
         }
 
-        function showFeedback(isCorrect) {
+        function showFeedback(isCorrect, q) {
             const feedbackMsg = document.getElementById('feedbackMessage');
+            feedbackMsg.className = 'feedback-message ' + (isCorrect ? 'success' : 'error');
+            
+            const correctOpt = q.options[q.ansIdx];
+            
             if (isCorrect) {
-                feedbackMsg.innerText = "Correct!";
-                feedbackMsg.style.color = "var(--correct-color)";
+                feedbackMsg.innerHTML = "Correct! The answer is <strong>" + correctOpt.letter + ". " + correctOpt.text + "</strong>";
             } else {
-                feedbackMsg.innerText = "Incorrect!";
-                feedbackMsg.style.color = "var(--wrong-color)";
+                feedbackMsg.innerHTML = "Incorrect! The correct answer is <strong>" + correctOpt.letter + ". " + correctOpt.text + "</strong>";
             }
             feedbackMsg.style.display = "block";
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise([feedbackMsg]);
+            }
         }
 
         function nextQuestion() {
