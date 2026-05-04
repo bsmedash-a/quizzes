@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EM Board Exam 2011 | Interactive Reviewer</title>
+    <title>EM Board Exam 2011 Quiz</title>
     <!-- MathJax for rendering LaTeX formulas -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -22,8 +22,6 @@
             --correct-color: #2ed573;
             --wrong-color: #ff4757;
             --nav-bg: #2f3542;
-            --solution-bg: #dfe4ea;
-            --solution-text: #2f3542;
         }
 
         * {
@@ -186,7 +184,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .option-btn {
@@ -228,27 +226,12 @@
             color: var(--accent-color);
         }
 
-        /* Solution Area */
-        .solution-container {
-            display: none;
-            background-color: rgba(55, 66, 250, 0.1);
-            border-left: 5px solid var(--accent-color);
-            padding: 25px;
-            border-radius: 0 6px 6px 0;
-            margin-bottom: 30px;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: var(--solution-text);
-        }
-
-        .solution-container strong {
-            color: var(--accent-color);
-            display: block;
-            margin-bottom: 12px;
+        .feedback-message {
             font-size: 1.2rem;
-            border-bottom: 1px dashed #a4b0be;
-            padding-bottom: 5px;
-            text-transform: uppercase;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
         }
 
         /* Controls */
@@ -302,12 +285,12 @@
 
     <div class="top-bar">
         <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
-        <h2>EM Board Exam 2011 Reviewer</h2>
+        <h2>EM Board Exam 2011 | Sequential Quiz</h2>
     </div>
 
     <div id="overlay" onclick="toggleSidebar()"></div>
     <div id="sidebar">
-        <div class="sidebar-header">100 Questions Navigator</div>
+        <div class="sidebar-header">Problems Navigator</div>
         <div class="nav-grid" id="navGrid"></div>
     </div>
 
@@ -315,16 +298,14 @@
         <div class="quiz-card" id="quizCard">
             <div class="question-header">
                 <span id="qHeader">Initializing...</span>
+                <span id="scoreTracker" style="color: var(--accent-color);">Score: 0</span>
             </div>
             
             <div class="question-text" id="qText">Extracting problem set...</div>
             
             <div class="options-container" id="optionsGrid"></div>
             
-            <div class="solution-container" id="solutionContainer">
-                <strong>Solution / Concept:</strong>
-                <span id="solutionText"></span>
-            </div>
+            <div class="feedback-message" id="feedbackMessage"></div>
             
             <div class="controls" id="controls" style="display:none;">
                 <button class="control-btn" id="prevBtn" onclick="prevQuestion()">&#8592; Previous</button>
@@ -335,591 +316,566 @@
 
     <!-- Raw Data Embed (Do not modify formatting) -->
     <script id="raw-data" type="text/plain">
-1. A type of bond where the corporation pledges securities which it owns (I, e, stocks, bonds of its subsidiaries).
-A. Mortgage
-B. Registered bond
-C. Coupon bond
-D. Collateral trust bond *
-2. The place where buyers and sellers come together.
-A. Market *
-B. Business
-C. Recreation center
-D. Buy and sell section
-3. An evil wrong committed by a person damaged another person's property or reputation is
-A. tort*
-B. material breach
-C. negligence
-D. fraud
-4. What is the probability of not getting a red ball from a bag containing 3 white balls, 5 blue balls, and 4 red balls?
-A. 2/3 *
-B. 5/12
-C. 1/3
-D. 1/4
-5. In how many ways can 7 persons be seated on a round table if a certain couple is in the group and must be seated together?
-A. 240 *
-B. 360
-C. 120
-D. 720
-6. A 100 liter mixture with 85% alcohol is placed in a container. How much water should be added to produce a mixture with 65% alcohol?
-A. 25.6
-B. 20.6
-C. 30.8 *
-D. 35.8
-7. What is the highest position in the corporation?
-A. President
-B. Board of Directors
-C. Chairman of the Board *
-D. Stockholders
-8. An association of two or more individuals for the purpose of operating a business as co-owners for profit.
-A. Sole proprietorship
-B. Company
-C. Partnership *
-D. Corporation
-9. Liquid assets such as cash and other assets that can be converted quickly into cash, such as accounts receivable and merchandise are called
-A. total assets
-B. fixed assets
-C. current assets *
-D. none of the above
-10. The length of time which the property may be operated at a profit.
-A. Physical life
-B. Economic life *
-C. Operating life
-D. All of the above
-11. The provision in the contract that indicates the possible adjustment of material cost and labor cost.
-A. Secondary clause
-B. Escalatory clause *
-C. Contingency clause
-D. Main clause
-12. Gross profit, sales less cost of good sold, as a percentage of a sales is called
-A. profit margin
-B. gross margin *
-C. net income
-D. rate of return
-13. Those funds that are required to make the enterprise or project a going concern.
-A. Initial investment
-B. Current accounts
-C. Working capital *
-D. Subscribed capital
-14. The payment for the use of borrowed money is called
-A. loan
-B. maturity value
-C. interest *
-D. principal
-15. Sometimes called second hand value.
-A. Scrap value
-B. Salvage value *
-C. Book value
-D. Going value
-16. If John gives $5 to Allen and Allen gives $2 to Eduard, and they have the same money thereafter, how much is Johns money higher than Allen?
-A. $7
-B. $5
-C. $8 *
-D. $3
-17. Transform the polar equation r*cos(theta)*sin(theta)= 4 to rectangular coordinates.
-A. xy=4 *
-B. x^2y=4
-C. x+y=4
-D. x^2+y^2=4
-18. Given f(x)=(x-1)/(x^3-3x^2+2x) , find x when the value of f(x) is undefined.
-A. 0,-1 and -2
-B. 0, 1 and 2*
-C. 0 and 2
-D. 1 and 2
-19. Given f(x)=3x-5 , g(f(x))=x, find g(x).
-A. (2x+5)/3
-B. (3x-5)/4
-C. (x+5)/3*
-D. (x-5)/3
-20. The value which has a disinterested third party, different from the buyer and seller, will determine in order to establish a price acceptable to both parties.
-A. Market value
-B. Goodwill value
-C. Fair value *
-D. Franchise value
-21. It is a series of equal payments occurring at equal intervals of time where the first payment is made after several periods, after the beginning of the payment.
-A. Deferred annuity *
-B. Delayed annuity
-C. Progressive annuity
-D. Simple annuity
-22. A method of computing depreciation in which the annual charge is a fixed percentage of the depreciation book value at the beginning of the year to which the depreciation applies.
-A. Straight lime method
-B. Sinking fund method
-C. SYD method
-D. Declining balance method *
-23. A method of depreciation where a fixed sum of money is regularly deposited at compound interest in a real or imaginary fund in order to accumulate an amount equal to the total depreciation of an asset at the end of the asset's estimated life.
-A. Straight line method
-B. Sinking fund method *
-C. Declining balance method
-D. SYD method
-24. The lessening of the value of an asset due to the decrease in the quantity available (referring to the natural resources, coal, oil, etc.)
-A. Depreciation
-B. depletion *
-C. inflation
-D. incremental cost
-25. An association of two or more persons for a purpose of engaging in a profitable business.
-A. Sole proprietorship
-B. Enterprise
-C. Partnership *
-D. Corporation
-26. A distinct legal entity which can practically transact any business transaction which a real person could do.
-A. Sole of proprietorship
-B. Enterprise
-C. Partnership
-D. Corporation *
-27. A type of bind where the corporation pledges securities which it owns (I,e, stocks, bonds of its subsidiaries).
-A. Mortgage
-B. Registered bond
-C. Coupon bond
-D. Collateral trust bond *
-28. A type of bond which does not have security except a promise to pay by the issuing corporation.
-A. Mortgage bond
-B. Registered bond
-C. Collateral trust bond
-D. Debenture bond *
-29. The residual value of a company's assets after all outside liabilities (shareholders excluded) has been allowed for.
-A. Dividend
-B. Equity *
-C. Return
-D. Per value
-30. The quantity of a certain commodity that is bought at a certain price at a given time and place.
-A. Demand *
-B. Supply
-C. Market
-D. Utility
-31. Solve for N if log of 3 top the base 6 equals N.
-A. 0.613 *
-B. 0.218
-C. 0.316
-D. 0.816
-32. A man bought a $20 book and wishes to sell it. At what price should he mark it if he wishes to give a 40 percent discount and make 50 percent profit on the cost?
-A. $40
-B. $55
-C. $50*
-D. $30
-33. A steel plate 6 cm square is to be formed into an open box by cutting equal squares out of the corners and bending up the edges to form a box. What is the side of the square removed so that the box formed will have a maximum volume?
-A. 1.0 cm *
-B. 1.5 cm
-C. 0.5 cm
-D. 2.0 cm
-34. The greatest unit pressure the soil can continuously stand is called
-A. bearing strength *
-B. yield strength
-C. ultimate strength
-D. fatigue strength
-35. Refers to the highest ordinate on the stress-strain diagram.
-A. Rapture strength
-B. Ultimate strength *
-C. Yield strength
-D. Allowable strength
-36. A kind of stress that is caused by forces acting along or parallel to the area resisting the force.
-A. Tensile stress
-B. Bearing stress
-C. Shearing stress *
-D. Tangential stress
-37. The ratio of the unit deformation or strains in a transverse direction is constant for stresses within the proportional limit. This is known as
-A. Hooke's Law
-B. Mohr's circle
-C. Poisson ratio *
-D. Slenderness ratio
-38. What is the constant term in the expansion of (2x^2+1/x)^9?
-A. 672 *
-B. 724
-C. 748
-D. 860
-39. Solve for x: 2^3x = 64
-A. 4
-B. 6
-C. 2 *
-D. 1
-40. Find x in the expression log 3 to the base 6 equals x times log 3 to the base 2.
-A. 1/3 *
-B. 1/2
-C. 2/3
-D. 3/4
-41. If ln x=3 and ln y=5, find ln(x^2/y^(1/2))
-A. 1.5
-B. 2.5
-C. 3.5 *
-D. 4.5
-42. A river is 580 ft wide. The bridge constructed across the river is banked 1/7 of its length in the east and 1/6 in the west. What is the length of the bridge?
-A. 840 ft *
-B. 760 ft
-C. 910 ft
-D. 1000 ft
-43. What is the probability of getting two faces in a deck of cards if drawing of cards is to be done twice?
-A. 0.02
-B. 0.05 *
-C. 0.04
-D. 0.03
-44. A plane with a velocity of 300 mph din still air, is travelling against the wind and travels a distance of 900 miles in 4 hours. Find the headwind velocity.
-A. 75 mph *
-B. 100 mph
-C. 150 mph
-D. 200 mph
-45. A, B and C are points on a circle. AC bisects the circle and AB=BC. The area of triangle ABC is most clearly what percent of the circles area?
-A. 44
-B. 36
-C. 32*
-D. 24
-46. Find the value of x for which f(x) is minimum given f(x)= x^2+5x+2=0
-A. 0
-B. -5/2 *
-C. -2
-D. -3/2
-47. Solve for x: x-3 = 3(1-x)
-A. 0.67
-B. 0.33
-C. 1.50 *
-D. 1.67
-48. Find the equation of the family of lines in which the slope and the y intercept are equal.
-A. y'=x/y
-B. y'=y/(x+1) *
-C. y'=y/x
-D. y'=x+y
-49. Find the radius of the circle circumscribing a regular pentagon with area 560 square units.
-A. 15.347 *
-B. 16.879
-C. 11.254
-D. 10.543
-50. Find the equation of the circle circumscribing a triangle with vertices (-1,-3), (-2, 4), (2, 1).
-A. x^2+3x+y^2-7y-10=0
-B. x^2+3x+y^2+7y-10=0
-C. x^2+3x+y^2-y-10=0 *
-D. x^2+3x+y^2-7y+10=0
-51. The upper and lower bases of a trapezoid measures 12 in and 16 in respectively. If the base angles are 55 deg and 65 deg. What is the length of the shorter leg?
-A. 3.78*
-B. 2.18
-C. 5.24
-D. 4.29
-52. What is the maximum area of the rectangle inscribed in an ellipse having an equation of 4x^2+16y^2=16.
-A. 4
-B. 12
-C. 8 *
-D. 6
-53. When a right circular cone is cut by a plane parallel to the axis of the cone the conic section formed is a/an
-A. parabola
-B. ellipse
-C. circle
-D. hyperbola *
-54. If the second derivative of the equation of a curve is equal to the negative of the equation of that same curve, the curve is
-A. paraboloid
-B. exponential
-C. tangent
-D. sinusoidal *
-55. The act of charging two or more buyers or sellers different prices for the same product where the elasticity of supply or demand at each price level differs among market is known as
-A. price manipulation
-B. price optimization
-C. price discrimination *
-D. price war
-56. A situation in which rival firms drive prices down through attempts to undercut each others prices is called
-A. price war *
-B. price discrimination
-C. price leadership
-D. price manipulation
-57. Maximum plant capacity in which a CPM is allowed to operate, tend or maintain
-A. 200 kW
-B. 220 kW
-C. 224 kW
-D. 242 kw*
-58. The state of a thermodynamic system is defined by its
-A. temperature
-B. pressure and temperature
-C. process
-D. properties *
-59. The partial pressure of a gas is the pressure that the gas will exert if it alone occupies the volume occupied by the mixture at the same temperature of the mixture.
-A. Dalton's law *
-B. Avogadro's law
-C. Amagat's law
-D. Pascal's law
-60. An accounting book where the original record of all transaction is ordinarily recorded.
-A. journal *
-B. balance sheet
-C. ledger
-D. balance sheet
-61. Given f(x)=2^x+4, g(x)=1/x, find f(g(f(x)))
-A. 1/(2^x+4) *
-B. 1/2^x
-C. 2^x+4
-D. 2x+4
-62. Simplify: (a^-2)^2 / (b^-2)^3
-A. b^6/a^4 *
-B. a^6/b^4
-C. b^4/a^6
-D. a^4/b^6
-63. Find the roots of the equation x^3 - 16x = 0.
-A. 0,4
-B. 0,-4,-4
-C. 0,-4
-D. 0,-4,4*
-64. Solve for x in the equations: 2^(x+y)=100 and 4^(x-y)=10.
-A. 4.55
-B. 4.25
-C. 4.75
-D. 4.15 *
-65. What is the value of x in the proportion (x + 1):4= 15:44.
-A. 6
-B. 4 *
-C. 5
-D. 3
-66. Determine the number of diagonals of a polygon with 15 sides.
-A. 60
-B. 80
-C. 120
-D. 90 *
-67. What is the area of the rhombus with diagonals of 10 m and 24 m?
-A. 150
-B. 240
-C. 120 *
-D. 180
-68. Evaluate the limit of x as x approaches to zero.
-A. 0
-B. 1/2
-C. 1 *
-D. indeterminate
-69. Three circles are externally tangent to each other and having the distances of their centers of 20 in., 23 in., and 25 in. What is the radius of the largest circle?
-A. 10
-B. 14 *
-C. 12
-D. 16
-70. Tom earned $200 for working 40 hours, if he works overtime he will be paid 1.5 times his regular income. If tom received a total of $230, how many hours did he worked?
-A. 4
-B. 44 *
-C. 5
-D. 55
-71. The point on the curve where the second derivative of the function is zero.
-A. maxima
-B. minima
-C. point of inflection *
-D. point of deflection
-72. What is the trigonometric substitution used for a function involving a^2 - x^2 ?
-A. x = a*sin(theta)*
-B. x = a*cos(theta)
-C. x = a*tan(theta)
-D. x = a*sec(theta)
-73. The first derivative of cosine x is
-A. sin x
-B. -cosx
-C. -sin x*
-D. sec x
-74. The sum of three numbers is 19. What is the smallest number in the group if their geometric mean is 6.
-A. 2
-B. 6
-C. 8
-D. 4*
-75. Which of the following numbers will give a maximum difference when subtracted by its cube?
-A. 0.707
-B. 0.533
-C. 0.500
-D. 0.577 *
-76. Decrease in the value of physical property due to the passage of time.
-A. depreciation *
-B. inflation
-C. recession
-D. depletion
-77. A situation whereby payment is made for work not done. The term also applies to the case where more workers are used than are reasonable requirement for efficient operation.
-A. feather bedding *
-B. downtime pay
-C. check-in pay
-D. moon lighting
-78. The minimum grade of mechanical engineer required in the operation of 500 kW Diesel Power Plant.
-A. RME
-B. CPM *
-C. PME
-D. MPE
-79. The ratio of average load to plant capacity.
-A. capacity factor *
-B. use factor
-C. demand factor
-D. load factor
-80. Two cylinders each weighing 100 kN and 200 kN with radii of 100 mm and 200 mm respectively, are placed with the heavier weight above the lighter weight and placed in a container with a width of 500 mm. Assume the lengths of the cylinders and container are the same. What is the reaction between the cylinders?
-A. 268.28 *
-B. 300.00
-C. 200.00
-D. 293.25
-81. A man is standing on a cliff 897 meters. He struck a tree with his axe and the sound 5.2 seconds after. Assuming constant temperature, what is the velocity of sound on that day?
-A. 340 m/s
-B. 342 m/s
-C. 345 m/s *
-D. 453 m/s
-82. A 4 inches diameter sphere is floating on water with its hemisphere submerged. Solve for the density of the sphere.
-A. 31.2 lb/ft3 *
-B. 1000 lb/ft3
-C. 62.4 lb/ft3
-D. 64.2 lb/ft3
-83. A block of wood is floating in seawater with submerged height of 30 cm. If placed in a pool of mineral oil with specific gravity of 0.80, what will be the submerged height of the wood?
-A. 30 cm
-B. 39 cm *
-C. 43 cm
-D. 29 cm
-84. Find the velocity of the liquid in the tank at the bottom 10 meters below the surface.
-A. 14 m/s *
-B. 20 m/s
-C. 16 m/s
-D. 10 m/s
-85. The cause of a fluid to contract.
-A. adhesion
-B. surface tension *
-C. capillary
-D. cohesion
-86. Entropy is a measure of
+1. Entropy is a measure of
 A. randomness or disorder *
 B. the change of enthalpy of a system
 C. the heat capacity of a substance
 D. the internal energy of a gas
-87. What is the most efficient thermodynamic cycle?
+2. What is the most efficient thermodynamic cycle?
 A. Rankine
 B. Otto
 C. Diesel
-D. Carnot*
-88. What is the pressure at 4000 ft above sea level?
+D. Carnot *
+3. What is the pressure at 4000 ft above sea level?
 A. 29.92 in Hg
-B. 24.00 in Hg
 C. 26 in Hg *
+B. 24.00 in Hg
 D. 22 in Hg
-89. At what temperature are the degrees Fahrenheit and degrees Celsius equal?
+4. At what temperature are the degrees Fahrenheit and degrees Celsius equal?
 A. 40
-B. 60
 C. -40 *
+B. 60
 D. -60
-90. A pendulum has a certain frequency in London. What is the effect of this frequency if it is measured with respect to the equator?
+5. A pendulum has a certain frequency in London. What is the effect of this frequency if it is measured with respect to the equator?
 A. increase
 B. decrease *
 C. remains the same
 D. none of these
-91. An interest earning fund in which equal deposits are made at equal intervals of time for the purpose of gradually accumulating a specific sum of money required at some future date.
+6. An interest earning fund in which equal deposits are made at equal intervals of time for the purpose of gradually accumulating a specific sum of money required at some future date.
 A. sinking fund *
 B. annuity
 C. amortization
 D. capitalized cost
-92. Find the minimum force P required to turn a 350 lb wheel with diameter of 10 inches over a block with a height of 2 inches.
+7. Find the minimum force P required to turn a 350 lb wheel with diameter of 10 inches over a block with a height of 2 inches.
 A. 240 N
 B. 340 N *
-C. 120 N
+c. 120 N
 D. 170 N
-93. Find the nominal rate which if converted semi-annually could be used instead of 11.55% compounded quarterly?
+8. Find the nominal rate which if converted semi-annually could be used instead of 11.55% compounded quarterly?
 A. 11.06%
 B. 11.39%
 C. 11.72% *
 D. 12.72%
-94. A company purchased an asset for P10,000 and plans to keep it for 10 years. The salvage value after 10 years is P2000. Find the book value after 3 years.
+9. A company purchased an asset for P10,000 and plans to keep it for 10 years. The salvage value after 10 years is P2000. Find the book value after 3 years.
 A. P6700
 B. P7100
 C. P7600 *
 D. P8000
-95. A formal organization of producers with an industry forming a perfect collision purposely formed to increase profit and block new comers from the industry:
+10. A formal organization of producers with an industry forming a perfect collision purposely formed to increase profit and block new comers from the industry:
 A. monopoly
 B. corporation
 C. cartel *
 D. competitors
-96. A pile of logs contains 75 logs so that the top layer contains 3 logs and each lower layer has one more log than the layer above. How many logs are there in the bottom layer?
+11. A pile of logs contains 75 logs SO that the top layer contains 3 logs and each lower layer has one more log than the layer above. How many logs are there in the bottom layer?
 A. 10
 B. 14
 C. 12 *
 D. 16
-97. If f(x,y)=(x^2-2xy+y^2)/(x^2-y^2), f(-x,-y) is equal to
+12. If f(x,y)=(x^2-2xy+y^2)/(x^2-y^2) , f(-x,-y) is equal to
 A. 1/(-x+y)
-B. (x+y)/(y-x)
 C. (-x+y)/(x+y)
+B. (x+y)/(y-x)
 D. (x-y)/(x+y) *
-98. Kinematic viscosity is an SI derivative unit described as
+13. Kinematic viscosity is an SI derivative unit described as
 A. watt per meter Kelvin
-B. sq. meters per second *
 C. Pascal second
+B. sq. meters per second *
 D. Newton per meter
-99. The length of the time during which property may be operated at a profit:
+14. The length of the time during which property may be operated at a profit:
 A. life
 B. length of time
 C. physical life
 D. economic life *
-100. In a cantilever beam with a concentrated load at the free end, the moment is:
+15. In a cantilever beam with a concentrated load at the free end, the moment is:
 A. constant along the beam
-B. maximum at the wall *
 C. maximum half way out on the beam
+B. maximum at the wall *
 D. maximum at the free end
+16. The logarithm of 1 to any base is:
+A. indeterminate
+C. infinity
+B. zero *
+D. one
+17. A type of bond where the corporation pledges securities which it owns (I,e, stocks, bonds of its subsidiaries).
+A. Mortgage
+B. Registered bond
+C. Coupon bond
+D. Collateral trust bond *
+18. The place where buyers and sellers come together.
+A. Market *
+B. Business
+C. Recreation center
+D. Buy and sell section
+19. An evil wrong committed by person damaged another person's property or reputation is
+A.tort *
+B. material breach
+C. negligence
+D. fraud
+20. What is the probability of not getting a red ball from a bag containing 3 white balls, 5 blue balls and 4 red balls?
+A. 2/3 *
+B. 5/12
+C. 1/3
+D. 1/4
+21. In how many ways can 7 persons be seated on a round table if a certain couple is in the group and must be seated together?
+A. 240 *
+B. 360
+C. 120
+D. 720
+22. A 100 liter mixture with 85% alcohol is placed in a container. How much water should be added to produce a mixture with 65% alcohol?
+A. 25.6
+B. 20.6
+C. 30.8 *
+D. 35.8
+23. What is the highest position in the corporation?
+A. President
+B. Board of Directors
+C. Chairman of the Board *
+D. Stockholders
+24. An association of two or more individuals for the purpose of operating a business as co-owners for profit.
+A. Sole proprietorship
+B. Company
+C. Partnership *
+D. Corporation
+25. Liquid assets such as cash and other assets that can be converted quickly into cash, such as accounts receivable and merchandise are called
+A. total assets
+B. fixed assets
+C. current assets *
+D. none of the above
+26. The length of time which the property may be operated at a profit.
+A. Physical life
+B. Economic life *
+C. Operating life
+D. All of the above
+27. The provision in the contract that indicates the possible adjustment of material cost and labor cost.
+A. Secondary clause 
+B. Escalatory clause *
+C. Contingency clause
+D. Main clause
+28. Gross profit, sales less cost of good sold, as a percentage of a sales is called
+A. profit margin
+C. net income
+B.gross margin *
+D. rate of return
+29. Those funds that are required to make the enterprise or project a going concern.
+A. Initial investment
+C. Working capital *
+B. Current accounts
+D. Subscribed capital
+30. The payment for the use of borrowed money is called
+A. loan
+B. maturity value
+C. interest *
+C. principal
+31. Sometimes called second hand value.
+A. Scrap value
+B. Salvage value *
+C. Book value
+D. Going value
+32. If John gives $5 to Allen and Allen gives $2 to Eduard, and they have the same money thereafter, how much is Johns money higher than Allen?
+A. $7
+B. $5
+C. $8 *
+D. $3
+33. Transform the polar equation r*cos(theta)*sin(theta) = 4 to rectangular coordinates.
+A. xy=4 *
+C. x+y=4
+B. x^2y=4
+D. x^2+y^2=4
+34. Given f(x)=(x-1)/(x^3-3x^2+2x) , find x when the value of f(x) is undefined.
+A. 0, -1 and -2
+C. 0 and 2
+B. 0, 1 and 2*
+D. 1 and 2
+35. Given f(x)=3x-5, g(f(x))=x, find g(x).
+A. (2x+5)/3
+C. (x+5)/3 *
+B. (3x-5)/4
+D. (x-5)/3
+36. The value which has a disinterested third party, different from the buyer and seller, will determine in order to establish a price acceptable to both parties.
+A. Market value
+C. Fair value *
+B. Goodwill value
+D. Franchise value
+37. It is a series of equal payments occurring at equal intervals of time where the first payment is made after several periods, after the beginning of the payment.
+A. Deferred annuity * 
+C. Progressive annuity
+B. Delayed annuity
+D. Simple annuity
+38. A method of computing depreciation in which the annual charge is a fixed percentage of the depreciation book value at the beginning of the year to which the depreciation applies.
+A. Straight lime method 
+C. SYD method
+B. Sinking fund method 
+D. Declining balance method *
+39. A method of depreciation where a fixed sum of money is regularly deposited at compound interest in a real or imaginary fund in order to accumulate an amount equal to the total depreciation of an asset at the end of the asset's estimated life.
+A. Straight line method 
+C. Declining balance method
+B. Sinking fund method *
+D. SYD method
+40. The lessening of the value of an asset due to the decrease in the quantity available (referring to the natural resources, coal, oil, etc.)
+A. Depreciation
+B. depletion *
+C. inflation
+D. incremental cost
+41. An association of two or more persons for a purpose of engaging in a profitable business.
+A. Sole proprietorship
+C. Partnership *
+B. Enterprise
+D. Corporation
+42. A distinct legal entity which can practically transact any business transaction which a real person could do.
+A. Sole of proprietorship 
+C. Partnership
+B. Enterprise
+D. Corporation *
+43. A type of bind where the corporation pledges securities which it owns (I,e, stocks, bonds of its subsidiaries).
+A. Mortgage
+B. Registered bond
+C. Coupon bond
+D. Collateral trust bond *
+44. A type of bond which does not have security except a promise to pay by the issuing corporation.
+A. Mortgage bond
+C. Collateral trust bond
+B. Registered bond
+D. Debenture bond *
+45. The residual value of a company's assets after all outside liabilities (shareholders excluded) has been allowed for.
+A. Dividend
+C. Return
+B. Equity *
+D. Per value
+46. The quantity of a certain commodity that is bought at a certain price at a given time and place.
+A. Demand *
+C. Market
+B. Supply
+D. Utility
+47. Solve for N if log of 3 top the base 6 equals N.
+A. 0.613 *
+B. 0.218
+C. 0.316
+D. 0.816
+48. A man bought a $20 book and wishes to sell it. At what price should he mark it if he wishes to give a 40 percent discount and make 50 percent profit on the cost?
+A. $40
+B. $55
+C. $ 50 *
+D. $30
+49. A steel plate 6 cm square is to be formed into an open box by cutting equal squares out of the corners and bending up the edges to form a box. What is the side of the square removed so that the box formed will have a maximum volume?
+A. 1.0 cm *
+B. 1.5 cm
+C. 0.5 cm
+D. 2.0 cm
+50. The greatest unit pressure the soil can continuously stand is called
+A. bearing strength * 
+C. ultimate strength
+B. yield strength
+D. fatigue strength
+51. Refers to the highest ordinate on the stress-strain diagram.
+A. Rapture strength
+C. Yield strength
+B. Ultimate strength *
+D. Allowable strength
+52. A kind of stress that is caused by forces acting along or parallel to the area resisting the force.
+A. Tensile stress
+B. Bearing stress
+C. Shearing stress *
+D. Tangential stress
+53. The ratio of the unit deformation or strains in a transverse direction is constant for stresses within the proportional limit. This is known as
+A. Hooke's Law
+B. Mohr's circle
+C. Poisson ratio *
+D. Slenderness ratio
+54. What is the constant term in the expansion of (2x^2+1/x)^9 ?
+A. 672 *
+C. 748
+B. 724
+D. 860
+29. Solve for x: 2^3x=64
+A. 4
+C. 2 *
+B. 6
+D. 1
+55. Find x in the expression log 3 to the base 6 equals x times log 3 to the base 2.
+A. 1/3 *
+B. 1/2
+C. 2/3
+D. 3/4
+56. If ln x=3 and 1n y=5, find ln(x^2/y^(1/2))
+A. 1.5
+B. 2.5
+C. 3.5 *
+D. 4.5
+57. A river is 580 ft wide. The bridge constructed across the river is banked 1/7 of its length in the east and 1/6 in the west. What is the length of the bridge?
+A. 840 ft *
+B. 760 ft
+C. 910 ft
+D. 1000 ft
+58. What is the probability of getting two faces in a deck of cards if drawing of cards is to be done twice?
+A. 0.02
+B. 0.05 *
+C. 0.04
+D. 0.03
+59. A plane with a velocity of 300 mph din still air, is travelling against the wind and travels a distance of 900 miles in 4 hours. Find the headwind velocity.
+A. 75 mph *
+B. 100 mph
+C. 150 mph
+D. 200 mph
+60. A, B and C are points on a circle. AC bisects the circle and AB=BC . The area of triangle ABC is most clearly what percent of the circles area?
+A. 44
+B. 36
+C. 32 *
+D. 24
+61. Find the value of x for which f(x) is minimum given F(x)= x^2+5x+2=0
+A. 0
+B. -5/2 *
+C. -2
+D. -3/2
+62. Solve for x: x-3=3(1-x)
+A. 0.67
+C. 1.50 *
+B. 0.33
+D. 1.67
+63. Find the equation of the family of lines in which the slope and the y- intercept are equal.
+A. y'=x/y
+B. y'=y/(x+1) *
+C. y'=y/x
+D. y'=x+y
+64. Find the radius of the circle circumscribing a regular pentagon with area 560 square units.
+A. 15.347 *
+c. 11.254
+B. 16.879
+D. 10.543
+65. Find the equation of the circle circumscribing a triangle with vertices (-1,-3), (-2, 4), (2, 1).
+A. x^2+3x+y^2-7y-10=0
+B. x^2+3x+y^2+7y-10=0
+C. x^2+3x+y^2-y-10=0 *
+D. x^2+3x+y^2-7y+10=0
+66. The upper and lower bases of a trapezoid measures 12 in and 16 in respectively. If the base angles are 55 deg and 65 deg. What is the length of the shorter leg?
+A. 3.78 *
+C. 5.24
+B. 2.18
+D. 4.29
+67. What is the maximum area of the rectangle inscribed in an ellipse having an equation of 4x^2+16y^2=16.
+A. 4 *
+B. 12
+C. 8 
+D. 6
+68. When a right circular cone is cut by a plane parallel to the axis of the cone the conic section formed is a/an
+A. parabola
+B. ellipse
+C. circle
+D. hyperbola *
+69. If the second derivative of the equation of a curve is equal to the negative of the equation of that same curve, the curve is
+A. paraboloid
+B. exponential
+C. tangent
+D. sinusoidal *
+70. The act of charging two or more buyers or sellers different prices for the same product where the elasticity of supply or demand at each price level differs among market is known as
+A. price manipulation
+B. price optimization
+C. price discrimination *
+D. price war
+71. A situation in which rival firms drive prices down through attempts to undercut each others prices is called
+A. price war *
+B. price discrimination
+c. price leadership
+D. price manipulation.
+72. Maximum plant capacity in which a CPM is allowed to operate, tend or maintain
+A. 200 kW
+B. 220 kW
+C. 224 kW
+D. 242 kW *
+73. The state of a thermodynamic system is defined by its
+A. temperature
+B. pressure and temperature
+C. process
+D. properties *
+74. The partial pressure of a gas is the pressure that the gas will exert if it alone occupies the volume occupied by the mixture at the same temperature of the mixture.
+A. Dalton's law *
+B. Avogadro's law
+C. Amagat's law
+D. Pascal's law
+75. An accounting book where the original record of all transaction is ordinarily recorded.
+A. journal *
+C. ledger
+B. balance sheet
+D. balance sheet
+76. Given f(x)=2^x+4, g(x)=1/x, find f(g(f(x)))
+A. 1/(2^x+4) *
+C. 2^x+4
+B. 1/2^x
+D. 2x+4
+77. Simplify: (a^-2)^2/(b^-2)^3
+A. b^6/a^4 *
+C. b^4/a^6
+B. a^6/b^4
+D. a^4/b^6
+78. Find the roots of the equation x^3-16x=0 .
+A. 0,4
+C. 0,-4
+B. 0,-4,-4
+D. 0,-4,4 *
+79. Solve for x in the equations: 2^(x+Y)=100 and 4^(x-y)=10.
+A. 4.55
+B. 4.25
+c. 4.75
+D. 4.15 *
+80. What is the value of x in the proportion (x+1):4=15:44.
+A. 6
+B. 4 *
+C. 5
+D. 3
+81. Determine the number of diagonals of a polygon with 15 sides.
+A. 60
+C. 120
+B. 80
+D. 90 *
+82. What is the area of the rhombus with diagonals of 10 m and 24 m?
+A. 150
+B. 240
+C. 120 *
+D. 180
+83. Evaluate the limit of x as x approaches to zero.
+A. 0
+B. 1/2
+C. 1*
+D. indeterminate
+84. Three circles are externally tangent to each other and having the distances of their centers of 20 in., 23 in., and 25 in. What is the radius of the largest circle?
+A. 10
+B. 14 *
+C. 12
+D. 16
+85. Tom earned $200 for working 40 hours, if he works overtime he will be paid 1.5 times his regular income. If tom received a total of $230, how many hours did he worked?
+A. 4
+B. 44 *
+c. 5
+D. 55
+86. The point on the curve where the second derivative of the function is zero.
+A. maxima
+C. point of inflection *
+B. minima
+D. point of deflection
+87. What is the trigonometric substitution used for a function involving a^2 - x^2 ?
+A. x= asin(theta)*
+C. x= atan(theta)
+B. x= acos(theta)
+D. x= asec(theta)
+88. The first derivative of cosine x is
+A. sin x
+B. -cosX
+C. -sin x *
+D. sec x
+89. The sum of three numbers is 19. What is the smallest number in the group if their geometric mean is 6.
+A. 2
+B. 6
+C. 8
+D. 4 *
+90. Which of the following numbers will give a maximum difference when subtracted by its cube?
+A. 0.707
+B. 0.533
+C. 0.500
+D. 0.577 *
+91. Decrease in the value of physical property due to the passage of time.
+A. depreciation *
+B. inflation
+C. recession
+D. depletion
+92. A situation whereby payment is made for work not done. The term also applies to the case where more workers are used than are reasonable requirement for efficient operation.
+A. feather bedding *
+B. downtime pay
+C. check-in pay
+D. moon lighting
+93. The minimum grade of mechanical engineer required in the operation of 500 kW Diesel Power Plant.
+A. RME *
+B. CPM
+C. PME
+D. MPE
+94. The ratio of average load to plant capacity.
+A. capacity factor *
+B. use factor
+C. demand factor
+D. load factor
+95. Two cylinders each weighing 100 kN and 200 kN with radii of 100 mm and 200 mm respectively, are placed with the heavier weight above the lighter weight and placed in a container with a width of 500 mm. Assume the lengths of the cylinders and container are the same. What is the reaction between the cylinders?
+A. 268.28 *
+B. 300.00
+C. 200.00
+D. 293.25
+96. A man is standing on a cliff 897 meters. He struck a tree with his axe and the sound 5.2 seconds after. Assuming constant temperature, what is the velocity of sound on that day?
+A. 340 m/s
+B. 342 m/s
+C. 345 m/s *
+D. 453 m/s
+97. A 4 inches diameter sphere is floating on water with its hemisphere submerged. Solve for the density of the sphere.
+A. 31.2 lb/ft3 *
+B. 1000 lb/ft3
+C. 62.4 lb/ft3
+D. 64.2 lb/ft3
+98. A block of wood is floating in seawater with submerged height of 30 cm. If placed in a pool of mineral oil with specific gravity of 0.80, what will be the submerged height of the wood?
+A. 30 cm
+B. 39 cm *
+C. 43 cm
+D. 29 cm
+99. Find the velocity of the liquid in the tank at the bottom 10 meters below the surface.
+A. 14 m/s *
+C. 16 m/s
+B. 20 m/s
+D. 10 m/s
+100. The cause of a fluid to contract.
+A. adhesion
+B. surface tension *
+c. capillary
+D. cohesion
     </script>
 
-    <!-- Quiz Logic & Math Solutions -->
     <script>
-        // Custom Math/Engineering Solutions mapped to question numbers
-        const solutionMap = {
-            4: { ans: "A", sol: "Total balls = 3 + 5 + 4 = 12. Not red = 3 white + 5 blue = 8. Probability = 8/12 = 2/3." },
-            5: { ans: "A", sol: "Treat the couple as 1 unit. There are now 6 units to arrange in a circle: (6-1)! = 5! = 120 ways. The couple can switch seats with each other (2!). Total ways = 120 × 2 = 240." },
-            6: { ans: "C", sol: "Let x be the amount of water added. 100(0.85) + x(0) = (100 + x)(0.65) => 85 = 65 + 0.65x => 20 = 0.65x => x = 20 / 0.65 = 30.76 ≈ 30.8 liters." },
-            16: { ans: "C", sol: "Let J = John, A = Allen. John gives $5 to Allen: John has J-5, Allen has A+5. Allen gives $2 to Eduard: Allen has A+5-2 = A+3. They have the same amount: J-5 = A+3 => J - A = 8. John's money is $8 higher than Allen's." },
-            17: { ans: "A", sol: "Polar coordinates to rectangular: x = r*cos(θ), y = r*sin(θ). If the equation is r^2*cos(θ)*sin(θ) = 4, then (r*cos θ)(r*sin θ) = 4 => xy = 4." },
-            18: { ans: "B", sol: "A rational function is undefined when the denominator is zero. x^3 - 3x^2 + 2x = 0 => x(x^2 - 3x + 2) = 0 => x(x-1)(x-2) = 0. Roots are 0, 1, 2." },
-            19: { ans: "C", sol: "f(x) = 3x - 5. We are given g(f(x)) = x. Let y = f(x) = 3x - 5. Then x = (y + 5)/3. Therefore, g(y) = (y + 5)/3, which means g(x) = (x + 5)/3." },
-            31: { ans: "A", sol: "log_6(3) = N. Using the change of base formula: N = ln(3) / ln(6) = 1.0986 / 1.7917 ≈ 0.613." },
-            32: { ans: "C", sol: "Cost = $20. Desired profit = 50% of cost = $10. Target selling price = $30. Markdown = 40%, so 0.60 * Marked Price = 30 => Marked Price = 30 / 0.60 = $50." },
-            33: { ans: "A", sol: "Volume of open box V = x(6 - 2x)^2. To maximize, take derivative dV/dx and set to zero. dV/dx = (6 - 2x)^2 + x(2)(6 - 2x)(-2) = 0 => (6 - 2x)[(6 - 2x) - 4x] = 0 => 6 - 6x = 0 => x = 1 cm." },
-            38: { ans: "A", sol: "General term in binomial expansion of (2x^2 + x^-1)^9 is C(9,k) * (2x^2)^(9-k) * (x^-1)^k. The power of x is 18 - 2k - k = 18 - 3k. For constant term, 18 - 3k = 0 => k=6. Coefficient = C(9,6) * 2^3 = 84 * 8 = 672." },
-            39: { ans: "C", sol: "2^(3x) = 64. Since 64 = 2^6, we have 3x = 6 => x = 2." },
-            40: { ans: "A", sol: "log_6(3) = x * log_2(3) => ln(3)/ln(6) = x * ln(3)/ln(2) => x = ln(2)/ln(6) = 0.693 / 1.791 = 0.386. Looking at options, ln(2)/ln(6) is roughly 1/3 in typical MCQ approximations." },
-            41: { ans: "C", sol: "ln(x^2 / y^(1/2)) = 2*ln(x) - 0.5*ln(y) = 2(3) - 0.5(5) = 6 - 2.5 = 3.5." },
-            42: { ans: "A", sol: "Bridge over water = L - L/7 - L/6 = L(42 - 6 - 7)/42 = 29L/42. Given this equals 580 ft: 29L/42 = 580 => L = 580 * 42 / 29 = 840 ft." },
-            43: { ans: "B", sol: "P(Face 1st) = 12/52. P(Face 2nd) = 11/51. Probability = (12/52) * (11/51) = 132/2652 = 0.0497 ≈ 0.05." },
-            44: { ans: "A", sol: "Net velocity = Distance / Time = 900 / 4 = 225 mph. Velocity against wind = Plane velocity - Wind velocity. 225 = 300 - V_wind => V_wind = 75 mph." },
-            45: { ans: "C", sol: "AC bisects the circle, so AC is the diameter (2r). Triangle ABC is an inscribed right triangle. Area of triangle = (1/2) * 2r * r = r^2. Area of circle = πr^2. Percentage = (r^2 / πr^2) * 100 = (1/π) * 100 ≈ 31.83% ≈ 32%." },
-            46: { ans: "B", sol: "f(x) = x^2 + 5x + 2. Minimum occurs at the vertex where f'(x) = 0. f'(x) = 2x + 5 = 0 => x = -5/2." },
-            47: { ans: "C", sol: "x - 3 = 3(1 - x) => x - 3 = 3 - 3x => 4x = 6 => x = 1.50." },
-            49: { ans: "A", sol: "Area of regular pentagon = 5 * (1/2) * R^2 * sin(360/5). 560 = 2.5 * R^2 * sin(72°) => R^2 = 560 / (2.5 * 0.951) = 235.5 => R = 15.347." },
-            50: { ans: "C", sol: "Center of the circle circumscribing a triangle can be found using the general equation x^2 + y^2 + Dx + Ey + F = 0 and solving the system with the 3 points." },
-            51: { ans: "A", sol: "Using trapezoid geometry and dropping altitudes from the top base to the bottom base. The horizontal segments sum to 16-12=4. Using tangents of 55° and 65°, the shorter leg evaluates to 3.78 in." },
-            52: { ans: "C", sol: "Ellipse equation: 4x^2 + 16y^2 = 16 => x^2/4 + y^2/1 = 1. Area of inscribed rectangle = 2a * 2b = 4ab? Wait, max area is 2ab. a=2, b=1. Max area = 2(2)(1) = 4. Alternatively, area = 4xy. x=sqrt(2), y=1/sqrt(2). Area = 4*sqrt(2)*(1/sqrt(2)) = 4. Note: MCQ keys often vary, follow the document answer C (8) if marked, but math is 4." },
-            61: { ans: "A", sol: "Given f(x) = 2^x + 4, g(x) = 1/x. We need f(g(f(x)))? Actually, if options show 1/(2^x+4), the question likely meant g(f(x)) = 1 / (2^x + 4)." },
-            62: { ans: "A", sol: "(a^-2)^2 / (b^-2)^3 = a^-4 / b^-6 = b^6 / a^4." },
-            63: { ans: "D", sol: "x^3 - 16x = 0 => x(x^2 - 16) = 0 => x(x-4)(x+4) = 0. Roots are 0, 4, -4." },
-            64: { ans: "D", sol: "2^(x+y) = 100 => x+y = 6.64. 4^(x-y) = 10 => 2x-2y = 3.32 => x-y = 1.66. Add the two: 2x = 8.3 => x = 4.15." },
-            66: { ans: "D", sol: "Number of diagonals in a polygon = n(n-3)/2 = 15(15-3)/2 = 15(12)/2 = 90." },
-            67: { ans: "C", sol: "Area of a rhombus = (d1 * d2) / 2 = (10 * 24) / 2 = 120 m^2." },
-            69: { ans: "B", sol: "Radii r1, r2, r3. r1+r2=20, r2+r3=23, r1+r3=25. 2(r1+r2+r3) = 68 => r1+r2+r3 = 34. Largest radius is opposite the smallest side: r3 = 34 - 20 = 14." },
-            70: { ans: "B", sol: "Regular rate = $200 / 40 = $5/hr. Overtime rate = $5 * 1.5 = $7.50/hr. Overtime pay = $230 - $200 = $30. Overtime hours = $30 / 7.50 = 4 hrs. Total = 40 + 4 = 44 hrs." },
-            74: { ans: "D", sol: "Geometric mean = (x*y*z)^(1/3) = 6 => xyz = 216. Sum x+y+z = 19. Integer combination fitting this is 4, 6, 9. Smallest is 4." },
-            75: { ans: "D", sol: "Maximize f(x) = x - x^3. Take derivative: f'(x) = 1 - 3x^2 = 0 => x = sqrt(1/3) ≈ 0.577." },
-            80: { ans: "A", sol: "Reaction between cylinders stacked in a trench. Draw free body diagram. Reaction = W / sin(theta) where cos(theta) = horizontal dist / center dist. Reaction calculates to 268.28 kN." },
-            81: { ans: "C", sol: "Distance = 897m, Time for echo = 5.2s. Total distance traveled by sound = 2 * 897 = 1794m. Velocity = 1794 / 5.2 = 345 m/s." },
-            82: { ans: "A", sol: "Submerged volume is hemisphere (half of total volume). Weight of object = Buoyant force => ρ_obj * V = ρ_water * (V/2) => ρ_obj = 62.4 / 2 = 31.2 lb/ft^3." },
-            83: { ans: "B", sol: "Wood floating in seawater (SG=1.03) with 30cm submerged. Object Mass = 1.03 * A * 30. In oil (SG=0.80), Object Mass = 0.80 * A * h. Therefore, 0.80 * h = 1.03 * 30 => h = 30.9 / 0.8 = 38.625 ≈ 39 cm." },
-            84: { ans: "A", sol: "Using Torricelli's Law: v = sqrt(2gh) = sqrt(2 * 9.81 * 10) = sqrt(196.2) = 14 m/s." },
-            92: { ans: "B", sol: "Force to pull wheel over block. P * (R - h) = W * sqrt(2Rh - h^2). Adjusting for moments gives P around 340 N." },
-            93: { ans: "C", sol: "Effective rate = (1 + 0.1155/4)^4 - 1. Semi-annual equivalent: (1 + r/2)^2 - 1 = Effective. r evaluates to 11.72%." },
-            94: { ans: "C", sol: "Straight-line depreciation: d = (10000 - 2000)/10 = 800 per year. Book Value after 3 years = 10000 - 3(800) = 7600." },
-            96: { ans: "C", sol: "Arithmetic sequence sum: S_n = (n/2)(2a + (n-1)d). 75 = (n/2)(2(3) + (n-1)(1)) => 150 = n^2 + 5n => n^2 + 5n - 150 = 0 => (n+15)(n-10) = 0 => n=10 layers. Bottom layer = a + (n-1)d = 3 + 9(1) = 12 logs." }
-        };
-
+        // Data Extraction
         const rawTextData = document.getElementById('raw-data').textContent || "";
+        // Match numbers at start of line
         const blocks = rawTextData.split(/(?:^|\n|\r\n)(?=\s*\d+\.\s)/).map(b => b.trim()).filter(b => b.length > 0);
+        
         const quizData = [];
+        let totalScore = 0;
 
-        // Forgiving Parser
-        blocks.forEach((block, index) => {
+        blocks.forEach((block) => {
+            // Find the question boundary (stops before A. or a.)
             const qMatch = block.match(/^(\d+)\.\s([\s\S]*?)(?=(?:a|A|\.a)\.?\s|\n(?:a|A)\.)/);
             if (!qMatch) return;
             
             const num = qMatch[1];
             const qText = qMatch[2].trim();
+            
             const optionsStr = block.substring(qMatch[0].length);
-            const optParts = optionsStr.split(/(?:^|\n)([a-d]|[A-D])\)?\s|\.\s/).filter(Boolean);
             
-            const options = [];
-            let ansIdx = 0;
-            
-            for (let i = 0; i < optParts.length; i += 2) {
-                let letter = optParts[i];
-                if (letter && letter.length === 1) { // A, B, C, D, a, b, c, d
-                    let text = (optParts[i+1] || "").trim();
-                    if (text.includes('*')) {
-                        ansIdx = options.length;
-                        text = text.replace(/\*/g, '').trim();
-                    }
-                    options.push({ letter: letter.toUpperCase(), text: text });
-                }
+            // Highly robust split to catch A., B., C., D. or a), b), c), d)
+            const optRegex = /(?:^|\n)([A-Da-d])[\.\)]\s/g;
+            let match;
+            let indices = [];
+            while ((match = optRegex.exec(optionsStr)) !== null) {
+                indices.push({ letter: match[1].toUpperCase(), index: match.index, matchLength: match[0].length });
             }
 
-            const mapData = solutionMap[num] || { sol: "Theoretical concept derived from general engineering, economics, or mathematics principles." };
+            const options = [];
+            let ansIdx = 0; // Default fallback
+
+            for (let i = 0; i < indices.length; i++) {
+                let start = indices[i].index + indices[i].matchLength;
+                let end = (i + 1 < indices.length) ? indices[i+1].index : optionsStr.length;
+                let text = optionsStr.substring(start, end).trim();
+                
+                // Identify correct answer by the asterisk
+                if (text.includes('*') || indices[i].letter.includes('*')) {
+                    ansIdx = i;
+                    text = text.replace(/\*/g, '').trim();
+                }
+                options.push({ letter: indices[i].letter, text: text });
+            }
             
-            quizData.push({
-                num, q: qText, options, ansIdx, solText: mapData.sol, userAnswered: false
-            });
+            if (options.length > 0) {
+                quizData.push({
+                    num: num, 
+                    q: qText, 
+                    options: options, 
+                    ansIdx: ansIdx, 
+                    userAnswered: false,
+                    isCorrect: false
+                });
+            }
         });
 
         let currentIndex = 0;
@@ -947,7 +903,7 @@ D. maximum at the free end
                 const btn = document.createElement('button');
                 btn.className = 'nav-item';
                 btn.id = `nav-btn-${idx}`;
-                btn.innerText = q.num;
+                btn.innerText = q.num; // Uses actual question number from text
                 btn.onclick = () => { loadQuestion(idx); toggleSidebar(); };
                 grid.appendChild(btn);
             });
@@ -956,24 +912,29 @@ D. maximum at the free end
         function updateNavStyles() {
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`nav-btn-${currentIndex}`).classList.add('active');
+            
             quizData.forEach((q, idx) => {
                 const btn = document.getElementById(`nav-btn-${idx}`);
                 if (q.userAnswered) btn.classList.add('completed');
             });
         }
 
+        function updateScore() {
+            document.getElementById('scoreTracker').innerText = `Score: ${totalScore} / ${quizData.length}`;
+        }
+
         function loadQuestion(index) {
             currentIndex = index;
             const q = quizData[currentIndex];
             
-            document.getElementById('qHeader').innerText = `Question ${q.num} of ${quizData.length}[cite: 11]`;
+            document.getElementById('qHeader').innerHTML = `Question ${index + 1} of ${quizData.length} (ID: ${q.num})`;
             document.getElementById('qText').innerHTML = q.q;
             
             const optionsGrid = document.getElementById('optionsGrid');
             optionsGrid.innerHTML = '';
             
-            const solContainer = document.getElementById('solutionContainer');
-            solContainer.style.display = 'none';
+            const feedbackMsg = document.getElementById('feedbackMessage');
+            feedbackMsg.style.display = 'none';
 
             q.options.forEach((opt, i) => {
                 const btn = document.createElement('button');
@@ -982,20 +943,26 @@ D. maximum at the free end
                 
                 if (q.userAnswered) {
                     btn.disabled = true;
-                    if (i === q.ansIdx) btn.classList.add('correct');
-                    else if (i === q.userSelectedIdx) btn.classList.add('wrong');
+                    if (i === q.ansIdx) {
+                        btn.classList.add('correct');
+                    } else if (i === q.userSelectedIdx) {
+                        btn.classList.add('wrong');
+                    }
                 } else {
                     btn.onclick = () => selectAnswer(i, btn);
                 }
                 optionsGrid.appendChild(btn);
             });
 
-            if (q.userAnswered) showSolution(q);
+            if (q.userAnswered) {
+                showFeedback(q.isCorrect);
+            }
 
             document.getElementById('prevBtn').disabled = (currentIndex === 0);
             document.getElementById('nextBtn').disabled = (currentIndex === quizData.length - 1);
             
             updateNavStyles();
+            updateScore();
 
             if (window.MathJax) {
                 MathJax.typesetPromise([document.getElementById('quizCard')]);
@@ -1006,6 +973,9 @@ D. maximum at the free end
             const q = quizData[currentIndex];
             q.userAnswered = true;
             q.userSelectedIdx = selectedIndex;
+            q.isCorrect = (selectedIndex === q.ansIdx);
+
+            if (q.isCorrect) totalScore++;
 
             const buttons = document.getElementById('optionsGrid').children;
             for (let i = 0; i < buttons.length; i++) {
@@ -1013,20 +983,23 @@ D. maximum at the free end
                 if (i === q.ansIdx) buttons[i].classList.add('correct');
             }
 
-            if (selectedIndex !== q.ansIdx) selectedBtn.classList.add('wrong');
+            if (!q.isCorrect) selectedBtn.classList.add('wrong');
 
-            showSolution(q);
+            showFeedback(q.isCorrect);
             updateNavStyles();
+            updateScore();
         }
 
-        function showSolution(q) {
-            const solContainer = document.getElementById('solutionContainer');
-            document.getElementById('solutionText').innerText = q.solText;
-            solContainer.style.display = 'block';
-
-            if (window.MathJax) {
-                MathJax.typesetPromise([solContainer]);
+        function showFeedback(isCorrect) {
+            const feedbackMsg = document.getElementById('feedbackMessage');
+            if (isCorrect) {
+                feedbackMsg.innerText = "Correct!";
+                feedbackMsg.style.color = "var(--correct-color)";
+            } else {
+                feedbackMsg.innerText = "Incorrect!";
+                feedbackMsg.style.color = "var(--wrong-color)";
             }
+            feedbackMsg.style.display = "block";
         }
 
         function nextQuestion() {
