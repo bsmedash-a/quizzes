@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Recall Quiz</title>
+    <!-- MathJax for rendering LaTeX formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <style>
+        :root {
+            --bg-color: #f1f2f6;
+            --main-color: #ffffff;
+            --text-color: #2f3542;
+            --accent-color: #3742fa;
+            --hover-color: #5352ed;
+            --correct-color: #2ed573;
+            --wrong-color: #ff4757;
+            --nav-bg: #2f3542;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--main-color);
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-color);
+            margin-right: 20px;
+            transition: color 0.2s;
+        }
+
+        .hamburger:hover { color: var(--accent-color); }
+
+        .top-bar h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: var(--nav-bg);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            width: 320px;
+            background-color: var(--nav-bg);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            position: fixed;
+            height: calc(100% - 60px);
+            top: 60px;
+            z-index: 99;
+            transform: translateX(-100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        #sidebar.open { transform: translateX(0); }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background-color: #1e272e;
+            text-align: center;
+            border-bottom: 1px solid #57606f;
+        }
+
+        .nav-grid {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .nav-item {
+            background-color: #57606f;
+            color: white;
+            border: none;
+            padding: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover { background-color: #747d8c; }
+        .nav-item.active { background-color: var(--accent-color); box-shadow: inset 0 0 0 2px white; }
+        .nav-item.completed { background-color: #2ed573; color: #2f3542; }
+
+        /* Main Content */
+        #main-content {
+            flex: 1;
+            margin-top: 60px;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .quiz-card {
+            background-color: var(--main-color);
+            width: 100%;
+            max-width: 850px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            height: fit-content;
+            margin-bottom: 40px;
+        }
+
+        .question-header {
+            font-size: 1.2rem;
+            color: #747d8c;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f1f2f6;
+            padding-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #2f3542;
+            word-wrap: break-word;
+        }
+
+        /* Options */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background-color: #f1f2f6;
+            border: 2px solid #ced6e0;
+            padding: 16px 20px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            color: #2f3542;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #eccc68;
+            border-color: #ffa502;
+        }
+
+        .option-btn.correct {
+            background-color: #e8f8f5;
+            border-color: var(--correct-color);
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .option-btn.wrong {
+            background-color: #ffefea;
+            border-color: var(--wrong-color);
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .option-letter {
+            font-weight: bold;
+            margin-right: 15px;
+            color: var(--accent-color);
+        }
+
+        .feedback-message {
+            padding: 20px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .feedback-message.success {
+            background-color: #e8f8f5;
+            color: #27ae60;
+            border-left: 5px solid #2ecc71;
+        }
+
+        .feedback-message.error {
+            background-color: #ffefea;
+            color: #c0392b;
+            border-left: 5px solid #ff4757;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            border-top: 2px solid #f1f2f6;
+            padding-top: 20px;
+        }
+
+        .control-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .control-btn:hover:not(:disabled) { background-color: var(--hover-color); }
+        .control-btn:disabled { background-color: #ced6e0; color: #747d8c; cursor: not-allowed; }
+
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 98;
+            display: none;
+        }
+        #overlay.show { display: block; }
+        
+        .error-message {
+            color: #ff4757;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h2>Math Recall Quiz</h2>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header">101 Problems Navigator</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div id="main-content">
+        <div class="quiz-card" id="quizCard">
+            <div class="question-header">
+                <span id="qHeader">Initializing...</span>
+                <span id="scoreTracker" style="color: var(--accent-color);">Score: 0</span>
+            </div>
+            
+            <div class="question-text" id="qText">Extracting problem set...</div>
+            <div class="options-container" id="optionsGrid"></div>
+            <div class="feedback-message" id="feedbackMessage"></div>
+            
+            <div class="controls" id="controls" style="display:none;">
+                <button class="control-btn" id="prevBtn" onclick="prevQuestion()">&#8592; Previous</button>
+                <button class="control-btn" id="nextBtn" onclick="nextQuestion()">Next &#8594;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Raw Data Embed (Do not modify formatting) -->
+    <script id="raw-data" type="text/plain">
+1. Find the 30^{th} term of an A.P. 4,7,10 ...
+A. 91 *
+B. 90
+C. 88
+D. 75
+2. A stack of bricks has 61 bricks in the bottom layer, 58 bricks in the second layer, 55 bricks in the third layer and so until there are 10 bricks in the last layer. How many bricks are there together?
+A. 638
+B. 637
+C. 640
+D. 639 *
+3. Find the sum of the first 10 terms of the geometric progression 2, 4, 8, 16,...
+A. 1023
+B. 2046 *
+C. 225
+D. 1596
+4. Once a month a man put some money into the cookie jar. Each month he put 50 centavos more into the jar than the month before. After 12 years he counted his money; he had P 5436. How much money did he put in the jar in the last month?
+A. P 73.50 *
+B. P 75.50
+C. 74.50
+D. 72.50
+5. The seventh term is 56 and the 12^{th} term is -1792 of the geometric progression. Find the ratio and the first term. Assume the ratios are equal.
+A. -2, 5/8
+B. -1, 5/8
+C. -1, 7/8
+D. -2, 7/8 *
+6. Factor the expression x^{2}+6x+8 as completely as possible ?
+A. (x+8)(x-2)
+B. (x+4)(x-2)
+C. (x+4)(x+2) *
+D. (x-4)(x-2)
+7. Find the value of k of the equation x^{2}+kx+4=0, so that the roots are equal.
+A. \pm 4 *
+B. \pm 8
+C. \pm 12
+D. \pm 2
+8. If the roots of the equation are 1 and 2. What is the quadratic equation ?
+A. x^{2}-3x+2=0 *
+B. x^{2}-3x-2=0
+C. x^{2}+3x+2=0
+D. x^{2}+3x-2=0
+9. In the expansion of (x+4y)^{12}, the numerical coefficient of the 5^{th} term is:
+A. 63,360
+B. 126,720 *
+C. 506,880
+D. 253,440
+10. Find the remainder if we divide 4y3+18y2+8y-4 by (2y+3).
+A. 10
+B. 11 *
+C. 15
+D. 13
+11. Find the 1987th digit in the decimal equivalent to 1785 / 9999 starting from decimal point.
+A. 8 *
+B. 1
+C. 7
+D. 5
+12. What is the lowest common factor of 10 and 32.
+A. 320
+B. 2 *
+C. 180
+D. 90
+13. The sum of Kim's and Kevin's ages is 18. In three years, Kim will be twice as old as Kevin. What are their ages now?
+A. 4, 14
+B. 5, 13 *
+C. 7, 11
+D. 6, 12
+14. What time after 3 o'clock will the hands of the clock be together for the first time?
+A. 3:16.36 *
+B. 3:14.32
+C. 3:12.30
+D. 3:17.37
+15. The difference of the squares of the digits of a two digit positive number is 27. If the digits are reversed in order and the resulting number subtracted from the original number, the difference is also 27. What is the original number?
+A. 63
+B. 54
+C. 48
+D. 73 *
+16. Jojo bought a second hand Betamax VCR and then sold it to Rudy at a profit of 40%. Rudy then sold the VCR to Noel at a profit of 20%. If Noel paid P 2,856 more than it cost to Jojo, how much did Jojo paid for the unit ?
+A. P 4,000
+B. P 4,100
+C. 4,200 *
+D. 4,300
+17. Ten liters of 25% salt solution and 15 liters of 35% salt solution are poured into a drum originally containing 30 liters of 10% salt solution. What is the percent concentration in the mixture?
+A. 19.55% *
+B. 22.15%
+C. 27.05%
+D. 25.72%
+18. The boat travels downstream in 2/3 of the time as it does going upstream. If the velocity of the river current is 8 kph, determine the velocity of the boat in still water.
+A. 40 kph *
+B. 30 kph
+C. 50 kph
+D. 60 kp
+19. A batch of concrete consisted of 200 lbs fine aggregates, 350 lbs coarse aggregate, 94 lbs cement, and 5 gallons of water. The specific gravity of sand and gravel maybe taken as 2.65 and that of the cement as 3.10. How much weight of cement is required to produced one cubic yard?
+A. 765 lbs
+B. 657 lbs
+C. 675 lbs
+D. 567 lbs *
+20. A club of 40 executives, 33 likes to smoke Marlboro, and 20 likes to smoke Phillip Moris. How many like both ?
+A. 13 *
+B. 10
+C. 11
+D. 12
+21. A and B working together can finish painting a home in 6 days. A working alone, can finish it in five days less than B. How long will it take each of them to finish the work alone ?
+A. 10, 15
+B. 15, 20 *
+C. 20, 25
+D. 5, 10
+22. Given that "w" varies directly as the product of x and y and inversely as the square of z, and that w=4 when x=2 y=6 and z=3. Find the value of "w" when x=1, y= 4 and z=2
+A. 2
+B. 3 *
+C. 4
+D. 5
+23. A merchant has three items on sale, namely a radio for P 50 a clock for P 30 and a flashlight for P 1.00. At the end of the day, he has sold a total of 100 of the three items and has taken exactly P 1000 on the total sales. How many radios did he sale ?
+A. 16 *
+B. 20
+C. 18
+D. 24
+24. The third term of a harmonic progression is 15 and the 9^{th} term is 6. Find the 11^{th} term ?
+A. 4
+B. 5 *
+C. 6
+D. 7
+25. What is the sum of the coefficients of the expansion of ( 2x-1)^{20}
+A. 0 *
+B. 1
+C. 2
+D. 3
+26. Find the ratio of the infinite geometric series if the sum is 2 and the first term is 1/2
+A. 1/3
+B. 1/2
+C. 3/4 *
+D. 1/4
+27. Determine the sum of the positive valued solution to the simultaneous equations: xy =15, yz=35, zx=21.
+A. 15 *
+B. 13
+C. 17
+D. 19
+28. A bookstore purchased a best selling book at P 200.00 per copy. At what price should this book be sold so that, giving a 20% discount, the profit is 30%.
+A. P 347
+B. P 280
+C. P 325 *
+D. P 350
+29. In a certain community of 1,200 people, 60% are literate. Of the males, 50% are literate, and of the females 70% are literate. What is the female population?
+A. 850
+B. 500
+C. 550
+D. 600 *
+30. Gravity causes a body to fall 16.1 feet in the 1st second, 48.3 in the 2nd second, 80.5 in the 3rd second, and so on. How far did the body fall during the 10th second ?
+A. 248.7 ft
+B. 308.1 ft
+C. 241.5 ft
+D. 305.9 ft *
+31. In a commercial survey involving 1,000 persons on brand preference, 120 were found to prefer brand x only, 200 prefer brand y only, 150 prefer brand z only, 370 prefer either brand x or y but not z, 450 prefer brand y or z but not x, and 420 prefer either brand z or x but not y. How many persons have no brand preference, satisfied with any of the 3 brands.
+A. 230 *
+B. 280
+C. 180
+D. 130
+32. The electric power which a transmission line can transmit is proportional to the product of its design voltage and current capacity, and inversely to the transmission distance. A 115 kilovolt line rated at 1000 amperes can transmit 150 Megawatts over 150 km. How much power, in Megawatts, can a 230 kilovolt line rated at 1,500 amperes transmit over 100 km?
+A. 785
+B. 485
+C. 675 *
+D. 595
+33. The number x, 2x +7, 10x-7 form a Geometric Progression. Find the value of x.
+A. -5 & -3/7
+B. 7 & 7/6
+C. 7 & 7/6 *
+D. 8 & 3/7
+34. Solve for x: 20-x = x
+A. 4,-5
+B. -4,-5
+C. -4, 5
+D. no solution *
+35. If 15 people won prizes in the state lottery, in how many ways can these 15 people win first, second, third, fourth and fifth prizes ?
+A. 4, 845
+B. 116, 280
+C. 360, 360 *
+D. 3,003
+36. How many 4 digits number can be formed without repeating any digit from the following digits: 1, 2, 3, 4, and 6?
+A. 120 *
+B. 130
+C. 140
+D. 150
+37. In how many ways can a set of 6 distinct books be arranged in a bookshelf?
+A. 720 *
+B. 120
+C. 360
+D. 180
+38. What is the number of permutations of the letters in the word BANANA ?
+A. 36
+B. 60 *
+C. 52
+D. 42
+39. In how many ways can 3 MARINES and 4 ARMIES be seated on a bench if the ARMIES must be seated together?
+A. 640
+B. 720
+C. 576 *
+D. 144
+40. Four different colored flags can be hung in a row to make coded signal. How many signals can be made if a signal consists of the display of one or more flags.
+A. 64 *
+B. 66
+C. 68
+D. 62
+41. There are four balls of four different colors. Two balls are taken at a time and arranged in a definite order. For example if a white and a red ball are taken, one definite arrangement is white first, red second and another arrangement is red first, white second. How many such arrangements are possible ?
+A. 24
+B. 6
+C. 12 *
+D. 36
+42. Three A, B, and C get into a bus that has six vacant seats on each side. In how many ways can they be seated if A insists on sitting on the right side ?
+A. 660 *
+B. 720
+C. 530
+D. 410
+43. A group of 6 speakers consists of 2 politicians and 4 lawyers who are not politicians. In arrangements for a speaking order at a meeting, the politicians will speak in succession and the lawyers in succession. In how many ways can the order be arranged ?
+A. 69
+B. 138
+C. 96 *
+D. 192
+44. In how many ways can a PSME chapter with 15 Directors, choose a President, a Vice-President, a Secretary, a Treasurer, and an Auditor, if no member can hold more than one position?
+A. 15
+B. 3,003
+C. 36,060
+D. 360,360 *
+45. A PSME unit has 10 ME's, 8 PME's and 6 CPM's. If a committee of 3 members one from each group is to be formed, how many such committees can be formed ?
+A. 260
+B. 380
+C. 480 *
+D. 360
+46. The lotto uses numbers 1-42. A winning number consists of six different numbers in any order. What are your chances of winning it?
+A. 5, 245, 786 *
+B. 8, 437, 224
+C. 10, 127, 420
+D. 2, 546, 725
+47. How many ways can you invite one or more of five friends to a party ?
+A. 25
+B. 31 *
+C. 15
+D. 62
+48. A semi-conductor company will hire 7 men and 4 women. In how many ways can the company choose from 9 men and 6 women?
+A. 680
+B. 540 *
+C. 480
+D. 840
+49. In how many ways can a committee of three consisting of two chemical engineers and one mechanical engineer can be formed from four chemical engineers and three mechanical engineers ?
+A. 18 *
+B. 64
+C. 32
+D. none of these
+50. In Mathematics examination, a student may select 7 problems from a set of 10 problems. In how many ways can he make his choice?
+A. 120 *
+B. 530
+C. 720
+D. 320
+51. How many line segments can be formed with 6 distinct points, no three of which are collinear ?
+A. 10
+B. 15 *
+C. 20
+D. 25
+52. Tony went to a drugstore. He bought a bottle of aspirin and bottle of Tylenol. The aspirin cost Php 1.25 more than Tylenol. He also bought cologne which cost twice as much as the total of the other two combined. How much did the Tylenol cost if his total bill (without tax) was Php 24.75?
+A. Php 4.50
+B. Php 3.50 *
+C. Php 6.25
+D. Php 5.75
+53. Lita has ten bills in her wallet. She has a total of Php 40.00. If she has one more Php 5 bill than Php 10 bills, and two more Php 1 bills than Php 5 bills, how many Php 10 bills does she have?
+A. 4
+B. 3
+C. 2 *
+D. 5
+54. In how many ways 7 scientists be assigned to one triple and two double hotel rooms?
+A. 210 *
+B. 200
+C. 300
+D. 230
+55. How many different sums of money can be made from a penny, a nickel, a dime, and a quarter ?
+A. 24
+B. 12
+C. 15 *
+D. 20
+56. If sin A=2.511x, cos A=3.06x and sin 2A=3.939x, find the value of x ?
+A. 0.265 *
+B. 0.256
+C. 0.562
+D. 0.625
+57. If tan x=1/2, tan y=1/3, What is the value of tan (x+y) ?
+A. 1 *
+B. 2
+C. 3
+D. 4
+58. If log 2=x and log 3=y, find log 1.2 in terms of x and y.
+A. 2x-y+1
+B. 2x-y-1
+C. 2x+y-1 *
+D. x+2y-1
+59. A PLDT tower and a monument stand on a level plane. The angles of depression of the top and bottom of the monument viewed from the top of the PLDT tower are 13 and 35 respectively. The height of the tower is 50 m. Find the height of the monument.
+A. 33.51 m *
+B. 7.58 m
+C. 47.3 m
+D. 30.57 m
+60. The angle or inclination of ascend of a road having 8.25% grade is degrees?
+A. 4.72 *
+B. 4.27
+C. 5.12
+D. 1.86
+61. If the sides of a parallelogram and an included angle are 6, 10, and 100 degrees respectively, find the length of the shorter diagonal.
+A. 10.63
+B. 10.37
+C. 10.73 *
+D. 10.23
+62. Points A and B 1000 m apart are plotted on a straight highway running east and west. From A, the bearing of a tower C is 32 degrees W of N and from B the bearing of C is 26 degrees N of E. Approximate the shortest distance of tower C to the highway.
+A. 364 m
+B. 374 m *
+C. 394 m
+D. 384 m
+63. Given a triangle with an angle C=28.7 deg side a = 132 units and side b=224 units. Solve for the side c.
+A. 95 units
+B. 125.4 units *
+C. 110 units
+D. 90 units
+64. An observer wishes to determine the height of a tower. He takes sight at the top of the tower from A and B, which are 50 ft apart at the same elevation on a direct line with the tower. The vertical angle at point A is 30 and at point B is 40 What is the height of the tower ?
+A. 85.60 ft
+B. 143.97 ft
+C. 110.29 ft
+D. 92.54 ft *
+65. The logarithm of the quotient (M/N) and the logarithm of the product MN is equal to 1.55630251 and 0.352182518 respectively. Find the value of M.
+A. 6
+B. 7
+C. 8
+D. 9 *
+66. The angle of elevation of the top of tower B from the top of the tower A is 28 and the angle of elevation of the top of tower A from the base of the tower B is 46 The two towers lie in the same horizontal plane. If the height of the tower B is 120 m, find the height of tower A.
+A. 87.2 m
+B. 79.3 m *
+C. 90.7 m
+D. 66.3 m
+67. Solve for x in the equation arctan (x+1) + arctan (x-1) = arctan (12).
+A. 1.50
+B. 1.34 *
+C. 1.20
+D. 1.25
+68. How many degrees is 4800 mils?
+A. 270 deg *
+B. 90 deg
+C. 180 deg
+D. 215 deg
+69. In the curve y=tan 3x, what is its period?
+A. 3\pi
+B. \pi/3 *
+C. 2\pi/3
+D. \pi
+70. Three circles are externally tangent to each other. The distances between their centers are 50 cm between circles A and B, 46 cm between circles B and C, and 40 cm between circles C and A. Determine the diameters, in cm, of each circle A, B, and C, respectively.
+A. 40 for A, 50 for B, 46 for C
+B. 44 for A, 56 for B, 36 for C *
+C. 50 for A, 46 for B, 40 for C
+D. 56 for A, 36 for B, 44 for C
+71. The central circle has 10-cm radius. Six equal smaller circles are to be arranged so that they are externally tangent each other and the centers lie in the circumference of the central circle. What should be the radius in cm, of the smaller circle ?
+A. 6.000
+B. 3.472
+C. 4.167
+D. 5.000 *
+72. The sides of a triangle are 195, 157, and 210 respectively. What is the area of the triangle ?
+A. 73 250 sq. units.
+B. 10 250 sq. units
+C. 14 586 sq. units *
+D. 11 260 sq. units
+73. Given a triangle of sides 10 cm and 15 cm an included angle of 60 Find the area of the triangle.
+A. 70
+B. 72
+C. 80
+D. 65 *
+74. In triangle BCD, BC=25 m, and CD=10 m. The perimeter of the triangle maybe :
+A. 69 m *
+B. 70 m
+C. 71 m
+D. 72 m
+75. The sides of a triangle are 8 cm, 10 cm, and 14 cm. Determine the radius of the inscribed and circumscribing circle.
+A. 3.45, 7.14
+B. 2.45, 7.14 *
+C. 2.45, 8.14
+D. 3.45, 8.14
+76. A quadrilateral have sides equal to 12 m, 20 m, 8m, and 16.97 m respectively. If the sum of the two opposite angles is equal to 225, find the area of the quadrilateral.
+A. 168 *
+B. 124
+C. 100
+D. 158
+77. Find the area of the shaded portion of the two concentric circles whose chord outside the small circle is 10 cm.
+A. 25\pi cm^{2} *
+B. 5\pi cm^{2}
+C. 10\pi cm^{2}
+D. 100 cm^{2}
+78. A regular pentagon has sides of 20 cm. An inner pentagon with sides of 10 cm is inside and concentric to the larger pentagon. Determine the area inside and concentric to the larger pentagon but outside of the smaller pentagon.
+A. 430.70 cm^{2}
+B. 473.77 cm^{2}
+C. 573.26 cm^{2}
+D. 516.14 cm^{2} *
+79. A rhombus has diagonals of 32 and 20 inches. Determine its area.
+A. 360 in^{2}
+B. 320 in^{2} *
+C. 280 in^{2}
+D. 400 in^{2}
+80. In a circle with a diameter of 10 m, a regular five pointed star touching its circumference is inscribed. What is the area of the part not covered by the star?
+A. 60.2 m^2
+B. 45.24 m^2
+C. 50.48 m^2 *
+D. 71.28 m^2
+81. Find the area of a regular octagon inscribed in a circle of radius 10 cm.
+A. 186.48 cm^{2}
+B. 282.24 cm^{2} *
+C. 148.91 cm^{2}
+D. 166.24 cm^{2}
+82. Find the area of a regular pentagon whose side is 25 m and apothem is 17.2 m.
+A. 846 m^{2}
+B. 1075 m^{2} *
+C. 1090 m^{2}
+D. 988 m^{2}
+83. The area of a circle circumscribing a hexagon is 144\pi m^{2} Find the area of the hexagon.
+A. 374.12 m^2 *
+B. 415.26 m^2
+C. 275.36 m^2
+D. 225.22 m^2
+84. If an equilateral is circumscribe about a circle of radius 10 cm, determine the side of the triangle.
+A. 34.64 cm *
+B. 64.12 cm
+C. 36.44 cm
+D. 32.10 cm
+85. A goat is tied to a corner of a 30 ft by 35 ft building. If the rope is 40 ft long and the goat can reach 1 ft farther than the rope length, What is the maximum area the goat can cover ?
+A. 4840.07
+B. 4804.07
+C. 8044.07
+D. 4084.07 *
+86. The distance between the center of the three circles which are mutually tangent to each other externally are 10, 12, and 14 units. Find the area of the largest circle.
+A. 72\pi
+B. 23\pi
+C. 64\pi *
+D. 16\pi
+87. Determine the area of a regular 6-star polygon if the inner regular hexagon has 10 cm sides.
+A. 441.66 cm^2
+B. 519.60 cm^2 *
+C. 467.64 cm^2
+D. 493.62 cm^2
+88. How many sides are in a polygon if each interior angle is 165 degrees.
+A. 12 sides
+B. 24 sides *
+C. 20 sides
+D. 48 sides
+89. A cubical container that measures 2 in. on a side is tightly packed with 8 marbles and is filled with water. All the 8 marbles are in contact with the walls of the container and the adjacent marbles. All the marbles are the same in size. What is the volume of water in the container?
+A. 0.38 in^3
+B. 3.8 in^3 *
+C. 2.5 in^3
+D. 4.2 in^3
+90. The ratio of the volume to the lateral area of a right circular cone is 2:1. If the altitude is 15 cm, what is the ratio of the slant height to the radius?
+A. 5:2 *
+B. 4:3
+C. 5:3
+D. 4:2
+91. A pyramid with a square base has an altitude of 25 cm. If the edge of the base is 15 cm. Calculate the volume of the pyramid.
+A. 1785 cm^3
+B. 5178 cm^3
+C. 1875 cm^3 *
+D. 5871 cm^3
+92. The volume of the water in a hemisphere having a radius of 2 m is 2.05 m^3. Find the height of the water.
+A. 0.602 *
+B. 0.782
+C. 0.498
+D. 0.865
+93. The bases of a right prism is a hexagon with one of each side equal to 6 cm. The bases are 12 cm apart. What is the volume of a right prism?
+A. 1211.6 cm^3
+B. 1212.5 cm^3
+C. 2211.7 cm^3
+D. 1122.4 cm^3 *
+94. Each side of a cube is increased by 1%. By what percent is the volume of the cube increased ?
+A. 23.4%
+B. 34.56%
+C. 30.3%
+D. 3.03 % *
+95. If the lateral area of a cylinder circumscribed about a sphere is A, what is the surface of the sphere?
+A. A *
+B. 2A
+C. 3A
+D. 4A
+96. A group of children playing with marbles placed 50 pieces of the marbles inside a cylindrical container with water filled to a height of 20 cm. If the diameter of each marble is 1.5 cm and that of the cylindrical container 6 cm. What would be the new height of water inside the cylindrical container after the marbles were placed inside?
+A. 23.125 cm *
+B. 22.125 cm
+C. 24.125 cm
+D. 25.125 cm
+97. A pipe lining material of silicon carbide used in the conveyance of pulverized coal to fuel a boiler, has a thickness of 2 cm and inside diameter of 10 cm. Find the volume of the material with a pipe length of 6 meters.
+A. 45,239 cm^3 *
+B. 49,532 cm^3
+C. 42,539 cm^3
+D. 43,932 cm^3
+98. The corners of a cubical block touched the closed spherical shell that encloses it. The volume of the box is 2744 cm^3. What volume in cm^3 inside shell is not occupied by the block ?
+A. 4,713.56 *
+B. 4133.25
+C. 3,360.14
+D. 5,346.42
+99. A circular cone having an altitude of 9 m is divided into 2 segments having the same vertex. If the smaller altitude is 6 m. Find the ratio of the volume of small cone to the big cone.
+A. 0.296 *
+B. 0.186
+C. 0.386
+D. 0.486
+100. A circular cylinder is circumscribed about a right prism having a square base one meter on an edge. The volume of the cylinder is 6.283 m3. Find its altitude in m.
+A. 4.5
+B. 4 *
+C. 5.5
+D. 5
+101. A conical vessel has a height of 24 cm and a base diameter of 12 cm. It holds water to a depth of 18 cm above its vertex. Find the volume of its content in cubic centimeter.
+A. 387.4 cm^3
+B. 381.7 cm^3 *
+C. 83.5 cm^3
+D. 385.2 cm^3
+    </script>
+
+    <script>
+        const rawTextData = document.getElementById('raw-data').textContent || "";
+        const blocks = rawTextData.split(/(?:^|\n|\r\n)(?=\d+\.\s)/).map(b => b.trim()).filter(b => b.length > 0);
+        
+        const quizData = [];
+        let totalScore = 0;
+
+        blocks.forEach((block) => {
+            const optStartMatch = block.match(/\n\s*[A-Da-d][\.\)]\s/);
+            if (!optStartMatch) return; 
+            
+            const optIndex = optStartMatch.index;
+            let questionPart = block.substring(0, optIndex).trim();
+            const optionsStr = block.substring(optIndex).trim();
+            
+            const numMatch = questionPart.match(/^(\d+)\.\s+/);
+            if (!numMatch) return;
+            
+            const numText = numMatch[1];
+            const qText = questionPart.substring(numMatch[0].length).trim();
+            
+            const optRegex = /(?:^|\n)\s*([A-Da-d])[\.\)]\s/g;
+            let match;
+            let indices = [];
+            while ((match = optRegex.exec(optionsStr)) !== null) {
+                indices.push({ letter: match[1].toLowerCase(), index: match.index, matchLength: match[0].length });
+            }
+
+            const options = [];
+            let ansIdx = 0; 
+
+            for (let i = 0; i < indices.length; i++) {
+                let start = indices[i].index + indices[i].matchLength;
+                let end = (i + 1 < indices.length) ? indices[i+1].index : optionsStr.length;
+                let text = optionsStr.substring(start, end).trim();
+                
+                if (text.includes('*') || indices[i].letter.includes('*')) {
+                    ansIdx = i;
+                    text = text.replace(/\*/g, '').trim();
+                }
+                options.push({ letter: indices[i].letter.toUpperCase(), text: text });
+            }
+            
+            if (options.length > 0) {
+                quizData.push({
+                    num: parseInt(numText, 10),
+                    q: qText, 
+                    options: options, 
+                    ansIdx: ansIdx, 
+                    userAnswered: false,
+                    isCorrect: false
+                });
+            }
+        });
+
+        quizData.sort((a, b) => a.num - b.num);
+
+        let currentIndex = 0;
+
+        function initApp() {
+            if (quizData.length === 0) {
+                document.getElementById('qHeader').innerHTML = "<span class='error-message'>Parse Error</span>";
+                document.getElementById('qText').innerHTML = "Could not parse questions. Check raw text format.";
+                return;
+            }
+            document.getElementById('controls').style.display = "flex";
+            buildNav();
+            loadQuestion(currentIndex);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            grid.innerHTML = '';
+            quizData.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-item';
+                btn.id = `nav-btn-${idx}`;
+                btn.innerText = q.num; 
+                btn.onclick = () => { loadQuestion(idx); toggleSidebar(); };
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateNavStyles() {
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-btn-${currentIndex}`).classList.add('active');
+            
+            quizData.forEach((q, idx) => {
+                const btn = document.getElementById(`nav-btn-${idx}`);
+                if (q.userAnswered) btn.classList.add('completed');
+            });
+        }
+
+        function updateScore() {
+            document.getElementById('scoreTracker').innerText = `Score: ${totalScore} / ${quizData.length}`;
+        }
+
+        function loadQuestion(index) {
+            currentIndex = index;
+            const q = quizData[currentIndex];
+            
+            document.getElementById('qHeader').innerHTML = `Problem ${q.num} of ${quizData.length}`;
+            document.getElementById('qText').innerHTML = q.q;
+            
+            const optionsGrid = document.getElementById('optionsGrid');
+            optionsGrid.innerHTML = '';
+            
+            const feedbackMsg = document.getElementById('feedbackMessage');
+            feedbackMsg.style.display = 'none';
+
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span class="option-letter">${opt.letter}.</span> ${opt.text}`;
+                
+                if (q.userAnswered) {
+                    btn.disabled = true;
+                    if (i === q.ansIdx) {
+                        btn.classList.add('correct');
+                    } else if (i === q.userSelectedIdx) {
+                        btn.classList.add('wrong');
+                    }
+                } else {
+                    btn.onclick = () => selectAnswer(i, btn);
+                }
+                optionsGrid.appendChild(btn);
+            });
+
+            if (q.userAnswered) {
+                showFeedback(q.isCorrect, q);
+            }
+
+            document.getElementById('prevBtn').disabled = (currentIndex === 0);
+            document.getElementById('nextBtn').disabled = (currentIndex === quizData.length - 1);
+            
+            updateNavStyles();
+            updateScore();
+
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('quizCard')]);
+            }
+        }
+
+        function selectAnswer(selectedIndex, selectedBtn) {
+            const q = quizData[currentIndex];
+            q.userAnswered = true;
+            q.userSelectedIdx = selectedIndex;
+            q.isCorrect = (selectedIndex === q.ansIdx);
+
+            if (q.isCorrect) totalScore++;
+
+            const buttons = document.getElementById('optionsGrid').children;
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true;
+                if (i === q.ansIdx) buttons[i].classList.add('correct');
+            }
+
+            if (!q.isCorrect) selectedBtn.classList.add('wrong');
+
+            showFeedback(q.isCorrect, q);
+            updateNavStyles();
+            updateScore();
+        }
+
+        function showFeedback(isCorrect, q) {
+            const feedbackMsg = document.getElementById('feedbackMessage');
+            feedbackMsg.className = 'feedback-message ' + (isCorrect ? 'success' : 'error');
+            
+            const correctOpt = q.options[q.ansIdx];
+            
+            if (isCorrect) {
+                feedbackMsg.innerHTML = "Correct! The answer is <br><br><strong>" + correctOpt.letter + ". " + correctOpt.text + "</strong>";
+            } else {
+                feedbackMsg.innerHTML = "Incorrect! The correct answer is <br><br><strong>" + correctOpt.letter + ". " + correctOpt.text + "</strong>";
+            }
+            feedbackMsg.style.display = "block";
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise([feedbackMsg]);
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIndex < quizData.length - 1) loadQuestion(currentIndex + 1);
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) loadQuestion(currentIndex - 1);
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
