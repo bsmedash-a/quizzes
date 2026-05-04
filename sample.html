@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematics Recall | Reviewer Quiz</title>
+    <!-- MathJax for rendering LaTeX formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --main-color: #ffffff;
+            --text-color: #1c1e21;
+            --accent-color: #007bff;
+            --hover-color: #0056b3;
+            --correct-color: #28a745;
+            --wrong-color: #dc3545;
+            --nav-bg: #343a40;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        .top-bar {
+            background-color: var(--main-color);
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex; align-items: center; position: fixed; width: 100%; top: 0; z-index: 100;
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        .hamburger { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-color); margin-right: 20px; }
+        .top-bar h2 { margin: 0; font-size: 1.1rem; color: var(--nav-bg); text-transform: uppercase; letter-spacing: 1px; }
+
+        #sidebar {
+            width: 320px; background-color: var(--nav-bg); color: white;
+            display: flex; flex-direction: column; transition: transform 0.3s ease;
+            position: fixed; height: calc(100% - 60px); top: 60px; z-index: 99;
+            transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+        #sidebar.open { transform: translateX(0); }
+        .sidebar-header { padding: 20px; font-weight: bold; background-color: #1a1e21; text-align: center; border-bottom: 1px solid #495057; }
+        .nav-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; flex: 1; }
+        .nav-item { background-color: #495057; color: white; border: none; padding: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: 0.2s; }
+        .nav-item:hover { background-color: #6c757d; }
+        .nav-item.active { background-color: var(--accent-color); box-shadow: inset 0 0 0 2px white; }
+        .nav-item.completed { background-color: var(--correct-color); }
+
+        #main-content { flex: 1; margin-top: 60px; padding: 40px 20px; display: flex; justify-content: center; overflow-y: auto; width: 100%; }
+        .quiz-card { background-color: var(--main-color); width: 100%; max-width: 850px; padding: 40px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); height: fit-content; margin-bottom: 40px; }
+        .question-header { font-size: 1rem; color: #6c757d; margin-bottom: 20px; border-bottom: 1px solid #dee2e6; padding-bottom: 10px; font-weight: 700; display: flex; justify-content: space-between; }
+        .question-text { font-size: 1.25rem; line-height: 1.6; margin-bottom: 30px; color: #212529; word-wrap: break-word; }
+
+        .options-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        .option-btn {
+            background-color: #f8f9fa; border: 2px solid #dee2e6; padding: 16px 20px; border-radius: 6px;
+            font-size: 1.1rem; cursor: pointer; text-align: left; transition: all 0.2s; display: flex; align-items: flex-start; color: #212529;
+        }
+        .option-btn:hover:not(:disabled) { background-color: #e2e6ea; border-color: var(--accent-color); }
+        .option-btn.correct { background-color: #d4edda; border-color: var(--correct-color); color: #155724; font-weight: bold; }
+        .option-btn.wrong { background-color: #f8d7da; border-color: var(--wrong-color); color: #721c24; font-weight: bold; }
+        .option-letter { font-weight: bold; margin-right: 15px; color: var(--accent-color); }
+
+        .feedback { padding: 20px; border-radius: 6px; font-size: 1.2rem; line-height: 1.5; margin-bottom: 20px; display: none; text-align: center; font-weight: bold; }
+        .feedback.success { background-color: #d4edda; color: #155724; border: 1px solid var(--correct-color); }
+        .feedback.error { background-color: #f8d7da; color: #721c24; border: 1px solid var(--wrong-color); }
+
+        .controls { display: flex; justify-content: space-between; border-top: 2px solid #dee2e6; padding-top: 20px; }
+        .ctrl-btn { background-color: var(--accent-color); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .ctrl-btn:disabled { background-color: #ced4da; color: #6c757d; cursor: not-allowed; }
+
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 98; display: none; }
+        #overlay.show { display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h2>Mathematics Coaching | Diagnostic Exam</h2>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header">100 Problems Navigator</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div id="main-content">
+        <div class="quiz-card" id="quizCard">
+            <div class="question-header">
+                <span id="qHeader">Initializing...</span>
+                <span id="scoreTracker" style="color: var(--accent-color);">Score: 0</span>
+            </div>
+            
+            <div class="question-text" id="qText">Extracting problem set...</div>
+            <div class="options-container" id="optionsGrid"></div>
+            <div class="feedback" id="feedbackArea"></div>
+            
+            <div class="controls">
+                <button class="ctrl-btn" id="prevBtn" onclick="prev()">Previous</button>
+                <button class="ctrl-btn" id="nextBtn" onclick="next()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script id="raw-data" type="text/plain">
+1|Three numbers $m+2$, $4m - 6$, $3m - 2$ are in arithmetic progression if $m$ is equal to what value?|A. 0|B. 1|C. 2|D. 3 *|D
+2|Using the wheel and the axle, a 400 N load can be raised by a force of 50N applied to the rim of the wheel. The radii of the wheel and the axle are 85 cm and 6 cm respectively. Calculate the efficiency of the machine.|A. 56% *|B. 65%|C. 12.5%|D. 10%|A
+3|The sum of the reciprocals of three numbers in H.P. (harmonic progression) is 12 and the product of these numbers is 1/48. What is the largest number?|A. 1/2 *|B. 1/4|C. 1/6|D. 1/3|A
+4|A machine costing Php 720,000 is estimated to have a life of 10 years. If the annual rate of depreciation is 25%, determine the total depreciation using the constant percentage or declining balance method.|A. 523,845.34|B. 679,454.27 *|C. 542,437.23|D. 753,243.33|B
+5|What is the geometric mean between -4 and -25?|A. 10|B. -10 *|C. 16|D. -16|B
+6|A train weighing 1000 KN is being pulled up a 2% grade. The train's resistance is 5 N/KN. Traveling the distance of 300 m the speed of the train was increased from 6 m/s to 12 m/s. What is the maximum power developed by the locomotive.|A. 520.4 kW *|B. 432.8 kW|C. 503.5 kW|D. 521.7 kW|A
+7|There are 15 men is a room shake hands with each other, the total number of handshakes is:|A. 90|B. 105 *|C. 110|D. 115|B
+8|Which of the following is not an assumption implicit in engineering economic analysis?|A. The beginning of the year convention is applicable. *|B. There is no inflation now, nor will there be any inflation during the lifetime of the project.|C. The effective interest rate in the problem will be constant during the lifetime of the project.|D. Nonquantifiable factors can be disregarded.|A
+9|The number of triangles that can be formed with 6 points on a circle is|A. 6|B. 12|C. 15|D. 20 *|D
+10|The term independent of x in the expansion of $(2x+1/3x)^6$ is|A. 80/3|B. 80/9|C. 160/27 *|D. 160/9|C
+11|An air-water vapor mixture is at a temperature of 20°C. The partial pressure of water is 2.3 kPa, and the partial pressure of the dry air is 99.1 kPa. Saturation pressure for water vapor at 20°C is 2.339 kPa. Most nearly the humidity ratio?|A. 0.014 *|B. 0.26|C. 0.35|D. 0.38|A
+12|If matrix A is equal to first row (ab, b^2) and second row (a^2, -ab), then A is a:|A. Scalar matrix|B. Nilpotent matrix *|C. idempotent matrix|D. involuntary matrix|B
+13|In calculations using standard structural shapes of I-beams, it is assumed that the shear stress is carried by the|A. entire cross-sectional area.|B. top flange only when in compression.|C. web only. *|D. flanges only.|C
+14|Torsional pendulum: 0.5 m shaft, diameter 0.5 cm, shear modulus 8x10^4 MPa, thin 3 kg disk, radius 30 cm. Natural frequency 8.5 rad/s. What is most nearly the period of oscillation?|A. 0.61 s|B. 0.74 s *|C. 0.87 s|D. 0.96 s|B
+15|Calculate the largest diameter circle that will fit inside a regular pentagon with 2-cm sides?|A. 1.54 cm|B. 2.752 cm *|C. 3.29 cm|D. 1.54 cm|B
+16|Compute the sum of integers from 1 to 100 that are divisible by 2 or 5.|A. 5450|B. 2520|C. 3050 *|D. 2050|C
+17|If matrix A, first row (-3, 4), second row (2,1), then its characteristic roots are:|A. (1, -5) *|B. (1, 5)|C. (-1, 5)|D. (-1, -5)|A
+18|Engine: P1000 maintenance 1st year, increases P500/yr. Rate 6% annually. Over 10-years, what is the approx effective annual maintenance cost?|A. P 3011.00 *|B. P 3452.00|C. P 2450.00|D. P 1345.00|A
+19|There are 10 defectives per 1,000 items in the long run. Probability that there is one and only one defective in random lot of 100?|A. 0.01|B. 0.99^100|C. 0.5|D. 0.3697 *|D
+20|A company has N machines producing 180 pcs/day. If 2 machines break down, workload of remaining increases by 3 pcs/day. Value of N?|A. 8|B. 12 *|C. 10|D. 15|B
+21|Substance dissolves at rate of 25% of undissolved portion per min. Initial amount 64/27 lb. Amount undissolved after 6 minutes?|A. 2/27|B. 16/27|C. 27/64 *|D. 3/4|C
+22|On a certain day the sun subtends an angle 0°32'10". Diameter is 866,500 miles. How far away is it?|A. 9.26 x 10^6 miles *|B. 4.63 x 10^8 miles|C. 9.26 x 10^5 miles|D. 4.68 x 10^6 miles|A
+23|All of the following processes can be found on a psychrometric chart except|A. heating and humidifying.|B. black body radiation. *|C. cooling and dehumidification.|D. evaporative cooling.|B
+24|The number of ways which 5 boys and 5 girls can be seated so that no two girls sit next to each other.|A. 5!^2|B. 10!/5!|C. 6!x5! *|D. 10!/(5!)^2|C
+25|The Carnot refrigeration cycle includes all of the following processes except|A. isentropic expansion.|B. isenthalpic expansion. *|C. isothermal heating.|D. isentropic compression.|B
+26|Three posts in level ground form equilateral triangle (side 20 ft). Heights are 12, 18, and 30 ft. Find area of triangle formed by tops?|A. 342 sq ft|B. 153 sq. ft|C. 235 sq. ft *|D. 205 sq. ft.|C
+27|Find the equation satisfied by coordinates (x, y) equidistant from origin and (1, 1)?|A. x + y = 1 *|B. x - y = 1|C. 2x = y|D. 3x - 2y = 1|A
+28|Which of the following statements is false?|A. Time rate of change of angular momentum equals total external moment.|B. Coefficient of restitution can be less than zero. *|C. Momentum is conserved during elastic collisions.|D. Period of simple pendulum is independent of mass.|B
+29|Cubical box designed for 8 cu ft holds only 7.997 cu ft. Relative error in its edge?|A. 0.00125|B. 0.00025|C. -0.125|D. -0.000125 *|D
+30|Stone ripples: radius increases at 2 ft/sec. How rapidly is disturbed area changing at end of 3 seconds?|A. 24pi sq.ft/s *|B. 48pi sq.ft/s|C. 12pi sq.ft/s|D. 2pi sq.ft./s|A
+31|Infinite geometric series: 1st term is 1, every term is sum of next successive terms. Fourth term is:|A. 1/8 *|B. 1/16|C. 1/4|D. 1/2|A
+32|Find the area of the region bounded by y = x^2/4 and y = x/2 + 2|A. 11|B. 9 *|C. 12|D. 10|B
+33|Solid circular base (radius 1). Every plane section perp to base diameter is isosceles triangle (alt 2). Find volume.|A. pi/2|B. 2pi|C. pi *|D. 1.5 pi|C
+34|Find the area of the largest isosceles triangle that can be drawn with equal sides k inch long.|A. k^2/3|B. 2k^2|C. k^2/2 *|D. 2.5 k^2|C
+35|Net present worth comparisons: which of the following could invalidate the calculation?|A. differences in magnitudes|B. evaluating over different time periods *|C. mutually exclusive projects|D. nonconventional cash flows|B
+36|Inclined plane 15 m, rises 3 m. Force to slide 20 kg box (no friction). Find AMA if 70 N force is actually required.|A. 2.8 *|B. 3.6|C. 3.1|D. 5.0|A
+37|If quantity increases by 0.1% of current value every 0.1 sec, doubling time is approx:|A. 14 sec|B. 69 sec *|C. 690 sec|D. 69,000 sec|B
+38|One advantage of comparing interest rates to the minimum attractive rate of return (MARR) is that|A. MARR is easy to calculate.|B. effective interest rate need never be known. *|C. it need not be used in numerical calculations.|D. it is federal government guaranteed.|B
+39|Diameter of sphere and base of cone are equal. What percentage of that diameter must cone height be for equal volumes?|A. 133%|B. 150%|C. 166%|D. 200% *|D
+40|Why does spinning ice skater angular velocity increase when arms come in?|A. Mass moment of inertia reduced.|B. Angular momentum constant|C. Radius of gyration reduced.|D. All of these *|D
+41|Cubical container (2 in side) packed with 8 marbles + water. Marbles tangent to walls/each other. Volume of water?|A. 0.38 cu in|B. 3.8 cu in *|C. 2.5 cu in|D. 4.2 cu in|B
+42|Product of complex numbers 3 + 4j and 7 - 2j?|A. 10 + 2j|B. 13 + 22j|C. 13 + 34j|D. 29 + 22j *|D
+43|General solution to d^2y/dx^2 - 4dy/dx + 4y = 0?|A. y = C1cosx + C2sinx|B. y = C1e^x + C2e^-x|C. y = e^-x(C1cosx - C2sinx)|D. y = e^2x(C1 + C2x) *|D
+44|Motion: s(t) = 40t + 5t^2 - 8t^3. Calculate initial acceleration?|A. 2 m/s^2|B. 3 m/s^2|C. 3 m/s^2|D. 10 m/s^2 *|D
+45|Position: S(t) = 2sinti i + 4costj. Magnitude of velocity when t = 4 rad?|A. 2.6|B. 2.7|C. 3.3|D. 4.1 *|D
+46|Projectile: V=110 m/s, launch angle 20°.地形 is level, no friction. Compute flight time?|A. 3.8 s|B. 7.7 s *|C. 8.9 s|D. 12 s|B
+47|1530 kg car towing 300 kg trailer. Friction 0.80. Banked curve (r=200m) at 100 km/h. Banking angle for no skidding?|A. 8.0°|B. 21° *|C. 36°|D. 78°|B
+48|Truck at 25 m/s. Bed friction 0.40. Shortest time to stop without box shifting?|A. 2.3 s|B. 4.7 s|C. 5.9 s|D. 6.4 s *|D
+49|Solve for x: sqrt(x - 3) = -6|A. 0|B. 3|C. 39|D. no solution *|D
+50|Two circles: sum of circumferences is 24pi, sum of areas is 84pi sq ft. Find smaller radius.|A. 3.55 *|B. 8.45|C. 6|D. 4.8|A
+51|Debt P10,000, 10% semi-annual, amortized over 5 years. Determine semi-annual payment.|A. Php 1,200.00|B. Php 1,193.90|C. Php 1,295.05 *|D. Php 1,400.40|C
+52|Gun shot into 0.50 KN block on 1.8 m rope. Bullet 5 N, muzzle V=320 m/s. High will bag swing?|A. 0.61 m|B. 0.51 m *|C. 0.90 m|D. 0.34 m|B
+53|All of the following units quantifying work except|A. foot-pounds.|B. watt-seconds.|C. joules.|D. dynes. *|D
+54|Conical vessel (H=24cm, D=12cm). Water depth 18 cm above vertex. Volume of content in cm^3?|A. 387.4 cm^3|B. 83.5 cm^3|C. 381.7 cm^3 *|D. 385.2 cm^3|C
+55|Minimum initial velocity rocket must be fired to reach target 1000 km away?|A. 3.1 km/s *|B. 3.4 km/s|C. 1.4 km/s|D. 2.4 km/s|A
+56|Object 400 N held by rope over drum. Friction 0.25, contact 150°. Force to raise object?|A. 350 N|B. 770 N *|C. 540 N|D. 780 N|B
+57|Freight cars (5 mtons each) roll and couple. Left: 1.5 m/s, Right: 1.2 m/s. Coupled velocity?|A. 0.15 m/s right *|B. 0.25 m/s left|C. 0.15 m/s left|D. 0.17 m/s right|A
+58|50 bonds (P1,000 face). Redeemable 15 yrs. Sinking fund rate 4%. Principal in fund at end of 12th year?|A. Php 32,938.00|B. Php 38,453.00|C. Php 40,378.00|D. Php 37,519.00 *|D
+59|Nominal rate 3%. Php 5,000 worth in 10 years continuously compounded?|A. P 5,450.00|B. P 6,300.00|C. P 6,750.00 *|D. P 6,120.00|C
+60|Population doubles every 40 yr. 1950 was 10,000. Population in 2010?|A. 28,284 *|B. 25,000|C. 30,000|D. 20,000|A
+61|Brine tank (100 L, 60kg salt). Salt (1kg/L) enters 2L/min. Drawn 3L/min. Salt after 1 hour?|A. 13 kg|B. 43 kg|C. 37 kg *|D. 51 kg|C
+62|Sum of first n terms: 5n^2 + 2n. Second term?|A. 7|B. 17 *|C. 24|D. 42|B
+63|Infinite geometric: 1st term 1, each term twice sum of succeeding. Sum?|A. 3/2 *|B. 4/3|C. 5/3|D. 5/2|A
+64|Rule of 72 calculates:|A. monthly payments.|B. time to double investment. *|C. time to triple investment.|D. time to decrease 1/72.|B
+65|Area of ellipse: aspect ratio 2, perimeter 18 inches?|A. 20.63 *|B. 12.54|C. 14.53|D. 22.54|A
+66|Percent increase in volume sphere: diameter 3cm to 4cm?|A. 200%|B. 137% *|C. 105%|D. 270%|B
+67|7 A current, 12 ohm resistor. Power dissipated?|A. 0.10 Hp|B. 0.8 Hp *|C. 0.60 Hp|D. 8 Hp|B
+68|Cost P5000 yr 1. Maintenance P300/yr for 7 yrs. Inflation 5%, interest 9%. Uninflated PW yr 1?|A. Php 3200|B. Php 3300 *|C. Php 3400|D. Php 3500|B
+69|Surface area (side + base) cone: 4 m high, 3 m base diameter?|A. 24 m^2|B. 27 m^2 *|C. 32 m^2|D. 36 m^2|B
+70| Christmas club problem differentiates by:|A. varying rates.|B. varying flows.|C. payment at t=0, none at end. *|D. no interest.|C
+71|Rights P5,000,000. Profits P600,000/yr indefinitely. Interest rate?|A. 8.3%|B. 9.0%|C. 10%|D. 12% *|D
+72|Auditorium vent: 3.3x10^4 kg/h. In -10°C, leaves 23°C. Air entering is 21.6°C. Heat supplied?|A. 120 kW|B. 290 kW *|C. 540 kW|D. 780 kW|B
+73|Air enters 50°F dry/49°F wet. Leaves saturated at 70°F. Outcome?|A. Adsorption|B. Fog *|C. Condensation|D. Sublimation|B
+74|Parameter greatest limiting thermal performance of open tower?|A. Approach|B. Dry-bulb|C. Range *|D. Wet-bulb|C
+75|Joules equivalent to 1 kg matter?|A. 10^-10 J|B. 10^-15 J|C. 1 MJ|D. 10^17 *|D
+76|Economic Order Quantity (EOQ): which is not an assumption?|A. constant rate.|B. positive cost.|C. delivered inst.|D. upper bound. *|D
+77|Which of the following is NOT a correct derivative?|A. d(cosx)=-sinx|B. d(1-x)^3=3(1-x)^2|C. d(1/x)=-1/x^2|D. d(cscx)=-cotx *|D
+78|Analysis concerned when frequency/probability unknown?|A. synthetical|B. risk|C. sensitivity|D. uncertainty *|D
+79|Liquid coldest exposed to atmosphere?|A. oxygen|B. argon|C. nitrogen|D. helium *|D
+80|Locus: point always twice as far from (1, 2) as from (-3, 4)?|A. 3x^2+3y^2+26x-28y+95=0 *|B. 3x^2-3y^2+20x-12y+90=0|C. 5x^2-5y^2+25x-10y+45=0|D. 5x^2+5y^2+15x-7y+40=0|A
+81|Acceleration produced when particle moves away from center of rotation?|A. tangential|B. coriolis *|C. centripetal|D. centrifugal|B
+82|Methods of general systems modelling except:|A. Monte Carlo.|B. Replacement.|C. Decision trees.|D. Rule of thumb. *|D
+83|Comparing terms of unknown series to known converging/diverging series:|A. comparison test. *|B. L'Hôpital's.|C. ratio test.|D. mean value.|A
+84|Cable shape: loose cable loaded by own weight?|A. Straight line|B. Parabola|C. catenary *|D. hyperbola|C
+85|Sensible 72.5 kW, Latent 3.2 kW. SHR?|A. 0.12|B. 0.39|C. 0.96 *|D. 1.1|C
+86|12.5mm rod, walls, +50°C. Axial force in rod?|A. 2.8 kN|B. 15 kN *|C. 19 kN|D. 58 kN|B
+87|Metal highest specific heat at 100°C?|A. aluminum *|B. bismuth|C. copper|D. iron|A
+88|Spherical excess: North pole, two equator points separated by 85° longitude?|A. 85 deg *|B. 60 deg|C. 275 deg|D. 95 deg|A
+89|Series: 1, 5, 14, 30... fifth term is:|A. 59|B. 53|C. 55 *|D. 50|C
+90|Series diverge positively = converge alternating. Series is:|A. Monotonic.|B. Conditionally. *|C. Absolutely.|D. Finite.|B
+91|Study of fluid flow and resistance in open pipes:|A. fluid mechanics.|B. hydraulics. *|C. aerodynamics|D. thermodynamics.|B
+92|Sector: r = 8 cm, arc = 13 cm. Area?|A. 48 cm^2|B. 50 cm^2|C. 52 cm^2 *|D. 60 cm^2|C
+93|Total volume mixture = sum of partial volumes:|A. gravimetric.|B. Amagat's law. *|C. Dalton's law.|D. mole.|B
+94|Processes irreversible except:|A. stirring.|B. isentropic decel. *|C. unrestrained exp.|D. phase change.|B
+95|Indirect product cost (IPC) spending variance:|A. actual - absorbed|B. actual - adjusted budget *|C. volume adj budget|D. budget - total absorbed|B
+96|Sinking fund method seldom used because:|A. connotation.|B. misleading.|C. initial dep low. *|D. initial dep high.|C
+97|HP output limitation: 1,000,000 BTU/hr, 1540°F and 40°F?|A. 98.|B. 295. *|C. 1140.|D. 3830.|B
+98|Equilibrium conditions exist in all except:|A. reversible.|B. frictionless.|C. infinitesimal forces.|D. steady flow. *|D
+99|Root of x^2+ax+12=0 is 4. x^2+ax+b=0 has equal roots. Value of b?|A. 4/7|B. 7/4|C. 4/49|D. 49/4 *|D
+100|Ratio of load-bearing force to applied force for lever:|A. Load factor|B. Efficiency|C. mechanical advantage *|D. influence factor|C
+101|Three numbers m+2, 4m-6, 3m-2 are in A.P. value of m?|A. 0|B. 1|C. 2|D. 3 *|D
+    </script>
+
+    <script>
+        const rawData = document.getElementById('raw-data').textContent.trim();
+        const quizData = rawData.split('\n').map(line => {
+            const [num, text, a, b, c, d, ans] = line.split('|');
+            return {
+                num, text, options: [a, b, c, d], ansLetter: ans.trim(), answered: null
+            };
+        });
+
+        let currentIdx = 0;
+        let score = 0;
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            quizData.forEach((q, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-item';
+                btn.innerText = q.num;
+                btn.id = `nav-${i}`;
+                btn.onclick = () => { currentIdx = i; loadQuestion(); toggleSidebar(); };
+                grid.appendChild(btn);
+            });
+        }
+
+        function loadQuestion() {
+            const q = quizData[currentIdx];
+            document.getElementById('qHeader').innerText = `Problem ${q.num} of ${quizData.length}`;
+            document.getElementById('qText').innerHTML = q.text;
+            
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+            
+            const fb = document.getElementById('feedbackArea');
+            fb.style.display = 'none';
+
+            q.options.forEach((opt, i) => {
+                const letter = String.fromCharCode(65 + i);
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                // Remove the source's asterisk from the display
+                const cleanText = opt.replace(/\s*\*$/, "");
+                btn.innerHTML = `<span class="option-letter">${letter}.</span> ${cleanText}`;
+                
+                if (q.answered) {
+                    btn.disabled = true;
+                    if (letter === q.ansLetter) btn.classList.add('correct');
+                    if (letter === q.answered && letter !== q.ansLetter) btn.classList.add('wrong');
+                } else {
+                    btn.onclick = () => select(letter);
+                }
+                grid.appendChild(btn);
+            });
+
+            if (q.answered) {
+                fb.style.display = 'block';
+                fb.className = `feedback ${q.answered === q.ansLetter ? 'success' : 'error'}`;
+                fb.innerText = q.answered === q.ansLetter ? 'CORRECT!' : `WRONG! Correct Answer: ${q.ansLetter}`;
+            }
+
+            document.getElementById('prevBtn').disabled = currentIdx === 0;
+            document.getElementById('nextBtn').disabled = currentIdx === quizData.length - 1;
+            
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(`nav-${currentIdx}`).classList.add('active');
+
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        function select(letter) {
+            const q = quizData[currentIdx];
+            q.answered = letter;
+            if (letter === q.ansLetter) {
+                score++;
+                document.getElementById('scoreTracker').innerText = `Score: ${score}`;
+            }
+            document.getElementById(`nav-${currentIdx}`).classList.add('completed');
+            loadQuestion();
+        }
+
+        function next() { if (currentIdx < quizData.length - 1) { currentIdx++; loadQuestion(); } }
+        function prev() { if (currentIdx > 0) { currentIdx--; loadQuestion(); } }
+
+        window.onload = () => { buildNav(); loadQuestion(); };
+    </script>
+</body>
+</html>
