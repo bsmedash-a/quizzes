@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elements of Mathematics | Comprehensive Quiz</title>
+    <!-- MathJax for rendering equations -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <style>
+        :root {
+            --bg-color: #f1f2f6;
+            --main-color: #ffffff;
+            --text-color: #2f3542;
+            --accent-color: #2c3e50;
+            --hover-color: #34495e;
+            --correct-color: #27ae60;
+            --wrong-color: #e74c3c;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-color); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--main-color);
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed; width: 100%; top: 0; z-index: 100;
+            display: flex; align-items: center; border-bottom: 3px solid var(--accent-color);
+        }
+        .hamburger { font-size: 1.8rem; cursor: pointer; margin-right: 20px; background: none; border: none; }
+        .top-bar h2 { margin: 0; font-size: 1.2rem; text-transform: uppercase; color: var(--accent-color); }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            width: 320px; background-color: var(--accent-color); color: white;
+            display: flex; flex-direction: column; transition: 0.3s;
+            position: fixed; height: calc(100% - 60px); top: 60px; z-index: 99;
+            transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+        #sidebar.open { transform: translateX(0); }
+        .sidebar-header { padding: 20px; font-weight: bold; background: #1a252f; text-align: center; }
+        .nav-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; flex: 1; }
+        .nav-item { background: #3e5871; color: white; border: none; padding: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .nav-item.active { background: #3498db; box-shadow: inset 0 0 0 2px white; }
+        .nav-item.completed { background: var(--correct-color); }
+
+        /* Main Content */
+        #main-content { flex: 1; margin-top: 60px; padding: 40px 20px; display: flex; justify-content: center; overflow-y: auto; }
+        .quiz-card { background: var(--main-color); width: 100%; max-width: 850px; padding: 40px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); height: fit-content; }
+        .q-header { color: #7f8c8d; margin-bottom: 20px; border-bottom: 2px solid #f1f2f6; padding-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; }
+        .q-text { font-size: 1.3rem; line-height: 1.6; margin-bottom: 30px; color: var(--text-color); }
+
+        .options-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
+        .option-btn { background: #f8f9fa; border: 2px solid #dcdde1; padding: 16px 20px; border-radius: 6px; font-size: 1.1rem; cursor: pointer; text-align: left; }
+        .option-btn:hover:not(:disabled) { background: #ebf5fb; border-color: #3498db; }
+        .option-btn.correct { background: #e8f8f5; border-color: var(--correct-color); color: #27ae60; font-weight: bold; }
+        .option-btn.wrong { background: #fdedec; border-color: var(--wrong-color); color: #c0392b; font-weight: bold; }
+
+        .controls { display: flex; justify-content: space-between; border-top: 2px solid #f1f2f6; padding-top: 20px; }
+        .btn { background: var(--accent-color); color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        .btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 98; display: none; }
+        #overlay.show { display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h2>Elements of Math & Economics Reviewer</h2>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header">Question Navigator</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div id="main-content">
+        <div class="quiz-card" id="quizCard">
+            <div class="q-header">
+                <span id="qIdx">Loading...</span>
+                <span id="score">Score: 0</span>
+            </div>
+            <div class="q-text" id="qText">Please wait while we prepare the exam...</div>
+            <div class="options-container" id="optionsGrid"></div>
+            <div class="controls">
+                <button class="btn" id="prevBtn" onclick="prev()">Previous</button>
+                <button class="btn" id="nextBtn" onclick="next()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script id="raw-data" type="text/plain">
+1. One nautical mile is equivalent to: A. 5280 ft. B. 6280 ft. C. 1.256 statute mile D. 1.854 km | Ans: D
+2. $255^{\circ}C$ is equivalent to: A. $491^{\circ}F$ B. 472°F C. 173.67°F D. 109.67°F | Ans: A
+3. Which of the following is correct? A. 1 hp=746 kW B. 1 hp=0.746 W C. 1 hp=0.746 kW D. 1 hp=546 W | Ans: C
+4. If equals are added to equals, the sum is equal. A. theorem B. postulate C. axiom D. corollary | Ans: C
+5. If $a=b$ and $b=c$ then $a=c$. This property of real numbers is known as: A. reflexive B. symmetric C. transitive D. addition | Ans: C
+6. If $a=b$ and $b=a$. This property of real numbers is known as: A. reflexive B. symmetric C. transitive D. multiplication | Ans: B
+7. A line segment joining two points on a circle is called: A. arc B. tangent C. sector D. chord | Ans: D
+8. An angle greater than straight angle and less than two straight angles is called: A. right angle B. obtuse angle C. reflex angle D. acute angle | Ans: C
+9. All circles having the same center but unequal radii are called A. encircle B. tangent circles C. concyclic D. concentric circles | Ans: D
+10. A triangle having three sides equal is called: A. equilateral B. scalene C. isosceles D. right | Ans: A
+11. In a regular polygon, the perpendicular line drawn from the center of the inscribed circle any one of the sides is called: A. radius B. altitude C. median D. apothem | Ans: D
+12. A quadrilateral with two and only two sides of which are parallel is called: A. parallelogram B. trapezoid C. quadrilateral D. rhombus | Ans: B
+13. A polygon with fifteen sides is called: A. dodecagon B. decagon C. pentedecagon D. nonagon | Ans: C
+14. A statement the truth of which is admitted without proof is called: A. an axiom B. a postulate C. a theorem D. a corollary | Ans: A
+15. A rectangle with equal sides is called: A. rhombus B. trapezoid C. square D. parallelogram | Ans: C
+16. The sum of the sides of a polygon is termed as: A. circumference B. altitude C. apothem D. perimeter | Ans: D
+17. A line that meets a plane but not perpendicular to it, in relation to the plane, is A. parallel B. collinear C. coplanar D. oblique | Ans: D
+18. A quadrilateral whose opposite sides are equal is generally termed as: A. a square B. a rectangle C. a rhombus D. a parallelogram | Ans: D
+19. A part of a line included between two points on the line is called: A. a tangent B. a secant C. a sector D. a segment | Ans: D
+20. If the edge of a cube is doubled, which of the following is correct? A. the lateral area will be quadrupled B. the volume is increased 8 times C. the diagonal is doubled D. all of the above | Ans: D
+21. The section of the sphere cut by a plane through its center is termed as: A. small circle B. incircle C. big circle D. great circle | Ans: D
+22. Lines that pass through a common point are called: A. collinear B. coplanar C. concurrent D. congruent | Ans: C
+23. In two intersecting lines, the angles opposite to each other are termed as: A. opposite angle B. vertical angles C. horizontal angle D. inscribed angle | Ans: B
+24. A normal to a given plane is: A. perpendicular to the plane B. lying on the plane C. parallel to the plane D. oblique to the plane | Ans: A
+25. The chord passing through the focus of the parabola and perpendicular to its axis is termed as: A. directrix B. translated axis C. latus rectum D. axis | Ans: C
+26. The locus of the point which move so the sum of its distances between two fixed points is constant is called as: A. a parabola B. a circle C. an ellipse D. a hyperbola | Ans: C
+27. A tangent to a conic is a line A. which is parallel to the normal B. which touches the conic at only one point C. which passes inside the conic D. all of the above | Ans: B
+28. The focus of a point that moves so that its distance from a fixed point and a fixed line is always equal is known as: A. a parabola B. a circle C. an ellipse D. a hyperbola | Ans: A
+29. The locus of a point, which moves so that it is always equidistant from a fixed point is known as: A. a parabola B. a circle C. an ellipse D. a hyperbola | Ans: B
+30. In polar coordinate system, the polar angle is positive when: A. measured clockwise B. measured counterclockwise C. measured in the terminal side of 0 D. none of these | Ans: B
+31. The plane rectangular coordinate is divided into four parts which are known as: A. coordinates B. octants C. quadrants D. axis | Ans: C
+32. The rectangular coordinate system in space is divided into eight compartments which are known as: A. quadrants B. octants C. axis D. coordinates | Ans: B
+33. A conic section whose eccentricity is greater than one is known as: A. a parabola B. an ellipse C. a circle D. a hyperbola | Ans: D
+34. A conic section whose eccentricity is less than one is known as: A. a parabola B. an ellipse C. a circle D. a hyperbola | Ans: B
+35. A conic section whose eccentricity is equal to one is known as: A. a parabola B. an ellipse C. a circle D. a hyperbola | Ans: A
+36. In polar coordinate system, the distance from a point to the pole is known as: A. polar angle B. x-coordinate C. radius vector D. y-coordinate | Ans: C
+37. The curve represented by the equation r=6 is: A. a parabola B. a line C. an ellipse D. a circle | Ans: D
+38. When two lines are perpendicular, the slope of one is: A. equal to the other B. equal to the reciprocal of the other C. equal to the negative of the other D. equal to the negative of the reciprocal of the other | Ans: D
+39. The axis of the hyperbola which is parallel to its directrices is known as: A. conjugate axis B. transverse axis C. major axis D. minor axis | Ans: A
+40. The axis of the hyperbola through its foci is known as: A. conjugate axis B. transverse axis C. major axis D. minor axis | Ans: B
+41. Any equation which, because of some mathematical process, has acquired an extra root is sometimes called a: A. redundant equation B. literal equation C. linear equation D. defective equation | Ans: A
+42. A statement that one mathematical expression is greater than or less than another is called: A. inequality B. non-absolute condition C. absolute condition D. conditional expression | Ans: A
+43. A relation in which every ordered pair (x,y) has one and only one value of y that corresponds to the value of x is called: A. function B. range C. domain D. coordinates | Ans: A
+44. An equation in which a variable appears under the radical sign is called: A. literal equation B. radical equation C. irradical equation D. irrational equation | Ans: B
+45. In a proportion of four quantities, the first and the fourth terms are referred to as the: A. means B. denominators C. extremes D. numerators | Ans: C
+46. A polygon is convex if no side, when extended, will pass through the interior of the polygon. A. convex B. equilateral C. isoperimetric D. congruent | Ans: A
+47. Which of the following statements are correct? A. All equilateral triangles are similar B. all right triangles are similar C. all isosceles triangles are similar D. all the above | Ans: A
+48. The volume of any solid of revolution is equal to the generating area times the circumference of the circle described by the centroid of the area. This is commonly known as: A. first proposition of Pappus B. second proposition of Pappus C. Cavalier's Principle D. Simpson's Rule | Ans: B
+49. It is defined as the motion of a rigid body in which a straight line passing through any two particles always remains parallel to its initial position A. translation B. rotation C. plane motion D. kinetics | Ans: A
+50. Which of the following is not a vector quantity? A. mass B. torque C. displacement D. velocity | Ans: A
+51. The product of force and the time during which it acts is known as: A. impulse B. momentum C. work D. impact | Ans: A
+52. The property of the body which measures its resistance to changes in motion. A. acceleration B. weight C. mass D. rigidity | Ans: C
+53. The study of motion without reference to the forces which causes motion is known as: A. kinetics B. dynamics C. statics D. kinematics | Ans: D
+54. A branch of physical science that deals with state of rest or motion of bodies under the action of forces is known as: A. mechanics B. kinetics C. kinematics D. statics | Ans: A
+55. In physics, work is defined in terms of the force acting through a distance. The rate at which the work is done is called: A. force B. energy C. power D. momentum | Ans: C
+56. The point through which the resultant of the distributed gravity force passes regardless of the orientation of the body in space is known as: A. center of inertia B. center of gravity C. center of attraction D. moment of inertia | Ans: B
+57. The specific gravity of the substance is the ratio of the density of the substance to the density of water. Another term for specific gravity is: A. specific weight B. unit weight C. relative density D. density | Ans: C
+58. The momentum of a moving object is the product of its mass and velocity. Newton's Second Law of Motion says that the rate of change of momentum with respect to time is: A. power B. energy C. momentum D. force | Ans: D
+59. The recorded current value of an asset is known as: A. scrap value B. book value C. salvage value D. present value | Ans: B
+60. The ratio of the interest payment to the principal for a given unit of time and is usually expressed as a percentage of the principal is known as: A. investment B. nominal interest C. interest D. interest rate | Ans: D
+61. A method of depreciation whereby the amount to recover is spread over the estimated life of the asset in terms of the periods or units of output is called: A. SYD method B. declining balance method C. straight line method D. sinking fund method | Ans: A
+62. The interest rate at which the present worth of cash flow on a project is zero, or the interest earned by an investment: A. rate of return B. effective rate C. nominal rate D. yield | Ans: A
+63. The lessening of the value of an asset due to the decrease in the quantity available. This refers to the natural resources such as coal, oil, and timber in the forest. A. depreciation B. depletion C. inflation D. incremental cost | Ans: B
+64. The method of depreciation where a fixed sum of money is regularly deposited at Compound interest in a real or imaginary fund in order to accumulate an amount equal to the total depreciation of an asset at the end of the asset's estimated life is known as: A. straight line method B. SYD method C. declining balance method D. sinking fund method | Ans: D
+65. The term used to express the series of uniform payments occurring at equal interval of time is: A. compound interest B. annuity C. perpetuity D. depreciation | Ans: B
+66. The profit derived from a project business enterprise without consideration of obligations to financial contributors and claim of others based on profit is known as: A. yield B. earning value C. economic return D. expected yield | Ans: C
+67. As applied to capitalized asset, the contribution of the initial cost by periodic changes to operation as in depreciation of the reduction of the depth by either periodic or irregular prearranged program is called: A. amortization B. annuity C. depreciation D. capital recovery | Ans: A
+68. The term used to define the loss in the value of an asset due to its use or passage of time is: A. amortization B. depletion C. depreciation D. depression | Ans: C
+69. The number of favorable outcomes divided by the number of possible outcomes is: A. permutations B. probability C. combination D. chance | Ans: B
+70. Two factors are considered essentially the same if: A. one is merely the negative of the other B. one is exactly the same as the other C. both of them are negative D. both of them are positive | Ans: A
+71. All integer is said to be prime if: A. it is factorable by any value B. it is an odd integer C. it has no other integer as a factor except itself or 1 D. it is an even integer | Ans: C
+72. Equations in which the members are equal for all permissible values of unknowns are called: A. a conditional equation B. an identity C. a parametric equation D. a quadratic equation | Ans: B
+73. Equation which satisfy only for some values of unknown are called: A. a conditional equation B. an identity C. a parametric equation D. a quadratic equation | Ans: A
+74. Those funds that are required to make the enterprise or project a going concern: A. Banking B. accumulated amount C. working capital D. principal or present work | Ans: C
+75. Ivory soap floats in water because: A. all matter has mass B. the density of ivory soap is unity C. the specific gravity of ivory soap is greater than that of water D. the specific gravity of ivory soap is less than that of water | Ans: D
+76. If the product of the slopes of any two straight lines is negative 1, one of these lines are said to be: A. parallel B. skew C. perpendicular D. non-intersecting | Ans: C
+77. When two planes intersect with each other, the amount of divergence between the two planes is expressed by measuring the: A. dihedral angle B. plane angle C. polyhedral angle D. reflex angle | Ans: A
+78. The angle which the line of sight to the object, makes with the horizontal, which is above the eye of the observer is called: A. angle of depression B. angle of elevation C. acute angle D. bearing | Ans: B
+79. These are product or services that are desired by humans and will be purchased if money is available after the required necessities have been obtained: A. utilities B. necessities C. luxuries D. producer goods and services | Ans: C
+80. These are product or services that are required to support human life and activities, that will be purchased in somewhat the same quantity even though the price varies considerably: A. utilities B. necessities C. luxuries D. producer goods and services | Ans: B
+81. In complex algebra, we use a diagram to represent a complex plane commonly called: A. Argand diagram B. Venn diagram C. Funicular diagram D. De Moivre's diagram | Ans: A
+82. The graphical representation of the commulative frequency distribution in a set of statistical data is called: A. Ogive B. Histogram C. Frequency polyhedron D. Mass diagram | Ans: A
+83. The median of a triangle is the line connecting a vertex and the midpoint of the opposite side. For a given triangle, these medians intersects at a point which is called the: A. orthocenter B. incenter C. circumcenter D. centroid | Ans: D
+84. The altitudes of the side of a triangle intersect at the point known as: A. orthocenter B. circumcenter C. centroid D. incenter | Ans: A
+85. The angular bisector of the sides of a triangle intersect at the point which is known as: A. orthocenter B. circumcenter C. centroid D. incenter | Ans: D
+86. The arc length equal to the radius of the circle is called: A. 1 radian B. 1 quarter circle C. pi radian D. 1 grad | Ans: A
+87. A five-pointed star is also known as: A. pentagon B. pentatron C. pentagram D. quintagon | Ans: C
+88. A point on the curve where the second derivative of a function is equal to zero is called: A. maxima B. minima C. point of inflection D. point of intersection | Ans: C
+89. The point on the curve where the first derivative of a function is zero and the second derivative is positive is called: A. maxima B. minima C. point of inflection D. point of intersection | Ans: B
+90. The area bounded by two concentric circles is called: A. ring B. disk C. annulus D. sector | Ans: C
+91. A condition where only few individuals produce a certain product and that any action of one will lead to almost the same action of the others: A. oligopoly B. semi-monopoly C. monopoly D. perfect competition | Ans: A
+92. An angular unit equivalent to 1/400 of the circumference of a circle is called: A. mil B. degree C. radian D. grad | Ans: D
+93. Any two points along a streamline in an ideal fluid in steady flow, the sum of the pressure, the potential energy per unit volume, and the kinetic energy per unit volume has the same value. This concept is known as the: A. Pascal's theorem B. Bernoulli's energy theorem C. Fluid theory D. Hydraulic theorem | Ans: B
+94. It is the amount that a willing buyer will pay to a willing seller for a property where each has equal advantage and is under no compulsion to buy or sell. A. fair value B. use value C. market value D. book value | Ans: C
+95. The line passing through the focus and perpendicular to the directrix of a parabola is called: A. latus rectum B. axis of parabola C. tangent line D. secant line | Ans: B
+96. A sequence of numbers where the succeeding term is greater than the preceeding term is called: A. dissonant series B. convergent series C. isometric series D. divergent series | Ans: D
+97. The number 0.123123123.... is A. irrational B. surd C. rational D. transcendental | Ans: C
+98. The altitudes of the sides of a triangle intersect at the point known as: A. orthocenter B. circumcenter C. centroid D. incenter | Ans: A
+99. When two plane intersect with each other, the amount of divergence between the two planes is expressed by measuring the: A. polyhedral angle B. plane angle C. reflex angle D. dihedral angle | Ans: D
+100. What is the point where the second derivative of a function is equal to zero? A. maxima B. minima C. inflection point D. point of intersection | Ans: C
+    </script>
+
+    <script>
+        const rawData = document.getElementById('raw-data').textContent.trim();
+        const quizData = rawData.split('\n').map(line => {
+            const parts = line.split('|');
+            const qContent = parts[0].trim();
+            const ansKey = parts[1].split(':')[1].trim();
+            
+            const numMatch = qContent.match(/^(\d+)\./);
+            const num = numMatch ? numMatch[1] : '';
+            
+            // Extract options
+            const options = [];
+            const labels = ['A.', 'B.', 'C.', 'D.'];
+            labels.forEach((label, idx) => {
+                const start = qContent.indexOf(label);
+                const nextLabel = labels[idx + 1];
+                const end = nextLabel ? qContent.indexOf(nextLabel) : qContent.length;
+                options.push(qContent.substring(start + 2, end).trim());
+            });
+
+            const qText = qContent.substring(num.length + 1, qContent.indexOf('A.')).trim();
+
+            return { num, qText, options, correct: ansKey, answered: null };
+        });
+
+        let currentIdx = 0;
+        let scoreCount = 0;
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            quizData.forEach((item, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-item';
+                btn.innerText = item.num;
+                btn.id = 'nav-' + i;
+                btn.onclick = () => { currentIdx = i; loadQuestion(); toggleSidebar(); };
+                grid.appendChild(btn);
+            });
+        }
+
+        function loadQuestion() {
+            const item = quizData[currentIdx];
+            document.getElementById('qIdx').innerText = `Question ${item.num} of 100`;
+            document.getElementById('qText').innerHTML = item.qText;
+            
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+            
+            item.options.forEach((opt, i) => {
+                const letter = String.fromCharCode(65 + i);
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span class="option-letter">${letter}.</span> ${opt}`;
+                
+                if (item.answered) {
+                    btn.disabled = true;
+                    if (letter === item.correct) btn.classList.add('correct');
+                    if (letter === item.answered && letter !== item.correct) btn.classList.add('wrong');
+                } else {
+                    btn.onclick = () => select(letter);
+                }
+                grid.appendChild(btn);
+            });
+
+            document.getElementById('prevBtn').disabled = currentIdx === 0;
+            document.getElementById('nextBtn').disabled = currentIdx === quizData.length - 1;
+            
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById('nav-' + currentIdx).classList.add('active');
+
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        function select(letter) {
+            const item = quizData[currentIdx];
+            item.answered = letter;
+            if (letter === item.correct) {
+                scoreCount++;
+                document.getElementById('score').innerText = `Score: ${scoreCount}`;
+            }
+            document.getElementById('nav-' + currentIdx).classList.add('completed');
+            loadQuestion();
+        }
+
+        function next() { if (currentIdx < quizData.length - 1) { currentIdx++; loadQuestion(); } }
+        function prev() { if (currentIdx > 0) { currentIdx--; loadQuestion(); } }
+
+        window.onload = () => { buildNav(); loadQuestion(); };
+    </script>
+</body>
+</html>
