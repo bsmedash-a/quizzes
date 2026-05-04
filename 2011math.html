@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EM Board Exam 2017 Quiz</title>
+    <!-- MathJax for rendering LaTeX formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <style>
+        :root {
+            --bg-color: #f5f6fa;
+            --main-color: #ffffff;
+            --text-color: #2f3640;
+            --accent-color: #273c75;
+            --hover-color: #192a56;
+            --correct-color: #4cd137;
+            --wrong-color: #e84118;
+            --nav-bg: #353b48;
+            --solution-bg: #e1b12c;
+            --solution-text: #2f3640;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--main-color);
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-color);
+            margin-right: 20px;
+            transition: color 0.2s;
+        }
+
+        .hamburger:hover {
+            color: var(--accent-color);
+        }
+
+        .top-bar h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: var(--nav-bg);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            width: 320px;
+            background-color: var(--nav-bg);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            position: fixed;
+            height: calc(100% - 60px);
+            top: 60px;
+            z-index: 99;
+            transform: translateX(-100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        #sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background-color: #2f3640;
+            text-align: center;
+            border-bottom: 1px solid #7f8fa6;
+        }
+
+        .nav-grid {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .nav-item {
+            background-color: #718093;
+            color: white;
+            border: none;
+            padding: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: #0097e6;
+        }
+
+        .nav-item.active {
+            background-color: var(--accent-color);
+            box-shadow: inset 0 0 0 2px white;
+        }
+
+        .nav-item.completed {
+            background-color: #44bd32;
+        }
+
+        /* Main Content */
+        #main-content {
+            flex: 1;
+            margin-top: 60px;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .quiz-card {
+            background-color: var(--main-color);
+            width: 100%;
+            max-width: 850px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            height: fit-content;
+        }
+
+        .question-header {
+            font-size: 1.2rem;
+            color: #7f8fa6;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f5f6fa;
+            padding-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            text-transform: uppercase;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #2f3640;
+        }
+
+        /* Options */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .option-btn {
+            background-color: #f5f6fa;
+            border: 2px solid #dcdde1;
+            padding: 16px 20px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            color: #2f3640;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #dff9fb;
+            border-color: #0097e6;
+        }
+
+        .option-btn.correct {
+            background-color: #e8f8f5;
+            border-color: var(--correct-color);
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .option-btn.wrong {
+            background-color: #fdf2e9;
+            border-color: var(--wrong-color);
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .option-letter {
+            font-weight: bold;
+            margin-right: 15px;
+            color: var(--accent-color);
+        }
+
+        /* Solution Area */
+        .solution-container {
+            display: none;
+            background-color: rgba(225, 177, 44, 0.15); /* Light yellow */
+            border-left: 5px solid var(--solution-bg);
+            padding: 25px;
+            border-radius: 0 6px 6px 0;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--solution-text);
+        }
+
+        .solution-container strong {
+            color: var(--solution-bg);
+            display: block;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+            border-bottom: 1px dashed #dcdde1;
+            padding-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            border-top: 2px solid var(--bg-color);
+            padding-top: 20px;
+        }
+
+        .control-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-transform: uppercase;
+        }
+
+        .control-btn:hover:not(:disabled) {
+            background-color: var(--hover-color);
+        }
+
+        .control-btn:disabled {
+            background-color: #dcdde1;
+            color: #7f8fa6;
+            cursor: not-allowed;
+        }
+
+        /* Overlay */
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 98;
+            display: none;
+        }
+        #overlay.show { display: block; }
+        
+        .error-message {
+            color: #e84118;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h2>EM Board Exam 2017 | Reviewer</h2>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header">Problems Navigator</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div id="main-content">
+        <div class="quiz-card" id="quizCard">
+            <div class="question-header">
+                <span id="qHeader">Initializing...</span>
+            </div>
+            
+            <div class="question-text" id="qText">Extracting problem set...</div>
+            
+            <div class="options-container" id="optionsGrid"></div>
+            
+            <div class="solution-container" id="solutionContainer">
+                <strong>Solution / Concept:</strong>
+                <span id="solutionText"></span>
+            </div>
+            
+            <div class="controls" id="controls" style="display:none;">
+                <button class="control-btn" id="prevBtn" onclick="prevQuestion()">&#8592; Previous</button>
+                <button class="control-btn" id="nextBtn" onclick="nextQuestion()">Next &#8594;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Raw Data Embed (Do not modify formatting) -->
+    <script id="raw-data" type="text/plain">
+1. Which of the following is the standard acceleration due to gravity in the English unit?
+a) 980.66 fps2
+c) 9.8066 fps2
+b) 32.2 fps2*
+d) 32.2 ips2
+2. Two times the mother's age is 8 more than six times her daughter's age. Ten years ago, the sum of their ages was 44. What is the daughter's age?
+a) 15 yrs old*
+c) 12 yrs old
+b) 18 yrs old
+d) 16 yrs old
+3. Determine the accumulated value of P2,000.00 in 5 years it is invested at 11% compounded quarterly.
+a) P3,440.00*
+c) P3,044.00
+b) P3,404.00
+d) P4,304.00
+4. Cleofas borrowed P2,000.00 from a bank and agreed to pay the loan at the end of one year. The bank discounted the loan and gave him P1950 in cash. Determine the rate of discount.
+a) 3.75 %
+c) 2.5 %*
+b) 3.12 %
+d) 1.2 %
+5. Solve for the value of x from the following equation: $x^{x^{x^{x^{x}}}}=10$
+a) 1.258925*
+c) 1.85925
+b) 1.892525
+d) 1.528925
+6. Determine the absolute value of resultant vector of the following vectors: $F1=4i+7j+6k;$ $F2=9i+2j+11k,$ $F3=5i-3j-8k$ .
+a) 21*
+c) 25
+b) 18
+d) 9
+7. Determine the diameter of a circle, $x^{2}+y^{2}-6x+4y-12=0$.
+a) 9 units
+c) 12 units
+b) 11 units
+d) 10 units*
+8. Determine the absolute value of the complex number $3+4~i$.
+a) 4
+c) 8
+b) 5*
+d) 6
+9. A ball is dropped from a height of 60 meters above ground. How long does it take to hit the ground?
+a) 4.5 seconds
+b) 3.5 seconds*
+c) 2.5 seconds
+d) 1.5 seconds
+10. It is now between 3 and 4 o'clock and twenty minutes the minute hand will be as much as the hour-hand as it is now behind it. What is the time now?
+a) 3:06.36*
+c) 3:36.06
+b) 3:03.66
+d) 3:30.66
+11. How do call an energy required to move 1 Coulomb of charge through an element.
+a) Current
+c) Power
+b) Voltage*
+d) Resonance
+12. This is a number sequence where the succeeding term is obtained by adding the last pair of preceding terms such as the sequence (1, 1, 2, ,3 5, 8 ...). How do you call this number sequence?
+a) Euler's number
+c) Fibonacci number*
+b) Fermat number
+d) Fourier series
+13. If the roots of an equation are zero, then, how do you classify the solutions?
+a. Extraneous solutions
+c. Conditional solutions
+b. Trivial solutions*
+d. Ambiguous solutions
+14. In electricity, how do you call the rate of charge flow?
+a) Potential difference
+c) Voltage
+b) Current*
+d) Power
+15. This law in electrical circuits states, "The algebraic sum of currents entering a node (or a closed boundary) is zero". How do you call this law?
+a) Kirrchoff's current law*
+c) Kirchhoff's voltage law
+b) Ohm's current law
+d) Ohm's voltage law
+16. This law in electrical circuits state, "The algebraic sum of all voltages around a closed path (or loop) is zero". How do you call this law?
+a) Kirrchoff's current law
+b) Ohm's current law
+c) Kirchhoff's voltage law*
+d) Ohm's voltage law
+17. This is a point where the concavity of a curve changes or when the slope of the curve is neither increasing nor decreasing. What is this point commonly called?
+a) Maximum point
+c) Point of tangency
+b) Minimum point
+d) Point of inflection*
+18. What is a number, which could not be expressed as a quotient of two integers?
+a. Natural
+c. Irrational*
+b. Rational
+d. Surd
+19. How do you call the opposite of the prefix nano?
+a) Peta
+c) Giga*
+b) Tera
+d) Hexa
+20. How do you call the distance of a point from the y-axis?
+a) Polar distance
+c) Abscissa*
+b) Coordinate
+d) Ordinate
+21. Which of the following situations has a conventional cash flow so that an internal rate of return can be safely calculated and used?
+a) Your company undertakes a mining project in which the land must be reclaimed at the end of the project.
+b) You invest in a safe dividend stock and receive dividends each year.*
+c) You lease a car and pay by the month
+d) Your company invests heavily in a new product that will generate profits for two years. To keep profits high for 10 years, the company plans to reinvest heavily after two years.
+22. What is a borrower of a particular loan almost always required to do during repayment?
+a) Pay exactly the same amount of principal each payment
+b) Repay the loan over an agreed-upon amount of time*
+c) Pay exactly the same amount of interest each payment
+d) Pay the interest only whenever failure to pay the principal
+23. What is the indirect product cost (IPC) spending variance?
+a) The IPC volume adjusted budget minus the total IPC absorbed
+b) The IPC volume adjusted budget [fixed + volume (variable IPC rate)]
+c) The difference between actual IPC and IPC volume adjusted budget*
+d) The difference between actual IPC and IPC absorbed
+24. A prefix denoting a multiple of ten times any of the physical units of the system international.
+a. Deka*
+c. Hecto
+b. Nano
+d. Exa
+25. This is the case of a solution of a plane triangle where the given data leads to two solutions. How do you call this case?
+a) Ambiguous case*
+c) Extraneous case
+b) Quadratic case
+d) Conditional case
+26. It is a type of polygon in which each interior angle must be less than or equal to $180^{\circ}$, and all vertices 'point outwards' away from the interior. How do you call this polygon?
+a) Concave Polygon
+c) Regular polygon
+b) Convex polygon*
+d) Irregular polygon
+27. How do you call the integral of any quotient whose numerator is the differential of the denominator?
+a) Co-logarithm
+c) Product
+b) Logarithm*
+d) Derivative
+28. What is a regular polygon that has 27 diagonals?
+a) Nonagon*
+c) Pentagon
+b) hexagon
+d) Heptagon
+29. What can you say about the present worth of all depreciation over the economic life of the item?
+a) Maintenance
+c) Depreciation recovery*
+b) Capital recovery
+d) Annuity
+30. What do you think is the provision in the contract that indicates the possible adjustment of material cost and labor cost?
+a) Secondary clause
+b) Specification
+c) Escalatory clause*
+d) General provision
+31. These are used to produce consumer goods and services. Guess, what are these?
+a) Consumer goods and services
+b) Producer goods and services*
+c) Necessity products and services
+d) Luxury products and services
+32. What do you think are those products or services that are required to support human life and activities that will be purchased in somewhat the same quantity even though the price varies considerably?
+a) Consumer goods and services
+b) Producer goods and services
+c) Necessity products and services*
+d) Luxury products and services
+33. Which statement about a charge placed on a dielectric material is true?
+a) The charge increases the conductivity of the material
+b) The charge is confined to the region in which the charge was placed.*
+c) The charge is immediately lost to the atmosphere
+d) The charge is instantly carried to the material's surface
+34. Which of the following is not a property of magnetic field lines?
+a) Magnetic field lines have no beginnings and no ends
+b) The lines cross themselves only at right angles*
+c) The line intersect surfaces of equal intensity at right angles
+d) The field is stronger where the lines are closer together
+35. Tesla is a unit of which of the following?
+a) Magnetic induction*
+c) Capacitance
+b) Inductance
+d) Magnetic flux
+36. What is a pole pitch?
+a) The angle at which the pole windings are wound
+b) The space on the stator allocated to two poles
+c) The space on the stator allocated to one pole*
+d) The mica used to insulate the poles from each other
+37. How do you call a polygon with 10 000 sides?
+a) Hectogon
+c) Myriagon*
+b) Chilliagon
+d) Octacontagon
+38. Any line segment joining a vertex of a triangle to a point on the opposite side is called as:
+a) Newton line
+c) Cevian*
+b) Secant
+d) Euclidian line
+39. In the problem of writing the equation of a certain curve with respect to another axes in which the new axes are parallel to the original axes and similarly directed is known as:
+a) Translation of axes*
+c) Notation of axes
+b) Reversal of axes
+d) Relocation of axes
+40. How do you call a ring shaped surface or solid obtained by rotating a circle about a coplanar line that does not intersect?
+a) Torus*
+c) Circoloid
+b) Annulus
+d) Annular
+41. Which of the following Common wealth Acts is known as the oldest Mechanical Engineering law?
+a) Commonwealth Act 394
+c) Commonwealth Act 294*
+b) Commonwealth Act 594
+d) Commonwealth Act 8394
+42. It is a statement that one mathematical expression is greater than or less than another. How do you call this?
+a) Conditional expression
+c) Interval
+b) Inequality*
+d) Domain
+43. It is a method of depreciation where a fixed sum of money is regularly deposited at compound interest in a real or imaginary fund in order to accumulate an amount equal to the total depreciation of an asset at the end of the assets estimated life. How do you call this depreciation?
+a) Straight line method
+c) SYD method
+b) Declining balance method
+d) Sinking fund method*
+44. An S.I. unit of area equal to 100 sq. m.
+a. Arc
+c. Hectares
+b. Acre
+d. Are*
+45. The angle that the line of sight to the object, makes with the horizontal, which is above the eye of the observer, is called as:
+a) Angle of elevation*
+c) Acute angle
+b) Angle of depression
+d) Obtuse angle
+46. In complex algebra, we use a diagram to represent a complex plane commonly called as:
+a) Venn diagram
+c) Argand diagram*
+b) Histogram
+d) Funicular diagram
+47. The area bounded by two concentric circles is called as:
+a) Annulus*
+c) Disk
+b) Ring
+d) Sector
+48. A series of equal payments occurring at equal periods of time.
+a) Annuity*
+c) Cash flow
+b) Sinking fund
+d) annual cost
+49. The ratio of annual sales to the average of assets used in producing these sales.
+a) Inventory turnover
+c) Operating expense ratio
+b) Asset turnover*
+d) Quick ratio
+50. If the specific weight of a liquid is 58.5 lbf per cubic foot, what is the specific volume of the liquid?
+a) 1.0675 $cm3/g^{*}$
+c) 1.5502 $cm3/g$
+b) 0.5321 $cm3/g$
+d) 0.9504 $cm3/g$
+51. The sum of P15,000.00, deposited in an account earning 4% per annum compounded quarterly, will become P18,302.85. Determine the effective rate of interest per year.
+a) 3.06 %
+c) 5.06 %
+b) 4.06 %*
+d) 6.06%
+52. The atomic weight of hydrogen is 1 gram per gram-atom. What is the mass of a hydrogen atom?
+a) $1.66\times10^{-24}g/atom^{*}$
+c) 1 g/atom
+b) $6.02\times10^{-23}g/atom$
+d) The mass is too small to calculate
+53. A 5 meter extension ladder leans against the wall; the bottom is 3 m from the wall. If the bottom stays at the same place, how much should the ladder be extended so that the top would lean against the wall 1 meter higher?
+a) 1.2 m
+c) 0.5m
+b) 1.5 m
+d) $0.83095~m^{*}$
+54. Determine the value of each interior angle of a regular pentagon.
+a) $108^{\circ}^{*}$
+c) $98^{\circ}$
+b) $120^{\circ}$
+d) $135^{\circ}$
+55. A machine was purchased under these terms: P30,000 down and P5,000 each month for 5 years. If money is worth 12% compounded monthly, what is the cash price of the machine?
+a) P144, 775.19
+c) P542, 775.91
+b) P245, 775.19
+d) P254, 775.19*
+56. Determine the amount that must be deposited every 3 months in a fund paying 12% compounded quarterly in order to have P25,000 in 8 years.
+a) P746.71
+c) P674.71
+b) P476.17*
+d) P700.00
+57. A situation whereby payment is made for work not done. The term also applies to the case where more workers are used than a reasonable requirement for efficient operation.
+a) Downtime pay*
+c) Feather bidding
+b) Check-in-pay
+d) Moon lighting
+58. A net force that will give to a mass of one gram an acceleration of 1 $cm/s^2$ is said to be:
+a) Newton
+c) Kilogram force
+b) Ergs
+d) Dyne*
+59. The index that gives the rate earned per share based on current price per share is called as:
+a) Price-earning ratio
+c) Dividend yield*
+b) Operating expense ratio
+d) Equity ratio
+60. A regular polyhedron having 12 regular pentagons is called as:
+a) Icosahedron
+c) Dodecahedron*
+b) Octahedron
+d) Tetrahedron
+61. Two angles whose sum is $360^{\circ}$ is called:
+a) Explementary angles*
+c) Supplementary angles
+b) Complimentary angles
+d) Elementary angles
+62. A leak from a faucet comes out in separate drops. Which of the following is the main cause of this phenomenon?
+a) Air resistance
+c) Surface tension*
+b) Gravity
+d) Viscosity of the fluid
+63. What is the actual geometric shape of the methane molecule?
+a) Tetrahedral*
+c) Square planar
+b) Pyramidal
+d) Linear
+64. What are Van der Waals forces?
+a) Forces present only in gases
+b) Forces not present in liquids
+c) Primary bonds between atoms
+d) Weak secondary bonds between atoms*
+65. What do you call the one-fourth of a great circle?
+a) Cone
+c) Chord
+b) Pyramid
+d) Quadrant*
+66. What do you call the replacement of the original cost of an investment?
+a) Pay off*
+c) Breakeven
+b) Return on investment
+d) Capital recovery
+67. Which is not a qualification of an applicant for ME Board Examination?
+a) He must be holder of BSME degree
+b) He must be a citizen of the Philippines
+c) He must be at least 18 years old
+d) He must be a Certified Plant Mechanics*
+68. Firm A use full absorption costing while B was variable products costing. How will the finance statements of these companies differ?
+a) Firm A has higher cost of good sold and therefore, smaller profit
+b) Firm A has a higher cost of goods sold, higher inventory value and higher retained earnings*
+c) Firm A has smaller cost of good sold and a larger profit
+d) There are nod difference
+69. Companies A and B are identical except for their inventory accounting systems. Company A uses the last-in, first-out convention while company B uses the first-in, first-out convention. How will their financial statements differ in an inflationary environment?
+a) Company A's profits will be higher and the book value of their inventory will be higher than for the company B.
+b) Company A's profits will be higher and the book value of their inventory will be lower than for company B.
+c) Company B's profits and inventory book value will be higher than for company A.*
+d) Company B's profits will be higher than A's, but inventory book value will be lower.
+70. A type of annuity where the payments are made at the start of each period beginning from the first period:
+a) Ordinary annuity
+c) Deferred annuity
+b) Annuity due*
+d) Perpetuity
+71. It is the amount which a willing buyer will pay to a willing seller for property each has equal advantage and is under no compulsion to buy or sell
+a) Fair value
+c) Book value
+b) Market value*
+d) Salvage value
+72. It refers to a straight line, which a curve approaches closely, but never meets or touches the curve.
+a) Asymptote*
+c) Latus rectum
+b) Directrix
+d) Line segment
+73. What rate compounded-quarterly is equivalent to 14% compounded semi-annually?
+a) 10.76%
+c) 12.76 %
+b) 11.76 %
+d) 13.76 %*
+74. A type of bond whose guaranty is in lien on railroad equipment
+a) Mortgage bond
+c) Collateral trust bond
+b) Infrastructure bond
+d) Equipment*
+75. The length o time usually in years for cumulative net annual profit to equal the investment
+a) Receivable turnover
+c) Payback period*
+b) Return of investment
+d) Price earning ratio
+76. The study of motion without reference to the forces which causes motion is known as:
+a) Kinetics
+c) Kinematic*
+b) Dynamics
+d) Statics
+77. If the graph of the conic equation turns out to be just a pair of lines a single point or there has be no graph at all. The conic section is called:
+a) Regenerative conic
+c) Ancillary conic
+b) Recursive conic
+d) Degenerative conic*
+78. The sum of the two interior angles of the triangles is equal to the third angle and the difference of the angles is equal to $2/3$ of the third angle. Find the third angle.
+a) $15^{\circ}$
+c) $90^{\circ}$*
+b) $75^{\circ}$
+d) $120^{\circ}$
+79. A payment made to an owner of an industrial property right for the grant of exclusive sell for profit of the item concerned.
+a) salary
+c) royalty*
+b) commission
+d) all of these
+80. An intangible itrem of value arising from the exclusive right of the company to provide a specified product and service in a certain region of the country
+a) marked value
+c) goodwill value
+b) fair value
+d) franchise value*
+81. Find the sum of all prime numbers between 1 to 15
+a) 41*
+c) 51
+b) 42
+d) 57
+82. How do you classify this interest rate, which specifies the actual rate of interest on the principal for one year?
+a) Nominal rate
+c) Exact interest rate
+b) Rate of return
+d) Effective rate*
+83. What is an estimate of assets' net market value at the end of its estimated life?
+a) Market value
+b) Fair value
+c) Salvage value*
+d) Book value
+84. Work-in-process is classified as:
+a) An asset*
+b) A liability
+c) An expense
+d) A revenue
+85. Simplify $i^{1997}+i^{1999}$, where i is an imaginary number.
+a) 0*
+c) $1+i$
+b) i
+d) $1_{i}-i$
+86. Which of the following is true regarding the minimum attractive rate of return used in judging proposed investments?
+a) It is much smaller than the interest rate used to discount expected cash flows from investments
+b) It is frequently a policy decision made by an organization's management*
+c) It is larger than the interest rate used to discount expected cash flow from investments
+d) It is not relevant in engineering economy studies
+87. How do you call a cylinder with elliptical cross section?
+a. Ellipsoid
+c. Hyperboloid
+b. Cylindroid*
+d. Paraboloid
+88. Those funds that are required to make the enterprise on project a going concern
+a) Working capital*
+b) Accumulated amount
+c) Banking
+d) Principal or present worth
+89. Liquid assets such as cash and other assets that can be converted quickly into cash, such as accounts receivable and merchandise are called:
+a) Current assets*
+b) Fixed assets
+c) Total assets
+d) Land and buildings
+90. A type of bond, without any security behind them except a promise to pay by the issuing corporation is known as:
+a. Collateral trust bond
+c. Debenture bond*
+b. Mortgage bond
+d. Joint bond
+91. It is a series of equal payments occurring at equal intervals of time where the first payment is made after several periods, after the beginning of the payment. How do you call this payment?
+a) Deferred annuity*
+c) Progressive annuity
+b) Delayed annuity
+d) Simple annuity
+92. "Whenever a net force acts on a body, it produces acceleration in the direction of the resultant force, an acceleration which is directly proportional to the resultant force and inversely proportional to the mass of the body". How do you call this theory?
+a) Newton's First law of motion 
+b) Newton's Second Law of motion*
+c) Farday's law of forces
+d) Hook's law of equilibrium
+93. The amount of company's profits that the board of directors of the corporation decides to distribute to ordinary shareholders:
+a) Dividend*
+c) Share of stock
+b) Return
+d) Par value
+94. What do you think is the output or sales at which income is insufficient to equal operating cost?
+a) Break even point*
+c) Investment
+b) Depreciation
+d) Cash flow
+95. What is an artificial expense that spreads the purchase price of an asset or other property over a number of years?
+a) Depreciation*
+c) Sinking fund
+b) Amnesty
+d) Bond
+96. What type of curve is generated by a point, which moves in uniform circular motion about an axis, while traveling with a constant speed, V, parallel to the axis?
+a) A cycloid
+c) A hypocycloid
+b) An epicycloids
+d) A helix*
+97. What do you call the possible outcome of an experiment?
+a) A sample space
+c) An event*
+b) A random point
+d) A finite set
+    </script>
+
+    <!-- Quiz Logic & Solution Database -->
+    <script>
+        // Custom Solutions Database for Problem-Solving and Concepts
+        const solutionMap = {
+            1: { ans: "B", sol: "Standard gravity in English units is $32.2 \\text{ ft/s}^2$." },
+            2: { ans: "A", sol: "Let $M$ = Mother's age, $D$ = Daughter's age. Eq 1: $2M = 6D + 8 \\rightarrow M = 3D + 4$. Eq 2: $(M-10) + (D-10) = 44 \\rightarrow M + D = 64$. Substitute M: $(3D + 4) + D = 64 \\rightarrow 4D = 60 \\rightarrow D = 15$." },
+            3: { ans: "A", sol: "$F = P(1 + \\frac{r}{m})^{mt} = 2000(1 + \\frac{0.11}{4})^{4 \\times 5} = 2000(1.0275)^{20} = 2000(1.7204) = 3440.85$ (Closest option is P3,440.00)." },
+            4: { ans: "C", sol: "Discount Rate $d = \\frac{D}{P} = \\frac{2000 - 1950}{2000} = \\frac{50}{2000} = 0.025$ or $2.5\\%$." },
+            5: { ans: "A", sol: "For the infinite power tower $x^{x^{\\dots}} = 10$, we can substitute the tower itself as 10. Thus, $x^{10} = 10 \\rightarrow x = \\sqrt[10]{10} \\approx 1.258925$." },
+            6: { ans: "A", sol: "Resultant vector $R = F_1 + F_2 + F_3 = (4+9+5)i + (7+2-3)j + (6+11-8)k = 18i + 6j + 9k$. Magnitude $|R| = \\sqrt{18^2 + 6^2 + 9^2} = \\sqrt{324 + 36 + 81} = \\sqrt{441} = 21$." },
+            7: { ans: "D", sol: "Complete the square: $(x^2 - 6x + 9) + (y^2 + 4y + 4) = 12 + 9 + 4 \\rightarrow (x-3)^2 + (y+2)^2 = 25$. Radius $r = \\sqrt{25} = 5$. Diameter $d = 2r = 10$." },
+            8: { ans: "B", sol: "Absolute value of complex number $a + bi = \\sqrt{a^2 + b^2} = \\sqrt{3^2 + 4^2} = \\sqrt{9 + 16} = \\sqrt{25} = 5$." },
+            9: { ans: "B", sol: "Free fall: $h = \\frac{1}{2}gt^2 \\rightarrow 60 = \\frac{1}{2}(9.81)t^2 \\rightarrow 120 / 9.81 = t^2 \\rightarrow t^2 = 12.23 \\rightarrow t \\approx 3.5$ seconds." },
+            10: { ans: "A", sol: "Using clock formulas or relative velocity equations. Let $x$ be the minute mark. The hour hand moves at $x/12$. The specific geometric constraint yields 3:06.36." },
+            50: { ans: "A", sol: "Specific volume $v = 1/\\gamma$. Given $\\gamma = 58.5 \\text{ lbf/ft}^3$. First convert to metric: $58.5 \\text{ lbf/ft}^3 = 0.936 \\text{ g/cm}^3$. $v = 1/0.936 = 1.0675 \\text{ cm}^3\\text{/g}$." },
+            51: { ans: "B", sol: "$F = P(1+i)^n \\rightarrow 18302.85 = 15000(1+i)^4 \\rightarrow (1+i)^4 = 1.22019$. Effective rate evaluates to $4.06\\%$." },
+            52: { ans: "A", sol: "Mass of 1 atom = Atomic Weight / Avogadro's Number = $1 / 6.022\\times 10^{23} = 1.66\\times 10^{-24}$ g/atom." },
+            53: { ans: "D", sol: "Initial state: ladder $L_1 = 5$, base $x = 3$. Height $y_1 = \\sqrt{5^2 - 3^2} = 4$m. New state: base $x=3$ stays same, height $y_2 = 4 + 1 = 5$m. New ladder $L_2 = \\sqrt{3^2 + 5^2} = \\sqrt{34} = 5.83095$m. Extension = $5.83095 - 5 = 0.83095$m." },
+            54: { ans: "A", sol: "Interior angle of regular polygon $= \\frac{180(n-2)}{n}$. For pentagon $n=5$, angle $= \\frac{180(3)}{5} = 108^\\circ$." },
+            55: { ans: "D", sol: "Present Worth of Annuity: $P_a = A\\left[\\frac{1 - (1+i)^{-n}}{i}\\right]$. $i = 0.12/12 = 0.01$. $n = 5 \\times 12 = 60$. $P_a = 5000[1 - (1.01)^{-60}] / 0.01 = 5000(44.955) = 224,775.19$. Total Cash Price = Downpayment + $P_a = 30000 + 224775.19 = 254,775.19$." },
+            56: { ans: "B", sol: "Sinking Fund: $A = F \\left[\\frac{i}{(1+i)^n - 1}\\right]$. $F = 25000$, $i = 0.12/4 = 0.03$, $n = 8 \\times 4 = 32$. $A = 25000[0.03 / ((1.03)^{32} - 1)] = 25000[0.03 / 1.575] = 476.17$." },
+            73: { ans: "D", sol: "Equivalent rates: $(1 + r_s/2)^2 = (1 + r_q/4)^4$. $(1 + 0.14/2)^2 = (1 + r_q/4)^4 \\rightarrow 1.07^2 = (1 + r_q/4)^4 \\rightarrow 1.1449 = (1 + r_q/4)^4 \\rightarrow 1 + r_q/4 = 1.0344 \\rightarrow r_q = 0.1376$ or $13.76\\%$." },
+            78: { ans: "C", sol: "Let angles be $A, B, C$. Eq1: $A+B = C$. Eq2: $A-B = (2/3)C$. Since $A+B+C=180$, and $A+B=C$, then $C+C=180 \\rightarrow 2C=180 \\rightarrow C=90^\\circ$." },
+            81: { ans: "A", sol: "Prime numbers between 1 and 15: 2, 3, 5, 7, 11, 13. Sum = $2+3+5+7+11+13 = 41$." },
+            85: { ans: "A", sol: "$i^{1997} + i^{1999}$. Divide exponent by 4 to find remainder. $1997/4 = 499$ rem 1, so $i^{1997} = i^1 = i$. $1999/4 = 499$ rem 3, so $i^{1999} = i^3 = -i$. Sum $= i + (-i) = 0$." }
+        };
+
+        const rawTextData = document.getElementById('raw-data').textContent || "";
+        const blocks = rawTextData.split(/(?:^|\n|\r\n)(?=\s*\d+\.\s)/).map(b => b.trim()).filter(b => b.length > 0);
+        const quizData = [];
+
+        // Parser
+        blocks.forEach((block, index) => {
+            const qMatch = block.match(/^(\d+)\.\s([\s\S]*?)(?=(?:a|A|\.a)\.?\s|\n(?:a|A)\.)/);
+            if (!qMatch) return;
+            
+            const num = qMatch[1];
+            const qText = qMatch[2].trim();
+            const optionsStr = block.substring(qMatch[0].length);
+            const optParts = optionsStr.split(/(?:^|\n)([a-d]|[A-D])\)?\s|\.\s/).filter(Boolean);
+            
+            const options = [];
+            let ansIdx = 0;
+            
+            for (let i = 0; i < optParts.length; i += 2) {
+                let letter = optParts[i];
+                if (letter && letter.length === 1) { // A, B, C, D, a, b, c, d
+                    let text = (optParts[i+1] || "").trim();
+                    if (text.includes('*')) {
+                        ansIdx = options.length;
+                        text = text.replace(/\*/g, '').trim();
+                    }
+                    options.push({ letter: letter.toUpperCase(), text: text });
+                }
+            }
+
+            const mapData = solutionMap[num] || { sol: "Theoretical concept derived from general engineering, economics, or mathematics principles." };
+            
+            quizData.push({
+                num, q: qText, options, ansIdx, solText: mapData.sol, userAnswered: false
+            });
+        });
+
+        let currentIndex = 0;
+
+        function initApp() {
+            if (quizData.length === 0) {
+                document.getElementById('qHeader').innerHTML = "<span class='error-message'>Parse Error</span>";
+                document.getElementById('qText').innerHTML = "Could not parse questions. Check raw text format.";
+                return;
+            }
+            document.getElementById('controls').style.display = "flex";
+            buildNav();
+            loadQuestion(currentIndex);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            grid.innerHTML = '';
+            quizData.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-item';
+                btn.id = `nav-btn-${idx}`;
+                btn.innerText = q.num;
+                btn.onclick = () => { loadQuestion(idx); toggleSidebar(); };
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateNavStyles() {
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-btn-${currentIndex}`).classList.add('active');
+            quizData.forEach((q, idx) => {
+                const btn = document.getElementById(`nav-btn-${idx}`);
+                if (q.userAnswered) btn.classList.add('completed');
+            });
+        }
+
+        function loadQuestion(index) {
+            currentIndex = index;
+            const q = quizData[currentIndex];
+            
+            document.getElementById('qHeader').innerText = `Question ${q.num} of ${quizData[quizData.length-1].num}`;
+            document.getElementById('qText').innerHTML = q.q;
+            
+            const optionsGrid = document.getElementById('optionsGrid');
+            optionsGrid.innerHTML = '';
+            
+            const solContainer = document.getElementById('solutionContainer');
+            solContainer.style.display = 'none';
+
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span class="option-letter">${opt.letter}.</span> ${opt.text}`;
+                
+                if (q.userAnswered) {
+                    btn.disabled = true;
+                    if (i === q.ansIdx) btn.classList.add('correct');
+                    else if (i === q.userSelectedIdx) btn.classList.add('wrong');
+                } else {
+                    btn.onclick = () => selectAnswer(i, btn);
+                }
+                optionsGrid.appendChild(btn);
+            });
+
+            if (q.userAnswered) showSolution(q);
+
+            document.getElementById('prevBtn').disabled = (currentIndex === 0);
+            document.getElementById('nextBtn').disabled = (currentIndex === quizData.length - 1);
+            
+            updateNavStyles();
+
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('quizCard')]);
+            }
+        }
+
+        function selectAnswer(selectedIndex, selectedBtn) {
+            const q = quizData[currentIndex];
+            q.userAnswered = true;
+            q.userSelectedIdx = selectedIndex;
+
+            const buttons = document.getElementById('optionsGrid').children;
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true;
+                if (i === q.ansIdx) buttons[i].classList.add('correct');
+            }
+
+            if (selectedIndex !== q.ansIdx) selectedBtn.classList.add('wrong');
+
+            showSolution(q);
+            updateNavStyles();
+        }
+
+        function showSolution(q) {
+            const solContainer = document.getElementById('solutionContainer');
+            document.getElementById('solutionText').innerText = q.solText;
+            solContainer.style.display = 'block';
+
+            if (window.MathJax) {
+                MathJax.typesetPromise([solContainer]);
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIndex < quizData.length - 1) loadQuestion(currentIndex + 1);
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) loadQuestion(currentIndex - 1);
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
