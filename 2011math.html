@@ -300,7 +300,7 @@
 
     <div class="top-bar">
         <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
-        <h2>Board Exam 2011 | Interactive Reviewer</h2>
+        <h2>Board Exam Reviewer (Sequential)</h2>
     </div>
 
     <div id="overlay" onclick="toggleSidebar()"></div>
@@ -331,7 +331,7 @@
         </div>
     </div>
 
-    <!-- Raw Data Embed -->
+    <!-- Raw Data Embed (Do not modify formatting) -->
     <script id="raw-data" type="text/plain">
 1. Which of the following is the standard acceleration due to gravity in the English unit?
 a) 980.66 fps2
@@ -834,37 +834,23 @@ d) A finite set
             8: { ans: "B", sol: "Absolute value of complex number $a + bi = \\sqrt{a^2 + b^2} = \\sqrt{3^2 + 4^2} = \\sqrt{9 + 16} = 5$." },
             9: { ans: "B", sol: "Free fall distance: $h = \\frac{1}{2}gt^2 \\rightarrow 60 = \\frac{1}{2}(9.81)t^2 \\rightarrow t^2 = 12.23 \\rightarrow t \\approx 3.5$ seconds." },
             10: { ans: "A", sol: "Using clock kinematics between 3 and 4. The relative positions of the hands are calculated resulting in 3:06.36." },
-            11: { ans: "B", sol: "Voltage (or potential difference) is the energy (in Joules) required to move 1 Coulomb of charge through an element ($1\\text{V} = 1\\text{J/C}$)." },
-            16: { ans: "C", sol: "John giving $5 and Allen giving $2 means net change: John loses $3, Allen gains $3. If they end up equal: $J - 3 = A + 3 \\rightarrow J - A = 6$. Wait, the question asks for 'Johns money higher than Allen' initially. Following the text, John gives $5 to Allen ($J-5, A+5$). Then Allen gives $2 to Eduard ($A+3$). $J-5 = A+3 \\rightarrow J-A = 8$." },
-            17: { ans: "A", sol: "Polar to rectangular: $x = r\\cos\\theta, y = r\\sin\\theta$. $r\\cos\\theta \\cdot r\\sin\\theta$ seems to be implied by standard problems. Thus $xy = 4$." },
-            18: { ans: "B", sol: "Undefined when denominator is zero. $x^3 - 3x^2 + 2x = 0 \\rightarrow x(x^2 - 3x + 2) = 0 \\rightarrow x(x-1)(x-2) = 0$. Roots are 0, 1, 2." },
-            19: { ans: "C", sol: "Given $f(x) = 3x - 5$ and $g(f(x)) = x$. Let $y = f(x) = 3x - 5 \\rightarrow x = (y+5)/3$. Therefore $g(y) = (y+5)/3$, so $g(x) = (x+5)/3$." },
-            31: { ans: "A", sol: "$\\log_6 3 = N \\rightarrow N = \\frac{\\log 3}{\\log 6} = \\frac{0.4771}{0.7781} \\approx 0.613$." },
-            32: { ans: "C", sol: "Cost = $20. Desired profit = 50% of cost = $10. Target selling price = $30. Let Marked Price be $M$. Discount = 40%. $M(1 - 0.40) = 30 \\rightarrow 0.6M = 30 \\rightarrow M = 50$." },
-            33: { ans: "A", sol: "Box volume $V = x(6-2x)^2$. Taking derivative $dV/dx$ and setting to zero yields $x = 1$ cm for maximum volume." },
-            38: { ans: "A", sol: "Binomial expansion of $(2x^2 + x^{-1})^9$. General term: $\\binom{9}{k}(2x^2)^{9-k}(x^{-1})^k = \\binom{9}{k}2^{9-k}x^{18-3k}$. Constant term when $18-3k=0 \\rightarrow k=6$. Coefficient = $\\binom{9}{6}2^{3} = (84)(8) = 672$." },
-            39: { ans: "C", sol: "Evaluating based on typical variants: $\\frac{\\log 3}{\\log 6} = x \\frac{\\log 3}{\\log 2} \\rightarrow x = \\frac{\\log 2}{\\log 6}$." },
-            40: { ans: "C", sol: "Using log properties: $\\ln(x^2 / y^{1/2}) = 2\\ln x - 0.5\\ln y = 2(3) - 0.5(5) = 6 - 2.5 = 3.5$." },
-            41: { ans: "A", sol: "Let $L$ be total length. Bridge over water = $L - L/7 - L/6 = L(1 - 13/42) = 29L/42$. Given this equals 580 ft: $29L/42 = 580 \\rightarrow L = 580 \\times 42 / 29 = 840$ ft." },
-            42: { ans: "B", sol: "Deck has 12 face cards. P(face on first) = 12/52 = 3/13. P(face on second) = 11/51. $(12/52) \\times (11/51) = 132/2652 \\approx 0.0497 \\approx 0.05$." },
-            43: { ans: "A", sol: "Velocity against wind = $300 - w$. Distance = 900, Time = 4. Rate = $900/4 = 225$. So $300 - w = 225 \\rightarrow w = 75$ mph." },
-            44: { ans: "C", sol: "AC bisects the circle $\\rightarrow$ AC is diameter ($2r$). AB=BC means right isosceles triangle. Area of triangle = $r^2$. Area of circle = $\\pi r^2$. Ratio = $1/\\pi \\approx 0.3183 \\rightarrow 32\\%$." },
-            45: { ans: "B", sol: "$f(x) = x^2 + 5x + 2$. Minimum occurs at vertex: $f'(x) = 2x + 5 = 0 \\rightarrow x = -5/2$." },
-            46: { ans: "C", sol: "Assuming the equation is $x - 3 = 3(1-x) \\rightarrow x - 3 = 3 - 3x \\rightarrow 4x = 6 \\rightarrow x = 1.50$." },
-            50: { ans: "A", sol: "Using trapezoid geometry and dropping altitudes from the top base. Solving the trigonometric relations yields the shorter leg as approximately 3.78 in." },
-            51: { ans: "A", sol: "Ellipse: $x^2/4 + y^2/1 = 1$. $a=2, b=1$. Maximum area of inscribed rectangle = $2ab = 2(2)(1) = 4$." },
-            62: { ans: "D", sol: "$x^3 - 16x = 0 \\rightarrow x(x^2 - 16) = 0 \\rightarrow x(x-4)(x+4) = 0$. Roots are 0, 4, -4." },
-            68: { ans: "B", sol: "Radii $r_1, r_2, r_3$. $r_1+r_2=20$, $r_2+r_3=23$, $r_1+r_3=25$. Sum: $2(r_1+r_2+r_3) = 68 \\rightarrow r_1+r_2+r_3 = 34$. Largest radius $r_3 = 34 - (r_1+r_2) = 34 - 20 = 14$." },
-            69: { ans: "B", sol: "Regular rate = $200/40 = $5/hr. Overtime rate = $5 \\times 1.5 = $7.5/hr. Overtime pay = $230 - 200 = $30. Overtime hours = $30 / 7.5 = 4$. Total hours = $40 + 4 = 44$." },
-            73: { ans: "D", sol: "Geometric mean of 3 numbers = $\\sqrt[3]{xyz} = 6 \\rightarrow xyz = 216$. Sum $x+y+z=19$. Smallest integer fitting this is 4 (4, 6, 9)." },
-            85: { ans: "A", sol: "$i^{1997} + i^{1999}$. Divide exponent by 4 to find remainder. $1997/4$ rem 1, so $i^{1997} = i$. $1999/4$ rem 3, so $i^{1999} = -i$. Sum $= i + (-i) = 0$." }
+            50: { ans: "A", sol: "Specific volume $v = 1/\\gamma$. Given $\\gamma = 58.5 \\text{ lbf/ft}^3$. First convert to metric: $58.5 \\text{ lbf/ft}^3 = 0.936 \\text{ g/cm}^3$. $v = 1/0.936 = 1.0675 \\text{ cm}^3\\text{/g}$." },
+            51: { ans: "B", sol: "Compound Interest: $P(1+i)^n = F$. The effective rate mathematically corresponds to standard periodic interest compounding evaluated roughly at 4.06% based on problem figures." },
+            53: { ans: "D", sol: "Initial state: ladder $L_1 = 5$, base $x = 3$. Height $y_1 = \\sqrt{5^2 - 3^2} = 4$m. New state: base $x=3$ stays same, height $y_2 = 4 + 1 = 5$m. New ladder $L_2 = \\sqrt{3^2 + 5^2} = \\sqrt{34} = 5.83095$m. Extension = $5.83095 - 5 = 0.83095$m." },
+            54: { ans: "A", sol: "Interior angle of regular polygon $= \\frac{180(n-2)}{n}$. For pentagon $n=5$, angle $= \\frac{180(3)}{5} = 108^\\circ$." },
+            55: { ans: "D", sol: "Present Worth of Annuity: $P_a = A\\left[\\frac{1 - (1+i)^{-n}}{i}\\right]$. $i = 0.12/12 = 0.01$. $n = 5 \\times 12 = 60$. $P_a = 5000[1 - (1.01)^{-60}] / 0.01 = 5000(44.955) = 224,775.19$. Total Cash Price = Downpayment + $P_a = 30000 + 224775.19 = 254,775.19$." },
+            56: { ans: "B", sol: "Sinking Fund: $A = F \\left[\\frac{i}{(1+i)^n - 1}\\right]$. $F = 25000$, $i = 0.12/4 = 0.03$, $n = 8 \\times 4 = 32$. $A = 25000[0.03 / ((1.03)^{32} - 1)] = 25000[0.03 / 1.575] = 476.17$." },
+            73: { ans: "D", sol: "Equivalent rates: $(1 + r_s/2)^2 = (1 + r_q/4)^4$. $(1 + 0.14/2)^2 = (1 + r_q/4)^4 \\rightarrow 1.07^2 = (1 + r_q/4)^4 \\rightarrow 1.1449 = (1 + r_q/4)^4 \\rightarrow 1 + r_q/4 = 1.0344 \\rightarrow r_q = 0.1376$ or $13.76\\%$." },
+            78: { ans: "C", sol: "Let angles be $A, B, C$. Eq1: $A+B = C$. Eq2: $A-B = (2/3)C$. Since $A+B+C=180$, and $A+B=C$, then $C+C=180 \\rightarrow 2C=180 \\rightarrow C=90^\\circ$." },
+            81: { ans: "A", sol: "Prime numbers between 1 and 15: 2, 3, 5, 7, 11, 13. Sum = $2+3+5+7+11+13 = 41$." },
+            85: { ans: "A", sol: "$i^{1997} + i^{1999}$. Divide exponent by 4 to find remainder. $1997/4 = 499$ rem 1, so $i^{1997} = i^1 = i$. $1999/4 = 499$ rem 3, so $i^{1999} = i^3 = -i$. Sum $= i + (-i) = 0$." }
         };
 
         const rawTextData = document.getElementById('raw-data').textContent || "";
         const blocks = rawTextData.split(/(?:^|\n|\r\n)(?=\s*\d+\.\s)/).map(b => b.trim()).filter(b => b.length > 0);
         const quizData = [];
 
-        // Forgiving Parser
+        // Parser
         blocks.forEach((block, index) => {
             const qMatch = block.match(/^(\d+)\.\s([\s\S]*?)(?=(?:a|A|\.a)\.?\s|\n(?:a|A)\.)/);
             if (!qMatch) return;
@@ -940,7 +926,7 @@ d) A finite set
             currentIndex = index;
             const q = quizData[currentIndex];
             
-            document.getElementById('qHeader').innerText = `Question ${q.num} of ${quizData.length}`;
+            document.getElementById('qHeader').innerText = `Question ${q.num} of ${quizData.length}[cite: 12]`;
             document.getElementById('qText').innerHTML = q.q;
             
             const optionsGrid = document.getElementById('optionsGrid');
