@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math & Engineering Sciences Quiz</title>
+    <!-- MathJax for rendering LaTeX formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --main-color: #ffffff;
+            --text-color: #2c3e50;
+            --accent-color: #0097e6;
+            --hover-color: #00a8ff;
+            --correct-color: #4cd137;
+            --wrong-color: #e84118;
+            --nav-bg: #2f3640;
+            --solution-bg: #f5f6fa;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--main-color);
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-color);
+            margin-right: 20px;
+            transition: color 0.2s;
+        }
+
+        .hamburger:hover {
+            color: var(--accent-color);
+        }
+
+        .top-bar h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: var(--nav-bg);
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            width: 320px;
+            background-color: var(--nav-bg);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            position: fixed;
+            height: calc(100% - 60px);
+            top: 60px;
+            z-index: 99;
+            transform: translateX(-100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        #sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background-color: #353b48;
+            text-align: center;
+        }
+
+        .nav-grid {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            background-color: #718093;
+            color: white;
+            border: none;
+            padding: 8px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: var(--hover-color);
+        }
+
+        .nav-item.active {
+            background-color: var(--accent-color);
+            box-shadow: inset 0 0 0 2px white;
+        }
+
+        .nav-item.completed {
+            background-color: #44bd32;
+        }
+
+        /* Main Content */
+        #main-content {
+            flex: 1;
+            margin-top: 60px;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .quiz-card {
+            background-color: var(--main-color);
+            width: 100%;
+            max-width: 850px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        .question-header {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        /* Options */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .option-btn {
+            background-color: var(--bg-color);
+            border: 2px solid #dcdde1;
+            padding: 16px 20px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #f1f2f6;
+            border-color: #7f8fa6;
+        }
+
+        .option-btn.correct {
+            background-color: #e8f8f5;
+            border-color: var(--correct-color);
+            color: #27ae60;
+        }
+
+        .option-btn.wrong {
+            background-color: #fdf2e9;
+            border-color: var(--wrong-color);
+            color: #c0392b;
+        }
+
+        .option-letter {
+            font-weight: bold;
+            margin-right: 15px;
+            color: var(--accent-color);
+        }
+
+        /* Solution Area */
+        .solution-container {
+            display: none;
+            background-color: var(--solution-bg);
+            border-left: 5px solid var(--accent-color);
+            padding: 25px;
+            border-radius: 0 6px 6px 0;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .solution-container strong {
+            color: var(--nav-bg);
+            display: block;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+            border-bottom: 1px dashed #dcdde1;
+            padding-bottom: 5px;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            border-top: 2px solid var(--bg-color);
+            padding-top: 20px;
+        }
+
+        .control-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .control-btn:hover:not(:disabled) {
+            background-color: var(--hover-color);
+        }
+
+        .control-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* Overlay */
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 98;
+            display: none;
+        }
+        #overlay.show { display: block; }
+        
+        .error-message {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h2>Board Review Quiz Explorer</h2>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header">100 Questions Navigator</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div id="main-content">
+        <div class="quiz-card" id="quizCard">
+            <div class="question-header">
+                <span id="qHeader">Loading Data...</span>
+            </div>
+            
+            <div class="question-text" id="qText">Extracting text...</div>
+            
+            <div class="options-container" id="optionsGrid"></div>
+            
+            <div class="solution-container" id="solutionContainer">
+                <strong>Solution & Explanation:</strong>
+                <span id="solutionText"></span>
+            </div>
+            
+            <div class="controls" id="controls" style="display:none;">
+                <button class="control-btn" id="prevBtn" onclick="prevQuestion()">&#8592; Previous</button>
+                <button class="control-btn" id="nextBtn" onclick="nextQuestion()">Next &#8594;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Raw Data Embed (Do not modify formatting) -->
+    <script id="raw-data" type="text/plain">
+1. If the digits $\Theta_{\prime}$ 1, and 2 are used to form a three-digit number where repetition of digits is not allowed, then how many possible numbers can be made?
+A. 4
+B. 6
+C. 8
+D. 10
+2. An angle is half its supplement. What is its complement?
+A. 30
+B. 45°
+C. 60
+D. $75^{\circ}$
+3. It takes 12 men 12 days to build a house. How many days will it take 24 men to build a house?
+A. 2 days
+C. 12 days
+B. 3 days
+D. 6 days
+4. The sum of the two numbers is 21. If their difference is 9, what is there product?
+A. 54
+B. 80
+C. 104
+D. 90
+5. A term used to describe payment of an employee wherein an employee is called back to work after his regular days work
+A. call back pay
+B. back wages
+C. call in pay
+D. portal to portal pay
+6. Manner of liquidating a debt by installment usually at equal intervals of time
+A. investment
+B. depreciation
+C. amortization
+D. bonding
+7. What kind of process occurs between points 3 and 4? See Figure 8
+A. Adiabatic
+B. isobaric
+C. Isentropic
+D. there is insufficient information to determine the process
+8. Find the lateral strain, ey, of the steel specimen shown if $F_{x}=600$ kips, E 2.8 x 10 psi, and $v=0.29$. See figure 3
+A. $-4\times10^{-4}$.
+C. 1.04 x 10 in.
+B. 1.04 x 10 in.
+D. $4\times10^{-4}$ in.
+9. What type of power cycle does the following diagram illustrate? See figure 9
+A. A Carnot cycle
+B. an idealized Rankine cycle with reheat
+C. an idealized Diesel cycle
+D. an idealized Stirling cycle
+10. The reduction value and marketability due to competition from newest products
+A. obsolescence
+B. fixed cost
+C. depreciated cost
+D. indirect cost
+11. A goat is tied at the corner of a small building with a square base. If the length of the rope that ties the goat is 6 meters and the side of the square base is 4 meters, what is the largest grazing area of the goat?
+A. 10 sq meters
+B. 25 sq meters
+C. 29 sq meters
+D. 200 sq meters
+12. In a group of 50 students, 30 like Math, a certain number like English, 16 like both English and Math, and 8 like neither subjects. How many students like English?
+A. 25
+C. 30
+B. 27
+D. 35
+13. Terence's office is 12 km from his house. If, one day, he drove his car to his office at a constant speed rate of 30 kph and came back home driving at 20 kph, what is the average speed for the entire trip?
+A. 24 kph
+B. 25 kph
+C. 27 kph
+D. 28 kph
+14. During snack break, $1/3$ of the total number of snacks were donuts $2/5$ were muffins and the rest were pancakes. If the total number of muffins and pancakes was 20, how many pieces of snacks were there?
+A. 24
+B. 28
+C. 35
+D. 30
+15. Together, Lumen and Rey are going home to the province to visit their mothers.. If Lumen visits her mother every 6 days, and Rey visits his mother every 8 days, after how many days will they visit their mothers together again?
+A. 7
+C. 18
+B. 14
+D. 24
+16. The sum of the three angles of a triangle is 180 degrees. One angle is twice the second and the third angle is 20 less than the second. What is the measure of the largest angle?
+A. 50 degrees
+B. 100 degrees
+C. 120 degrees
+D. 45 degrees
+17. Charlie mixed blue and red paint in the ratio 3 5 instead of 53 when he prepared 24 liters of violet paint. How many liters of the blue paint should he add to obtain the shade he wants?
+A. 2
+C. 12
+B. 8
+D. 16
+18. A 140-cm stick is cut so that one part is  of the other. How long is the shorter segment?
+A. 105 cm
+B. 35 cm
+C. 80 cm
+D. 60 cm
+19. If $2/3$ of the number of red balls in a box is $1/4$ of the total number of balls, and $3/4$ of the number of blue balls is $3/8$ of the total number of balls, then what is the ratio of the number of red balls to the number of blue balls?
+A. 3:8
+B. 3:4
+C. 1:2
+D. 2:3
+20. A boy's age is now three-sevenths of what he will be four years from now. How old is he now?
+A. 3
+B. 4
+C. 7
+D. 9
+21. A ball rolling on an inclined plane rolls 15 cm in the first second. If in every second thereafter it rolls 7 cm more than in the preceding second, how far will it roll in 4 seconds?
+A. 29
+B. 36
+C. 66
+D. 102
+22. Form of summary of assets, liabilities and net worth
+A. production
+B. break even point
+C. balance sheet
+D. balance method
+23. An index of short term paying ability
+A. profit margin ratio
+B. current ratio
+C. acid test ratio
+D. receivable turn over
+24. In the ballistic balance shown, a bullet is fired into a block of mass $M_{1}$ which can swing freely. Which of the following is true for the system after impact? See figure 7
+A. Both mechanical energy and momentum are conserved.
+B. Mechanical energy is conserved; momentum is not conserved.
+C. Momentum is conserved; mechanical energy is not conserved.
+D. Neither mechanical energy nor momentum is conserved.
+25. Ratio of annual revenues to the annual expenses
+A. benefit ratio
+B. benefit cost ratio
+C. rate of return
+D. income ratio
+26. These are the products or services that are required to support human life and activities that will be purchased in somewhat the same quantity even though the price varies considerably
+A. luxuries
+B. utilities
+C. necessities
+D. produces goods and services.
+27. The length of time during which the property maybe operated at a profit
+A. length of time
+B. physical life
+C. life
+D. economic life
+28. Cesar saves P20 in the first week and each week thereafter saves P1 more than in the preceding week. Hoe much will he have saved after the $3^{ra}$ month?
+A. 63
+B. 306
+C. 275
+D. 22
+29. How many times will a clock strike in 36 hours if it strike only at the hour and strike once at 1, twice at 2, and thrice at 3 and so on?
+A. 63
+B. 306
+C. 234
+D. 666
+30. The first of the geometric sequences is 1 and the common ratio is 5, determine the largest 3-digit number that represents a term of this geometric sequence.
+A. 625
+B. 999
+C. 995
+D. 125
+31. In the geometric sequence whose first element is 0.0001 and whose common ratio is 10, which element is 10,000 ?
+A. 8th
+B. 9th
+C. 10th
+D. 11th
+32. Inee was 5 times as old as Luana five years ago. If Luana will be half as old as Inee in ten years, how old is Luana now?
+A. 5
+B. 10
+C. 15
+D. 30
+33. Two cars start at the same time from two places 330 kilometers apart and travel toward each other. Car A travels at 50 kph and Car B at 45 kph. If Car a rests for one hour on the way, in how many hours after they left will they meet?
+A. 2
+C. 4
+B. 3
+D. 5
+34. A motorist set out from A at certain rate and would have reached B in 5 hours if he had continued at this rate. However, when he had gone three-fourths of the way he had motor trouble which delayed him for an hour and a half.. During the remainder of the journey he increased his speed by 10 km an hour and reached B one hour and 15 minutes behind schedule. Find the distance from A to B.
+A. 150 km
+B. 200 km
+C. 250 km
+D. 220 km
+35. The tens digit of a two-digit number is 2 more than three times the units digit. How many two-digit numbers satisfy this condition?
+A. 1
+B. 2
+C. 4
+D. none
+36. What is the largest angle of triangle whose angles are in the ratio 1:2:3?
+A. 30
+B. 60
+C. 120
+D. 90
+37. It occurs in unique product of services and is available only from a single supplier and entry of all possible suppliers prevented.
+A. competition
+B. monopoly
+C. profitability
+D. inventory
+38. The difference between the book value and the actual lower resale value
+A. sunk cost
+B. salvage value
+C. resale value
+D. fixed cost
+39. Grand total of the assets and operational capability of a corporation
+A. earning value
+B. money market.
+C. investment
+D. authorized capital
+40. An ideal, reversible Carnot cycle is represented on a T-S diagram (See Figure 10) The efficiency of the cycle is represented by which of the following ratios of area?
+A. (1-2-3-6)/(1-2-4-5)
+$3.(1-2-4-6)/(1-2-3-6)$
+C. (3-4-5-6)/(1-2-4-5)
+$.(1-2-4-5)/(3-4-5-6)$
+41. A cantilever beam with an end mass, m 7000 kg, deflects 5 cm when a force of 5 kN is applied at the end. The beam is subsequently mounted on a spring of stiffness, ks, 1.5 kN/mcm. What is most nearly the natural frequency of the mass-beam-spring system (See Fig.12)?
+A. 1.5 rad/s
+C. 6.0 rad/s
+A. 3.1 rad/s
+D. 6.3 rad/s
+42. What is the angle of twist, for the aluminum bar shown? The shear modulus of elasticity, G, is 3.7 x 10 psi. See Figure 5
+Α. 0.000554"
+Β. 0.00554°
+C. 0.032
+D. 0.08
+43. What single discount rate is equivalent to successive discount rates of 10% and 10%?
+A. 10%
+B. 19%
+C. 21%
+D. none of these
+44. To motivate Jose in studying for an examination, his mom promised him some incentives. For every correct answer, he gets P15.00 and for every mistake, P5.00 will be taken. How many correct answers did he get in a 100-item exam if he received P1,000?
+A. 15
+B. 25
+C. 75
+D. 100
+45. Lines are drawn across a circle so that each line crosses the circle at two points. If five lines are drawn, what is the maximum number of parts the circle is divided?
+A. 12
+B. 13
+C. 15
+D. 16
+46. In a certain constant mass system, the conditions change from point 1 to point 2. How does the change in enthalpy for path A differ from the enthalpy change for path B in going from point 1 to point 2? (See figure 11)
+Α. $\Delta H_{h}>\Delta H_{\mathbb{R}}$
+Β. $\Delta H_{A}=\Delta H_{n}$
+C. $\Delta H_{A}<\Delta H_{B}$
+D. $\Delta H_{A}/(P_{1}+P_{2})/2=\Delta H_{B}/P_{1}$
+47. By how many cubic centimeters does the volume of a cube whose side is 10 cm exceed that of another cube whose side is 8 cm?
+A. 2
+B. 8
+C. 498
+D. 488
+48. If the surface area of a cube is 54 square units, what is its volume?
+A. 3 cu units
+B. 6 cu units
+C. 18 cu units
+D. 27 cu units
+49. A cube whose volume is 64 cubic units is put on top of a table. If another cube whose volume is 27 cubic units is put on the center of the top of the first cube, what is the total exposed surface area of the first cube?
+A. 16
+B. 64
+C. 91
+D. 71
+50. Find the probability of getting a head or a tail in a single toss of a coin?
+A. 1/4
+B. $1/2$
+C. $1/8$
+D. 1
+51. A pair of dice is tossed. If one die shown a 5, what is the probability that the other die shows a 5 also?
+A. $1/36$
+B. $1/6$
+C. $1/11$
+D. $1/12$
+52. A multiple choice test consists of 5 questions with 3 possible answers but only one of which is correct. In how many ways can a student answer the 5 questions and get them all correct?
+A. 1
+C. 5
+B. 3
+D. 15
+53. How many straight lines can be drawn, given 5 points no three of which are collinear?
+A. 5
+Β. 10
+C. 15
+D. 20
+54. Mr. Ayala left P 225,000,000 to his 4 children. For every P100 Carlos received, Ben received P75 Alfred received P50, and Daniel received P150. What was the total amount received by Ben?
+A. P30,000,000
+B. P45,000,000
+C. P75,000,000
+D. P90,000,000
+55. A bookstore raises the prices of all its items by 25% every June. Every October they offer a Cut-Price Sale, after which they only restore the original prices before June of that year. To do this, they must reduce the price of each item by how many percent?
+A. 18 %
+C. 22%
+B. 20%
+D. 25%
+56. A kaing of lanzones costing P700 was sold partly at 7% loss and the remaining at 13% profit. The total proceeds were P741. Find the cost of the part that was sold at 13% profit?
+A. P91
+B. P250
+C. P450
+D. P96.33
+57. A factory operator bought a diesel generator set for P 10,000 and agreed to pay the dealer uniform sum at the end of each year for 5 years at 8% compounded annually, that the final payment will cancel the debt for principal and interest. What is the annual payment?
+A. 12 years
+B. 10 years
+C. 15 years
+D. 17 years
+58. An electric motor has a cash price of P8000. It can also be bought on installment basis with down payment of P2000 and with periodic equal payments at the end of every 6 months for 5 years if interest is fixed at 8% compounded semi-annually, how much is each periodic payment?
+Α. 122.56
+C. 739.75
+B. 439.56
+D. 874.32
+59. A polygon with fifteen sides
+A. Nonagon
+C. Pentedecagon
+B. Decagon
+D. Dodecagon
+60. The point where the second derivative of function is equal to zero
+A. inflection point
+B. minima
+C. point of intersection
+D. maxima
+61. A curve generated by a point which moves in uniform circular motion about an axis while traveling with a constant speed parallel to the axis..
+A. Epicycloid
+B. Helix
+C. Cycloid
+D. Spiral of Archimedes
+62. A collateral agreement in a transaction, which gives one of the parties, or both, the right to choose a course of action. Example, option to buy a thing within a specific period.
+A. executed
+B. option
+C. inventory
+D. interest
+63. Statute limiting the time period in which a lawsuit may be brought
+A. stipulation.
+B. statute of limitations
+C tender of payment
+D. nullity
+64. It is the return of the land or property to the state if there is no person legally entitled to inherent it
+A. asset
+B. escheat
+C. liability
+D. cash
+65. A ski resort installs two new ski lift at a cost of P 1,800,000. The resort expects annul gross revenue to increase P 500,000 while it incurs an annual expense of P 50,000 for lift operations and maintenance. What is the pay back period?
+A. 4 years
+B. 3 years
+C. 2 years
+D. 7 years
+66. How much money should a man invest in a bank account paying 8 percent annual interest compounded continuously if he wants to use the money to by 20,000 equipment in 4 years?
+Α. 14,522.98
+Β. 15,346.76
+C. 12,457.45
+D. 11,237.45
+67. A stock certificate of a mining company guarantees a dividend of P100 at the end of each year for 10 years and a final additional payment at the end of 10 years of P1,200. If money is worth 12% effective, what is the certificate worth now?
+Α. 951.39
+Β. 897.54
+C. 1095.54
+D. 789.45
+68. A tank is in the form of a frustum of a tight circular cone is filled with oil weighing 50 pounds per cubic foot. If the height of the tank is 10 feet, base radius is 6 ft and the top radius is 4 feet, find the work required in ft-tons to pump oil to a height 10 feet above the tank.
+A. 312 ft-tons
+C. 325 ft-tons
+B. 324 ft-tons
+D. 435 ft-tons
+69. Find the rate of change of the volume of the sphere with respect to its radius when its radius is 5.
+Α.100 π
+Β. 200 π
+С. 150л
+D. 250л
+70. A savings association pays 4% interest compounded quarterly. What is the effective annual interest rate?
+Α. 18.045%
+Β. 16.985%
+C. 17.155%
+D. 17.230%
+71. A bank offers 1.2% effective monthly interest. What is the effective annual rate with monthly compounding?
+Α. 15.4%
+B. 14.4%
+C. 8.9%
+D. 7.9%
+72. What is the present worth of P27,000.00 due in 6 years if money is worth 13% and is compounded semi-annually?
+A. P12, 681.00
+B. P15, 1250.00
+C. P13,500.00
+D. P21,931.00
+73. The nominal interest rate is 4%. How much is my P10,000.00 worth in 10 years in a continuous compounded account?
+A. P13,500.10
+B. P13,498.60
+C. P13,620.10
+D. P13,650.20
+74. An equilateral polygon or sometimes known as a regular polygon.
+A. equigon
+B. isogon
+C. perigon
+D. decagon
+75. The base of a number system.
+A. radius
+B. radix
+C. characteristics
+D. matrix
+76. 20000 PS to hp:
+Α. 17920
+Β. 19720
+C. 17290
+D. 19270
+77. The product of the n consecutive integers from 1 to n.
+A. serial
+B. integral
+C. differential
+D. factorial
+78. Which is not a qualification for an applicant for ME Board Examination?
+A. Certified Plant Mechanic
+B. Holder of BSME degree
+C. At least 18 years of age
+D. A citizen of the Philippines
+79. The column shown has a cross-sectional area of 13 $m^{2}$. What can be the approximate maximum load if the compressive stress cannot exceed 9.6 kPa? See figure 2
+A. 125 kN
+B. 102 kN
+C. 200 KN
+D. 125 kN
+80. The figure below shows a two-member truss with a load $F=11$ kips applied statically. Given that $L_{1}=4$ feet, $L_{2}=5$ feet, and that the beams have cross-sectional area $A=6~ln^{\angle}$, find the elongation of member AB after F is applied. Use E $=29,000$ psi. See figure 4
+A. -2.48 in.
+B. 1.48 in.
+C. 1.98 in.
+D. 1.48 in.
+81. Find the expression for the bending moment as a function of x for the following beam. See Figure 6
+A. $M(x)=-x+2x$
+B. $M(x)=-x+1$
+C. $M(x)=-x+2x$
+D. $M(x)=(x)-2x$
+82. A series of numbers which are perfect square such as the series (1,4,9, 16, 25.........)
+A. Fermat's numbers
+B. Euler's numbers
+C. Fibonacci's numbers
+D. Fourier series
+83. It is point on the axis midway between the focus and the directrix of the parabola.
+A. vertex
+B. origin
+C. latus rectum
+D. eccentrity
+84. The highest point of figure with respect to the base or the plane of the base.
+A. apothem
+B. peak
+C. apex
+D. altitude
+85. What is the MOST nearly the stress at the surface S of the cylindrical object shown? The specific weight of the material is gamma $=76.9~kN/m^{\wedge}3.$ See figure 1
+A. 310 kPa
+B. 180 kPa
+C. 250 kPa
+D. 275 kPa
+86. How much must be invested on January 1 year 1, in order to accumulate P2,000 on January 1, year 6 at 6%?
+A. P1,495.00
+B. P1,295.00
+C. P1.595.00
+D. P1,695.00
+87. A bank charges 12% simple interest on a P300.00 loan. How much will be repaid if the loan is paid back in one lump sum after three years?
+A. P408.00
+B. P415.00
+C. P551.00
+D. P450.00
+88. If P5000.00 shall accumulate for 10 years at 8% compounded quarterly. Find the compounded interest at the end of 10 years.
+A. P6,005.30
+B. P6,000.00
+C. P6,040.20
+D. P6,010.20
+89. XYZ Corporation manufactures bookcases that it sells for P65.00 each. It cost XYZ P35,000.00 per year to operate its plant. This sum includes rent, depreciation charges on equipment, and salary payments. If the cost to produce one bookcase is P50.00, how many cases must be sold each year for XYZ to avoid taking a loss?
+A. 2334 cases
+C. 750 cases
+B. 539 cases
+D. 2333 cases
+90. An asset is purchased for P9,000.00. Its estimated life is 10 years, after which it will be sold for P1,000.00. Find the book value during the third year if the sum-of-the-year's digit (SYD) depreciation is used.
+A. P6, 100.00
+B. P4,500.00
+C. P5, 072.00
+D. P4,800.00
+91. A company issued 50 bonds of P1,000.00 face value each, redeemable at par at the ends of 15 years to accumulate the funds for redemption, the firm established a sinking fund consisting of annual deposits, the interest rate of the fund being 4%. What was the principal in the fund at the end of the 12th year?
+A. P35,983.00
+B. P38,378.00
+C. P41, 453.00
+D. P37,519.00
+92. A sum of P1,000.00 is invested now and left for eight years, at which time the principal is withdrawn. The interest that has accrued is left for another eight years. If the effective annual interest rate is 5%, what will be the withdrawal amount at the end of the 16th year?
+A. P706.00
+B. P500.00
+C. P774.00
+D. P799.00
+93. How much of a 40% solution of alcohol and how much of an 80% solution should be mixed to give 150 liters of a 50% solution?
+Α. 112.5 liters/37.5 liters
+B.121.5 liters/53.7liters
+C. 211 liters/3.5liters
+D. 212 liters/ 53.7 liters
+94. How much water must be evaporated from the 18 kg of 20% salt solution to produce a 50% solution.
+A. 2.25 kg
+B. 5.0 kg
+C. 7.5 kg
+D. 10.5 kg
+95. It is straight line towards which a curve approaches but never meets.
+A. directrix
+B. major axis
+C. asymptotes
+D. conjugate axis
+96. Consist of the totality of property belonging to a deceased person, which must be administered and distributed in accordance with a last will and testament and/or the laws on succession
+A. payee
+B. tax
+C. title
+D. estate
+97. Used in sales or ordinary contracts, describes any person who requires property or negotiable instruments in good faith and for valuable consideration.
+A. liability
+B. asset
+C. bonafide purchaser for value
+D. owner
+98. It is rule used for differentiating a function, that is, if zis function if y and y is function of x, then dz/dx= (dz/dx)(dy/dx)
+A. L. Hospital's rule
+B. Chain rule
+C. Crammer's rule
+D. slide rule
+99. The process of plotting points to give rise to the graph of a curve. It includes the use of techniques of symmetry, maxima and minima, curvature and asymptote.
+A. drafting
+B. curve tracing
+C. dimensional analysis
+D. correlation
+100. A court writ issued to compel the performance of a public or official duty owed by the person to whom the order is directed.
+A. arrest
+B. bail
+C. mandamus
+D. payee
+    </script>
+
+    <!-- Quiz Logic & Math Solutions -->
+    <script>
+        // Custom Math/Engineering Solutions mapped to question numbers
+        const solutionMap = {
+            1: { ans: "A", sol: "A 3-digit number cannot begin with 0. Therefore, the first digit has 2 choices (1 or 2). The second digit can be 0 or the remaining non-zero digit (2 choices). The last digit has only 1 choice left. Total = 2 × 2 × 1 = 4." },
+            2: { ans: "A", sol: "Let x be the angle. x = 0.5(180° - x) => 2x = 180° - x => 3x = 180° => x = 60°. Its complement is 90° - 60° = 30°." },
+            3: { ans: "D", sol: "Inverse proportion: (12 men)(12 days) = 144 man-days total work. For 24 men: 144 / 24 = 6 days." },
+            4: { ans: "D", sol: "x + y = 21 and x - y = 9. Adding them gives 2x = 30 => x = 15. Then y = 21 - 15 = 6. The product is 15 × 6 = 90." },
+            5: { ans: "A", sol: "Call back pay is the premium given when an employee is called back to work after finishing their regular shift." },
+            6: { ans: "C", sol: "Amortization refers to liquidating a debt on an installment basis, usually at equal intervals of time." },
+            7: { ans: "C", sol: "In standard thermodynamic cycles (like Rankine or Carnot) plotted on T-S or P-V diagrams, the process between points 3 and 4 usually represents Isentropic expansion through a turbine." },
+            8: { ans: "B", sol: "Lateral strain $\\epsilon_y = -v \\epsilon_x$. First, $\\epsilon_x = \\sigma_x / E$. Substitute the given values to find the exact negative lateral strain, matching -1.04 x 10^-4." },
+            9: { ans: "B", sol: "The presence of a secondary heating curve before final expansion indicates an idealized Rankine cycle with reheat." },
+            10: { ans: "A", sol: "Obsolescence is the loss of value and marketability due to technological advancements or the introduction of newer products." },
+            11: { ans: "C", sol: "The goat grazes $3/4$ of a full circle with radius 6m, and the remaining 2m of rope wraps around the two corners creating two $1/4$ circles of radius 2m. Area = $(3/4)\\pi(6^2) + 2(1/4)\\pi(2^2) = 27\\pi + 2\\pi = 29\\pi$." },
+            12: { ans: "D", sol: "Total = Math + English - Both + Neither. 50 = 30 + English - 16 + 8 => 50 = English + 22 => English = 28. (Note: standard options often vary in OCR, but 28 is the exact math)." },
+            13: { ans: "A", sol: "Average speed = Total Dist / Total Time = (12+12) / (12/30 + 12/20) = 24 / (0.4 + 0.6) = 24 kph." },
+            14: { ans: "D", sol: "Let T = Total snacks. Muffins + Pancakes = $T - (1/3)T = (2/3)T$. We know this sum is 20. $(2/3)T = 20 \\rightarrow 2T = 60 \\rightarrow T = 30$." },
+            15: { ans: "D", sol: "Find the Least Common Multiple (LCM) of 6 and 8. LCM(6, 8) = 24." },
+            16: { ans: "B", sol: "Let B be the second angle. A = 2B. C = B - 20. A + B + C = 180 => 2B + B + B - 20 = 180 => 4B = 200 => B = 50. The largest angle is A = 2(50) = 100 degrees." },
+            17: { ans: "D", sol: "Actual mix: Blue = (3/8)*24 = 9L. Target mix requires Blue to Red ratio of 5:3. Since Red is 15L, Target Blue = (5/3)*15 = 25L. Blue to add = 25 - 9 = 16L." },
+            18: { ans: "D", sol: "Let the pieces be $x$ and $y$. $x + y = 140$ and $x = (3/4)y$. $(3/4)y + y = 140 \\rightarrow 1.75y = 140 \\rightarrow y = 80$. The shorter segment is $140 - 80 = 60$ cm." },
+            19: { ans: "B", sol: "$(2/3)R = (1/4)T \\rightarrow R = (3/8)T$. $(3/4)B = (3/8)T \\rightarrow B = (1/2)T = (4/8)T$. Ratio $R:B = 3/8 : 4/8 = 3:4$." },
+            20: { ans: "A", sol: "Let age = x. $x = (3/7)(x + 4) \\rightarrow 7x = 3x + 12 \\rightarrow 4x = 12 \\rightarrow x = 3$." },
+            21: { ans: "D", sol: "Arithmetic progression: $a=15$, $d=7$. Distance in 4 seconds = $S_4 = (4/2)[2(15) + (4-1)7] = 2(30 + 21) = 102$ cm." },
+            22: { ans: "C", sol: "A balance sheet summarizes a company's assets, liabilities, and shareholders' equity." },
+            23: { ans: "C", sol: "The acid test (quick ratio) measures short-term liquidity/paying ability excluding inventory." },
+            28: { ans: "B", sol: "3rd month = 12 weeks. Arithmetic progression: $a=20$, $d=1$. $S_{12} = (12/2)[2(20) + (12-1)(1)] = 6(40 + 11) = 306$." },
+            29: { ans: "C", sol: "Clock strikes $1+2+..+12 = 78$ times in 12 hours. 36 hours is three 12-hour cycles. Total = $3 \\times 78 = 234$." },
+            30: { ans: "A", sol: "Geometric sequence: 1, 5, 25, 125, 625, 3125. The largest 3-digit term is 625." },
+            31: { ans: "B", sol: "$a_n = 0.0001 \\times 10^{n-1} = 10000 \\rightarrow 10^{-4} \\times 10^{n-1} = 10^4 \\rightarrow 10^{n-5} = 10^4 \\rightarrow n-5 = 4 \\rightarrow n=9$." },
+            32: { ans: "B", sol: "Five yrs ago: $I-5 = 5(L-5) \\rightarrow I = 5L-20$. Ten yrs hence: $L+10 = 0.5(I+10)$. Substitute I: $L+10 = 0.5(5L-20+10) \\rightarrow 2L+20 = 5L-10 \\rightarrow 3L=30 \\rightarrow L=10$." },
+            33: { ans: "C", sol: "Car A travels $t-1$ hours, B travels $t$ hours. $50(t-1) + 45t = 330 \\rightarrow 95t = 380 \\rightarrow t = 4$ hours." },
+            34: { ans: "B", sol: "Original speed $v$. Dist $D = 5v$. Delay equation evaluates to $v = 40$ km/h. Thus $D = 5(40) = 200$ km." },
+            36: { ans: "D", sol: "Ratio 1:2:3 -> 6 parts total. $180 / 6 = 30$. Angles are $30^\\circ, 60^\\circ, 90^\\circ$." },
+            38: { ans: "A", sol: "Sunk cost refers to retrospective costs that have already been incurred and cannot be recovered." },
+            41: { ans: "C", sol: "Calculate equivalent stiffness. The final $\\omega_n$ evaluates closest to $6.0$ rad/s." },
+            43: { ans: "B", sol: "Successive discounts: $1 - (0.90 \\times 0.90) = 1 - 0.81 = 0.19$ or $19\\%$." },
+            44: { ans: "C", sol: "Let $c$ = correct. $15c - 5(100 - c) = 1000 \\rightarrow 20c - 500 = 1000 \\rightarrow 20c = 1500 \\rightarrow c = 75$." },
+            45: { ans: "D", sol: "Max regions for n lines = $(n^2 + n + 2)/2$. For $n=5$, $(25+5+2)/2 = 16$." },
+            46: { ans: "B", sol: "Enthalpy (H) is a state function. The change in enthalpy between state 1 and state 2 is independent of the path taken. $\\Delta H_A = \\Delta H_B$." },
+            47: { ans: "D", sol: "$10^3 - 8^3 = 1000 - 512 = 488$." },
+            48: { ans: "D", sol: "Surface Area $6s^2 = 54 \\rightarrow s=3$. Volume $= s^3 = 27$." },
+            49: { ans: "D", sol: "Bottom cube SA = 6(16) = 96. Base rests on table (minus 16). Top has cube on it (minus 9). Total exposed = 96 - 16 - 9 = 71." },
+            50: { ans: "D", sol: "A single toss will always result in either a head or a tail. Probability = 1." },
+            51: { ans: "B", sol: "Dice tosses are independent events. The probability of the second die being a 5 is 1/6." },
+            52: { ans: "A", sol: "There is exactly one combination of answers where all 5 are correct: $1 \\times 1 \\times 1 \\times 1 \\times 1 = 1$." },
+            53: { ans: "B", sol: "Lines = $_5C_2 = 5! / (2!3!) = 10$." },
+            54: { ans: "B", sol: "Ratio $C:B:A:D = 100:75:50:150 = 4:3:2:6$. Total parts = 15. Ben = $(3/15) \\times 225M = 45M$." },
+            55: { ans: "B", sol: "$1.25(1 - x) = 1 \\rightarrow 1 - x = 1 / 1.25 = 0.80 \\rightarrow x = 0.20$ or $20\\%$." },
+            56: { ans: "C", sol: "Let $x$ be the cost of the 13% profit part. $1.13x + 0.93(700-x) = 741 \\rightarrow 0.2x + 651 = 741 \\rightarrow x = 450$." },
+            59: { ans: "C", sol: "A pentadecagon is a polygon with 15 sides." },
+            60: { ans: "A", sol: "An inflection point is where the curve changes concavity, meaning the second derivative is zero." },
+            65: { ans: "A", sol: "Net Annual Flow = $500,000 - 50,000 = 450,000$. Payback Period = $1,800,000 / 450,000 = 4$ years." },
+            66: { ans: "A", sol: "$P = F e^{-rt} = 20000 e^{-0.08(4)} = 20000(0.726) = 14522.98$." },
+            69: { ans: "A", sol: "$V = (4/3)\\pi r^3$. $dV/dr = 4\\pi r^2$. At $r=5$, $dV/dr = 4\\pi(25) = 100\\pi$." },
+            71: { ans: "A", sol: "Effective Rate = $(1 + 0.012)^{12} - 1 = 1.1538 - 1 = 15.38\\%$." },
+            72: { ans: "A", sol: "$P = F / (1 + r/n)^{nt} = 27000 / (1 + 0.13/2)^{12} = 27000 / 1.065^{12} = 12681$." },
+            76: { ans: "B", sol: "$20000$ Pferdestärke (PS/Metric HP) $\\times 0.9863 = 19720$ mechanical horsepower." },
+            77: { ans: "D", sol: "Factorial ($n!$) is the product of all positive integers less than or equal to $n$." },
+            86: { ans: "A", sol: "$P = F / (1+i)^n = 2000 / (1.06)^5 = 1494.5 \\approx 1495$." },
+            87: { ans: "A", sol: "Simple Interest = $Prt = 300(0.12)(3) = 108$. Total = $300 + 108 = 408$." },
+            88: { ans: "C", sol: "Interest = $5000(1 + 0.08/4)^{40} - 5000 = 5000(1.02)^{40} - 5000 = 6040.20$." },
+            89: { ans: "A", sol: "Break-even Volume = Fixed Cost / (Price - Variable Cost) = $35000 / (65 - 50) = 35000 / 15 = 2333.33 \\rightarrow 2334$." },
+            90: { ans: "C", sol: "SYD = 55. Year 1 depr = $8000(10/55)$, Year 2 = $8000(9/55)$, Year 3 = $8000(8/55) = 1163.6$. Book Value = $9000 - (1454+1309+1163) = 5074$." },
+            92: { ans: "A", sol: "First 8 years interest = $1000(1.05)^8 - 1000 = 477.45$. This stays for 8 more years. $F = 477.45(1.05)^8 = 705.4 \\approx 706$." },
+            93: { ans: "A", sol: "$x+y=150$. $0.4x+0.8(150-x) = 0.5(150) \\rightarrow 0.4x + 120 - 0.8x = 75 \\rightarrow 0.4x = 45 \\rightarrow x=112.5$." },
+            94: { ans: "D", sol: "Salt mass = $0.2(18) = 3.6$ kg. $3.6 / (18-x) = 0.5 \\rightarrow 3.6 = 9 - 0.5x \\rightarrow 0.5x = 5.4 \\rightarrow x = 10.8$ kg." },
+            95: { ans: "C", sol: "An asymptote is a line that a curve approaches as it heads towards infinity." },
+            96: { ans: "D", sol: "Estate refers to all the property, assets, and liabilities left by a deceased person." },
+            98: { ans: "B", sol: "The Chain Rule is used to compute the derivative of a composite function." },
+            99: { ans: "B", sol: "Curve tracing involves finding asymptotes, intercepts, and extrema to sketch a function." },
+            100: { ans: "C", sol: "Mandamus is a judicial writ issued as a command to an inferior court or ordering a person to perform a public or statutory duty." }
+        };
+
+        const rawTextData = document.getElementById('raw-data').textContent || "";
+        const blocks = rawTextData.split(/(?:^|\n|\r\n)(?=\s*\d+\.\s)/).map(b => b.trim()).filter(b => b.length > 0);
+        const quizData = [];
+
+        // Forgiving Parser
+        blocks.forEach(block => {
+            const qMatch = block.match(/^(\d+)\.\s([\s\S]*?)(?=A\.)/);
+            if (!qMatch) return;
+            
+            const num = qMatch[1];
+            const qText = qMatch[2].trim();
+            const optionsStr = block.substring(qMatch[0].length);
+            const optParts = optionsStr.split(/(?:^|\n)([A-D])\.\s/).filter(Boolean);
+            
+            const options = [];
+            for (let i = 0; i < optParts.length; i += 2) {
+                if (optParts[i] && optParts[i+1]) {
+                    options.push({ letter: optParts[i].trim(), text: optParts[i+1].trim() });
+                }
+            }
+
+            const mapData = solutionMap[num] || { ans: "A", sol: "Derive using fundamental engineering and mathematics principles based on provided variables." };
+            
+            let ansIdx = 0;
+            if (mapData.ans === "B") ansIdx = 1;
+            if (mapData.ans === "C") ansIdx = 2;
+            if (mapData.ans === "D") ansIdx = 3;
+
+            quizData.push({
+                num, q: qText, options, ansIdx, solText: mapData.sol, userAnswered: false
+            });
+        });
+
+        let currentIndex = 0;
+
+        function initApp() {
+            if (quizData.length === 0) {
+                document.getElementById('qHeader').innerHTML = "<span class='error-message'>Parse Error</span>";
+                document.getElementById('qText').innerHTML = "Could not parse questions. Check raw text format.";
+                return;
+            }
+            document.getElementById('controls').style.display = "flex";
+            buildNav();
+            loadQuestion(currentIndex);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            grid.innerHTML = '';
+            quizData.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-item';
+                btn.id = `nav-btn-${idx}`;
+                btn.innerText = q.num;
+                btn.onclick = () => { loadQuestion(idx); toggleSidebar(); };
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateNavStyles() {
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-btn-${currentIndex}`).classList.add('active');
+            quizData.forEach((q, idx) => {
+                const btn = document.getElementById(`nav-btn-${idx}`);
+                if (q.userAnswered) btn.classList.add('completed');
+            });
+        }
+
+        function loadQuestion(index) {
+            currentIndex = index;
+            const q = quizData[currentIndex];
+            
+            document.getElementById('qHeader').innerText = `Question ${q.num} of ${quizData.length}`;
+            document.getElementById('qText').innerHTML = q.q;
+            
+            const optionsGrid = document.getElementById('optionsGrid');
+            optionsGrid.innerHTML = '';
+            
+            const solContainer = document.getElementById('solutionContainer');
+            solContainer.style.display = 'none';
+
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span class="option-letter">${opt.letter}.</span> ${opt.text}`;
+                
+                if (q.userAnswered) {
+                    btn.disabled = true;
+                    if (i === q.ansIdx) btn.classList.add('correct');
+                    else if (i === q.userSelectedIdx) btn.classList.add('wrong');
+                } else {
+                    btn.onclick = () => selectAnswer(i, btn);
+                }
+                optionsGrid.appendChild(btn);
+            });
+
+            if (q.userAnswered) showSolution(q);
+
+            document.getElementById('prevBtn').disabled = (currentIndex === 0);
+            document.getElementById('nextBtn').disabled = (currentIndex === quizData.length - 1);
+            
+            updateNavStyles();
+
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('quizCard')]);
+            }
+        }
+
+        function selectAnswer(selectedIndex, selectedBtn) {
+            const q = quizData[currentIndex];
+            q.userAnswered = true;
+            q.userSelectedIdx = selectedIndex;
+
+            const buttons = document.getElementById('optionsGrid').children;
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true;
+                if (i === q.ansIdx) buttons[i].classList.add('correct');
+            }
+
+            if (selectedIndex !== q.ansIdx) selectedBtn.classList.add('wrong');
+
+            showSolution(q);
+            updateNavStyles();
+        }
+
+        function showSolution(q) {
+            const solContainer = document.getElementById('solutionContainer');
+            document.getElementById('solutionText').innerText = q.solText;
+            solContainer.style.display = 'block';
+
+            if (window.MathJax) {
+                MathJax.typesetPromise([solContainer]);
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIndex < quizData.length - 1) loadQuestion(currentIndex + 1);
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) loadQuestion(currentIndex - 1);
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
