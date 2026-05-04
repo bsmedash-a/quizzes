@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLRC Diagnostic Test - Mathematics</title>
+    <!-- MathJax for rendering LaTeX formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --main-color: #ffffff;
+            --text-color: #333;
+            --accent-color: #4b0082; /* Indigo theme for SLRC */
+            --hover-color: #6a0dad;
+            --correct-color: #27ae60;
+            --wrong-color: #e74c3c;
+            --nav-bg: #2c3e50;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        .top-bar {
+            background-color: var(--main-color);
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex; align-items: center; position: fixed; width: 100%; top: 0; z-index: 100;
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        .hamburger { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-color); margin-right: 20px; }
+        .top-bar h2 { margin: 0; font-size: 1.1rem; color: var(--nav-bg); text-transform: uppercase; letter-spacing: 1px; }
+
+        #sidebar {
+            width: 320px; background-color: var(--nav-bg); color: white;
+            display: flex; flex-direction: column; transition: transform 0.3s ease;
+            position: fixed; height: calc(100% - 60px); top: 60px; z-index: 99;
+            transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+        #sidebar.open { transform: translateX(0); }
+        .sidebar-header { padding: 20px; font-weight: bold; background-color: #1a252f; text-align: center; border-bottom: 1px solid #34495e; }
+        .nav-grid { padding: 15px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; overflow-y: auto; flex: 1; }
+        .nav-item { background-color: #34495e; color: white; border: none; padding: 10px 0; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        .nav-item.active { background-color: var(--accent-color); box-shadow: inset 0 0 0 2px white; }
+        .nav-item.completed { background-color: var(--correct-color); color: white; }
+
+        #main-content { flex: 1; margin-top: 60px; padding: 40px 20px; display: flex; justify-content: center; overflow-y: auto; }
+        .quiz-card { background-color: var(--main-color); width: 100%; max-width: 850px; padding: 40px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); height: fit-content; margin-bottom: 40px; }
+        .question-header { font-size: 1rem; color: #7f8c8d; margin-bottom: 20px; border-bottom: 1px solid #f1f2f6; padding-bottom: 10px; font-weight: 700; display: flex; justify-content: space-between; }
+        .question-text { font-size: 1.25rem; line-height: 1.6; margin-bottom: 30px; color: #2c3e50; word-wrap: break-word; }
+
+        .options-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        .option-btn {
+            background-color: #f8f9fa; border: 2px solid #dee2e6; padding: 16px 20px; border-radius: 6px;
+            font-size: 1.1rem; cursor: pointer; text-align: left; transition: all 0.2s; display: flex; align-items: flex-start; color: #2c3e50;
+        }
+        .option-btn:hover:not(:disabled) { background-color: #f1f1f1; border-color: var(--accent-color); }
+        .option-btn.correct { background-color: #e8f8f5; border-color: var(--correct-color); color: #27ae60; font-weight: bold; }
+        .option-btn.wrong { background-color: #fdedec; border-color: var(--wrong-color); color: #c0392b; font-weight: bold; }
+        .option-letter { font-weight: bold; margin-right: 15px; color: var(--accent-color); }
+
+        .feedback-message { padding: 20px; border-radius: 6px; font-size: 1.2rem; line-height: 1.5; margin-bottom: 20px; display: none; text-align: center; }
+        .feedback-message.success { background-color: #e8f8f5; color: #27ae60; border-left: 5px solid var(--correct-color); }
+        .feedback-message.error { background-color: #fdedec; color: #c0392b; border-left: 5px solid var(--wrong-color); }
+
+        .controls { display: flex; justify-content: space-between; border-top: 2px solid #ecf0f1; padding-top: 20px; }
+        .control-btn { background-color: var(--accent-color); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .control-btn:disabled { background-color: #bdc3c7; color: #ffffff; cursor: not-allowed; }
+
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 98; display: none; }
+        #overlay.show { display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h2>SLRC Diagnostic Test | Mathematics</h2>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header">100 Problems Navigator</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div id="main-content">
+        <div class="quiz-card" id="quizCard">
+            <div class="question-header">
+                <span id="qHeader">Initializing...</span>
+                <span id="scoreTracker" style="color: var(--accent-color);">Score: 0</span>
+            </div>
+            
+            <div class="question-text" id="qText">Extracting problem set...</div>
+            <div class="options-container" id="optionsGrid"></div>
+            <div class="feedback-message" id="feedbackMessage"></div>
+            
+            <div class="controls" id="controls" style="display:none;">
+                <button class="control-btn" id="prevBtn" onclick="prevQuestion()">&#8592; Previous</button>
+                <button class="control-btn" id="nextBtn" onclick="nextQuestion()">Next &#8594;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Embed -->
+    <script id="raw-data" type="text/plain">
+1|A certain job can be finished by 18 workers in 26 days, how many workers are needed to finish the job in 12 days?|A. 45|B. 39|C. 30|D. 24|B
+2|Given the numerals 9, 2, 7, 5, what is the difference between the largest 3-digit number and the smallest 3-digit number that can be formed from these numerals if no digits are repeated in a number?|A. 777|B. 718|C. 500|D. 448|B
+3|What is 30% of 25/18?|A. 25/6|B. 25/54|C. 5/12|D. 5/108|C
+4|You have a bag filled with 20 green marbles, 9 red marbles and 16 green marbles. You randomly select a marble from the bag. What is the probability that you select a red marble?|A. 5/9|B. 16/45|C. 1/5|D. 4/9|C
+5|If n < m and a < b, then?|A. n+a < m+b|B. n = a|C. m = b|D. n+a > m+b|A
+6|A cube is rectangular solid, the length, width and height of the measure called edge (e) of a cube. The volume of the cube is found by 'cubing the measure of the edge'. What is the volume of the cube whose edge is 4 cm?|A. 27 cm^3|B. 64 cm^3|C. 125 cm^3|D. 216 cm^3|B
+7|Find the equation of the line with slope two and passing through the point (3,-1).|A. 2x-y-7=0|B. 2x+y-7=0|C. 2x-y+7=0|D. 2x+y+7=0|A
+8|Bastian has 7 maroon T-shirts and 5 blue T-shirts. If she picks one T-shirt at random, what is the probability that will NOT be blue?|A. 7/12|B. 5/12|C. 1/6|D. 1/2|A
+9|Alexis is 5 times old as Faye. Three years from now, he will be twice as old as Faye. How old is Faye?|A. 9|B. 5|C. 4|D. 1|D
+10|What is the measure of the complement of an angle is its supplement is 145 degrees?|A. 25°|B. 35°|C. 45°|D. 55°|D
+11|Jerome spends 15% of his monthly salary for house rental, 10% for electric bill and 25% for food and personal necessities. After paying all these expenses he still has P6,000 left. How much does he earn every month?|A. P18,000|B. P15,000|C. P12,000|D. P10,000|C
+12|The annual budget of a certain department amounts to 2 billion. From this amount, the budgets of three bureaus are in the ratio 5:3:2. How much does the bureau with the smallest budget receive?|A. 400 M|B. 300 M|C. 200 M|D. 100 M|A
+13|In which quadrant is the point (-13,7) located?|A. Quadrant IV|B. Quadrant III|C. Quadrant II|D. Quadrant I|C
+14|What must be subtracted from 5x^3 - 2x^2 + 3x - 5 to get 2x^3 - 8 + 5x - 2x^2?|A. 3x^3 - 2x + 3|B. 3x^3 + 2x + 3|C. 3x^3 - 2x^2 - 3|D. 3x^3 - 2x^2 + 3|A
+15|A bomb was dropped in an area where rebels were hiding. The perimeter of the damage area was 480 meter and width was 15 meters. What was the length of the damage area?|A. 300 m|B. 275 m|C. 225 m|D. 125 m|C
+16|A meter stick was cut into two pieces at 640-mm mark. What is the ratio of the smaller piece to the larger piece?|A. 16:25|B. 13:50|C. 9:16|D. 9:25|C
+17|A box is 16 inches long, 12 inches wide and 6 inches high. How many square inches of paper would be needed to cover it on all sides?|A. 180 sq. in.|B. 240 sq. in.|C. 360 sq. in.|D. 720 sq. in.|D
+18|Pipe D can fill a swimming pool in three hours while Pipe C can fill the same pool in two hours. If Pipe D and Pipe C are both open, how long will they fill the swimming pool?|A. 1.2 hours|B. 1.5 hours|C. 2 hours|D. 5 hours|A
+19|Together, Mark, Cardo and Christopher earn P72, 000 a month. If Mark earns P6, 000 more than Cardo and P9, 000 more than Christopher, how much does Cardo earn? (Modified for Source Context)|A. P22,000|B. P23,000|C. P25,000|D. P29,000|C
+20|A picture 10 cm by 8 cm is mounted on a piece of hard cardboard. If there is margin of 2½ cm around the picture, what is the perimeter of the cardboard used?|A. 67 cm|B. 57 cm|C. 47 cm|D. 37 cm|B
+21|A rectangular sheet of paper is folded in half. Then it is folded in half again, and again in half. If the folding in half is done in 5 times, and edges are creased each time. How many small rectangles will you see when you unfold the original sheet of paper?|A. 32|B. 48|C. 64|D. 80|A
+22|How many ways can a committee of 4 people are selected from a group of 7 people?|A. 280|B. 140|C. 70|D. 35|D
+23|A park has a triangular shape. It has a base of 24m and a height of 9m. What is its area?|A. 54 m^2|B. 42 m^2|C. 108 m^2|D. 122 m^2|C
+24|A car comes in two different styles. Each style comes in four colors. How many different versions of the car are available?|A. 8|B. 6|C. 4|D. 2|A
+25|Eunice received these grades on four math tests: 80, 90, 83, and 79. What grade must she receive on a fifth test in order to have an average of 85?|A. 95|B. 93|C. 92|D. 90|B
+26|Six people are standing in a line waiting to file an income tax return. In how many ways can they stand in line?|A. 120|B. 240|C. 360|D. 720|D
+27|Water rationed in a village every other day. The truck tanks deliver 8 tons of water every 10 hour. How many tons of water was delivered in 4 days to each house by the agent?|A. 24|B. 32|C. 48|D. 120|B
+28|The ratio of the number of chickens, dogs and cats in Mang Tomas' backyard is 5: 1: 2. If there are 64 animals of these kinds in his backyard, how many of them are dogs?|A. 8|B. 6|C. 4|D. 2|A
+29|When Mr.Catapang was asked about his age, he replied "I am half century, half score and half decade old." How old is he in years?|A. 80|B. 75|C. 70|D. 65|D
+30|What is 3 m and 28 dm converted to centimeters?|A. 58|B. 580|C. 5800|D. 58000|B
+31|The average height of a male giraffe is 17 feet. What is the height in inches?|A. 204|B. 170|C. 51|D. 29|A
+32|If 8x + 12 = 24, what is the value of 24x + 36?|A. 48|B. 64|C. 72|D. 96|C
+33|A homebuilder orders 10% more tiles than the original estimate of 170 tiles in case some tiles break while they are being installed. How many tiles does the homebuilder order?|A. 207|B. 197|C. 187|D. 177|C
+34|Pat had incurred the following expenses in his 4 trips in Ilocos; P4,200 in his first trip, P5,600 in his second trip, P6,100 in his third trip and P4,800 in his fourth trip. What were his total expenses for his trip to Ilocos?|A. P20,700|B. P20,900|C. P21,200|D. P21,500|A
+35|Jayson repacks a 60 kg sack of sugar into small packs of 750 g. How many small packs can be made?|A. 90|B. 80|C. 75|D. 45|B
+36|What is the least positive integer that can be divided by 4, 5, and 10 without any remainder?|A. 20|B. 40|C. 50|D. 100|A
+37|A tenant was awarded a house and lot package worth Php 180 000.00 he has to pay the package for 20 years at 9% per annum. How much will the lot cost after 20 years?|A. P404,000|B. P504,000|C. P604,000|D. P704,000|B
+38|One fifth of the width and one fourth of the length of a rectangular cardboard are cut-off. What is the area of the remaining piece?|A. 80% of the original area|B. 60% of the original area|C. 50% of the original area|D. 40% of the original area|B
+39|If P75.00 is shared among three children in the ratio of 3:7:15. What is the size of the smallest share?|A. P 9|B. P 15|C. P 25|D. P 35|A
+40|If m is a positive integer in the equation 6m = n then n must be a:|A. negative odd integer|B. positive odd integer|C. negative even integer|D. positive even integer|D
+41|Which statement about the equation 2(x-1) = 3x - (x+ 2) is true?|A. The equation has every number as a solution.|B. The solution is -0.5.|C. The solution is -1.|D. The equation has no solution.|A
+42|Marta spent 30% of her allowance on snacks and 40% on a book and had P450 pesos left. How much is her allowance?|A. P2000|B. P1500|C. P1200|D. P1000|B
+43|The quiz scores of Mark are 6, 5, 9, 8, 10, 7, 8, and 9. Find the median of his quiz score.|A. 8.5|B. 8.|C. 7.5|D. 7|B
+44|What part of an hour has passed from 2:48 PM to 3:20 PM?|A. 8/25|B. 8/15|C. 1/3|D. 7/8|B
+45|Solve: $2\sqrt{12} + \sqrt{75} - 4\sqrt{27}$|A. -3\sqrt{3}|B. -2\sqrt{3}|C. 3\sqrt{3}|D. 2\sqrt{3}|A
+46|How much interest would be paid on a bank loan of P36,000 for 8 months at 12% annual interest?|A. P3,600|B. P3,240|C. P2,880|D. P2,400|C
+47|Multiply (3 - 2i) (3 + 2i)|A. 9 - 16i|B. 9 - 4i^2|C. 13|D. 4i|C
+48|If a^3 is an odd number, which of the following is/are TRUE? I. a^5 is odd, II. a^6 is odd, III. a^3 + 1 is odd, IV. a^2 + 2 is odd|A. III and IV|B. III only|C. I, II and IV|D. I and II|C
+49|A certain bank issues 3-letter identification codes to its customers. If each letter can be used only once per code, how many different codes are possible?|A. 72|B. 326|C. 15,600|D. 17,576|C
+50|If x = -5, what is the value of (x^2 - 9)/(x + 3)?|A. 7|B. 5|C. -6|D. -8|D
+51|Mrs. Mercado purchased an air conditioner for a discounted price of P10,200. If she got 15% discount, what was the original price?|A. P11,000|B. P11,400|C. P11,800|D. P12,000|D
+52|The measure of each interior angle of a regular polygon is 160°. How many sides does it have?|A. 12|B. 15|C. 18|D. 24|C
+53|What is the average mass of an adult man?|A. 7000mg|B. 70g|C. 70 kg|D. 700kg|C
+54|A 10 meter log steel pipe shrank 0.05% when exposed to below freezing temperature. By how many centimeters did the pipe shrank?|A. 0.0005|B. 0.005|C. 0.05|D. 0.5|D
+55|Which of the weights is the heaviest?|A. 0.42 kg.|B. 40.25 cg|C. 412 g.|D. 4050 mg.|A
+56|A traveler was helped by other passengers for his extra weight of 112 kg. There were three travelers who gave their allotment of 25 kg. How much more extra weight will he need to pay?|A. 48|B. 38|C. 37|D. 35|C
+57|Eunice has a long strip of cloth that is 9 ¾ ft. long. If she cuts it into three equal parts, how long would each piece be?|A. 4½ ft.|B. 3 ft.|C. 3 ¼ ft.|D. 2 ¾ ft.|C
+58|A music collector has 1200 CDs, and 65% of them were produced after 1990. How many of the CDs were produced before 1990?|A. 780|B. 660|C. 540|D. 420|D
+59|A swimming pool is an equilateral triangle in shape. One side is 11 meters. How many meters of rope is needed to enclose the pool?|A. 66|B. 55|C. 44|D. 33|D
+60|You deposit $1500 into a dollar account that earns 2.4% interest compounded annually. Find the balance after 6 years.|A. $1972.38|B. $1927.83|C. $1729.38|D. $ 1792.83|C
+61|In a theme park, 45% of the staffs are women. If there are 220 men in the theme park, how many staffs are there?|A. 520|B. 500|C. 430|D. 400|D
+62|For a child, the regular admission price to Ocean Park is Php 350. With a special pass, the admission price is discounted 20%. What is the admission price when the pass is used?|A. Php 250|B. Php 280|C. Php 300|D. Php 320|B
+63|How many gallons of water will fill a fish tank that is 18 inches by 12 inches by 48 inches? (there are 231 cubic inches per gallon) Round your answer to the nearest gallon.|A. 47 gallons|B. 45 gallons|C. 40 gallons|D. 48 gallons|B
+64|Find the sum of all integers on the number line starting from -32 to 37.|A. 5|B. 50|C. 138|D. 175|D
+65|Riona and Kate are cycling on a track. Kate completes one lap every 12 seconds, and Riona completes one lap every 15 seconds. When will Kate lap Riona, assuming that they started together?|A. after 1 minute|B. after 2 minutes|C. after 3 minutes|D. after 45 seconds|A
+66|Successive discounts of 10% and 30% are equivalent to what single discount?|A. 33%|B. 34%|C. 36%|D. 37%|D
+67|An employee earning P9,200 a month will receive a 15% increase next month. How much will his/her new salary be?|A. P10,600|B. P10,580|C. P10,530|D. P10,500|B
+68|What is the sum of all two digit numbers divisible by 5?|A. 945|B. 950|C. 960|D. 1050|A
+69|In how many different ways can 5 beads of different colors be arranged on a bracelet?|A. 10|B. 24|C. 80|D. 120|B
+70|How many integers between 1 and 150 are divisible by both 4 and 5?|A. 7|B. 8|C. 9|D. 10|A
+71|Which of the following equations has a slope of 1/2?|A. 3y + 6x = 5|B. 2y = 2x + 7|C. 4x + 3y = 12|D. x - 2y = 4|D
+72|Mark's scores in 5 quizzes in Statistics are 92, 80, 85, 86 and 72. What must he get in the 6^{th} quiz to get an average of 85?|A. 88|B. 89|C. 90|D. 91|C
+73|The sum of two integers is 74 and their difference is 26, what is the bigger number?|A. 24|B. 36|C. 48|D. 50|D
+74|A telephone company charges P18 for the first three minutes plus P2.50 every additional minute. At this rate, how much will a 15-minute cost?|A. P37.50|B. P48.00|C. P55.50|D. P90.00|B
+75|In a card game, a player got the following scores: 35, 60, -40, 80, 100, 25, 25. What is the final score?|A. 115|B. 85|C. -85|D. -115|C
+76|The ratio of men to women in the national pool of athletes is 15: 7. If there are 72 more men than women, how many athletes are there in the national pool?|A. 1080|B. 504|C. 198|D. 192|C
+77|The price of one seat in theater is P30.00 and an average of 300 persons enters every day. If the price was increased to P40.00, how many persons would yield the same amount to the theater?|A. 225|B. 250|C. 275|D. 280|A
+78|Which of the length is the smallest?|A. 4199 mm.|B. 445 m.|C. 150 cm.|D. 0.451 km.|C
+79|Which of the following is equal to 225 minutes?|A. 3 hours and 35 minutes|B. 3 hours and 55 minutes|C. 3 hours and 45 minutes|D. 4 hours and 5 minutes|C
+80|A room of 10 m by 7 m. There is 7.5 m by 5 m carpet in the middle. What percent of the room is uncovered?|A. 46.4%|B. 48%|C. 53.6%|D. 62%|A
+81|A top of a cliff overlooking the ocean is 1025 ft. above sea level. The sea floor at the foot of the cliff is 45 ft. below sea level. A rock falls of the cliff and drops to the sea floor. Which expression represents the change of elevation of the rock?|A. 1050-(-45)|B. 1050-45|C. 45-1050|D. -45-1050|A
+82|A man started painting a wall at 9:00 AM and was able to finish painting 3/5 of it at 10:30 AM. Continuing at this rate, at what time will he finish painting the wall?|A. 12:30 AM|B. 12:15 AM|C. 11:35 AM|D. 11:30 AM|D
+83|The arithmetic mean of set of 50 numbers is 38. If two numbers 45 and 35 are discarded, the mean of the remaining set of numbers is:|A. 38.5|B. 37.92|C. 37.5|D. 37.24|B
+84|Which of the following is a factor of the equation x^2 - 2x - 24 = 0?|A. x + 6|B. x + 4|C. x + 2|D. x - 4|B
+85|What percent of 4 is 3/5 of 8?|A. 120%|B. 83 1/3%|C. 80%|D. 48%|A
+86|What is the range of the following scores: 86, 70, 83, 90, 85, 78, 79, 81, 87?|A. 20|B. 16|C. 15|D. 12|A
+87|The sum of two integers is 63. If one of the integers is three more than twice the other, what are the two integers?|A. 18 and 45|B. 19 and 44|C. 20 and 43|D. 21 and 42|C
+88|A policeman caught a pusher carrying prohibited drugs. Each package weighted 12½ kg, 10 kg, 8 1/8 kg, and 11 kg. Give the total weight of the confiscated drugs?|A. 43½ kg|B. 42 7/8 kg|C. 41 ¾ kg|D. 41 7/8 kg|D
+89|What is the volume of a cube whose surface area is 54?|A. 45|B. 36|C. 27|D. 9|C
+90|Rodel spent 1/4 of his money on pair of socks, 1/5 of it on a magazine and P70 on a snack. If he had P62 left, how much money did he start with?|A. 360|B. P320|C. P300|D. P240|D
+91|An artist ordered cans of red paint, white paint, and green paint in the ratio 2:4:6, respectively. If he ordered a total of 24 cans of paint, how many cans of white paint did he order?|A. 16|B. 12|C. 8|D. 4|C
+92|Employees at Sonic Music town get a 20% discount on all purchases. If Henry buys three tapes at P7.49 each, how much will he have to pay after his employee discount?|A. P19.98|B. P18.98|C. P17.98|D. P16.98|C
+93|A vehicle consumes one liter of gasoline to travel 10 km. After tune-up, it travels 15% farther on one liter. How many liters of gasoline will it take for a vehicle to travel 230 km.?|A. 20|B. 20.15|C. 23|D. 23.15|A
+94|Three brothers inherited a cash amount of P120,000 and they divided it among themselves in the ratio of 5: 2: 1. How much more is the largest share than the smallest share?|A. P75,000|B. P60,000|C. P30,000|D. P15,000|B
+95|It takes 20 men build a house for 60 days. How many men will be needed to build it in 15 days?|A. 40|B. 80|C. 120|D. 160|B
+96|Write this ratio in its simplest form: 3 dm is to 20 cm.|A. 3:2|B. 3:20|C. 20:3|D. 2:3|A
+97|Mr. Alonzo owns 3/8 of Macro financial shares. After selling 1/3 of his share, how much of Macro financial does Mr. Alonzo still own?|A. 5/8|B. 1/4|C. 5/16|D. 2/9|B
+98|A town map has a scale of 1 cm = 6,500 m. If two streets are 7 cm apart on the map, what is their actual distance in kilometers?|A. 0.455|B. 4.55|C. 45.5|D. 455|C
+99|In a class of 58 students, 14 are females. What is the ratio of males to females?|A. 29:7|B. 22:7|C. 7:29|D. 7:22|B
+100|A 100-kg bag contains salt and water. If 80% is water, how many kg of salt must be added to make it 20% water?|A. 230|B. 235|C. 300|D. 315|C
+    </script>
+
+    <script>
+        const rawData = document.getElementById('raw-data').textContent.trim();
+        const quizData = rawData.split('\n').map(line => {
+            const [num, text, a, b, c, d, ans] = line.split('|');
+            return {
+                num, text, options: [a, b, c, d], ansLetter: ans.trim(), answered: null
+            };
+        });
+
+        let currentIdx = 0;
+        let score = 0;
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            quizData.forEach((q, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-item';
+                btn.innerText = q.num;
+                btn.id = `nav-${i}`;
+                btn.onclick = () => { currentIdx = i; loadQuestion(); toggleSidebar(); };
+                grid.appendChild(btn);
+            });
+        }
+
+        function loadQuestion() {
+            const q = quizData[currentIdx];
+            document.getElementById('qHeader').innerText = `Problem ${q.num} of ${quizData.length}`;
+            document.getElementById('qText').innerText = q.text;
+            
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+            
+            const fb = document.getElementById('feedbackMessage');
+            fb.style.display = 'none';
+
+            q.options.forEach((opt, i) => {
+                const letter = String.fromCharCode(65 + i);
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span class="option-letter">${letter}</span> ${opt}`;
+                
+                if (q.answered) {
+                    btn.disabled = true;
+                    if (letter === q.ansLetter) btn.classList.add('correct');
+                    if (letter === q.answered && letter !== q.ansLetter) btn.classList.add('wrong');
+                } else {
+                    btn.onclick = () => select(letter);
+                }
+                grid.appendChild(btn);
+            });
+
+            if (q.answered) {
+                fb.style.display = 'block';
+                fb.className = `feedback-message ${q.answered === q.ansLetter ? 'success' : 'error'}`;
+                fb.innerText = q.answered === q.ansLetter ? 'CORRECT!' : `WRONG! Correct Answer: ${q.ansLetter}`;
+            }
+
+            document.getElementById('prevBtn').disabled = currentIdx === 0;
+            document.getElementById('nextBtn').disabled = currentIdx === quizData.length - 1;
+            
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(`nav-${currentIdx}`).classList.add('active');
+
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        function select(letter) {
+            const q = quizData[currentIdx];
+            q.answered = letter;
+            if (letter === q.ansLetter) {
+                score++;
+                document.getElementById('scoreTracker').innerText = `Score: ${score}`;
+            }
+            document.getElementById(`nav-${currentIdx}`).classList.add('completed');
+            loadQuestion();
+        }
+
+        function next() { if (currentIdx < quizData.length - 1) { currentIdx++; loadQuestion(); } }
+        function prev() { if (currentIdx > 0) { currentIdx--; loadQuestion(); } }
+
+        window.onload = () => { buildNav(); loadQuestion(); document.getElementById('controls').style.display='flex'; };
+    </script>
+</body>
+</html>
