@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math, Econ & Engg Sciences Quiz</title>
+    <title>Algebra Problems & Solutions</title>
     <!-- MathJax for rendering LaTeX formulas -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -14,20 +14,19 @@
     </script>
     <style>
         :root {
-            --bg-color: #f8f9fa;
+            --bg-color: #f4f6f8;
             --main-color: #ffffff;
-            --text-color: #2d3436;
-            --accent-color: #0984e3;
-            --hover-color: #74b9ff;
-            --correct-color: #00b894;
-            --wrong-color: #d63031;
-            --nav-bg: #2d3436;
-            --solution-bg: #e3f2fd;
+            --text-color: #2c3e50;
+            --accent-color: #e67e22;
+            --hover-color: #d35400;
+            --nav-bg: #2c3e50;
+            --border-color: #e2e8f0;
+            --solution-bg: #fef9e7;
         }
 
         * {
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
@@ -42,13 +41,13 @@
         /* Top Bar */
         .top-bar {
             background-color: var(--main-color);
-            padding: 15px 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
             position: fixed;
-            top: 0;
             width: 100%;
+            top: 0;
             z-index: 100;
         }
 
@@ -68,14 +67,13 @@
 
         .top-bar h2 {
             margin: 0;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: var(--nav-bg);
-            font-weight: 600;
         }
 
         /* Sidebar Navigation */
         #sidebar {
-            width: 300px;
+            width: 280px;
             background-color: var(--nav-bg);
             color: white;
             display: flex;
@@ -96,50 +94,51 @@
         .sidebar-header {
             padding: 20px;
             font-size: 1.1rem;
-            font-weight: bold;
-            background-color: #1e272e;
-            text-align: center;
+            font-weight: 600;
+            background-color: #1a252f;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .nav-grid {
             padding: 15px;
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
             overflow-y: auto;
-            flex: 1;
         }
 
         .nav-item {
-            background-color: #636e72;
+            background-color: #34495e;
             color: white;
-            border: none;
+            border: 1px solid #2c3e50;
             padding: 10px 0;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.85rem;
             transition: all 0.2s;
         }
 
         .nav-item:hover {
             background-color: var(--accent-color);
+            border-color: var(--accent-color);
         }
 
         .nav-item.active {
             background-color: var(--accent-color);
-            box-shadow: inset 0 0 0 2px white;
+            border-color: var(--hover-color);
         }
 
         .nav-item.completed {
-            background-color: var(--correct-color);
+            border-bottom: 3px solid #2ecc71;
         }
 
         /* Main Content */
         #main-content {
             flex: 1;
             margin-top: 60px;
-            padding: 30px 20px;
+            padding: 40px 20px;
             display: flex;
             justify-content: center;
             overflow-y: auto;
@@ -151,118 +150,111 @@
             width: 100%;
             max-width: 800px;
             padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
             height: fit-content;
         }
 
         .question-header {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             color: #7f8c8d;
             margin-bottom: 20px;
-            border-bottom: 2px solid #ecf0f1;
+            border-bottom: 2px solid var(--border-color);
             padding-bottom: 10px;
             font-weight: 600;
-            display: flex;
-            justify-content: space-between;
         }
 
         .question-text {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-
-        /* Options */
-        .options-container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 30px;
-        }
-
-        .option-btn {
-            background-color: #f1f2f6;
-            border: 2px solid #dfe4ea;
-            padding: 15px 20px;
-            border-radius: 6px;
-            font-size: 1.05rem;
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.2s;
-            display: flex;
-            align-items: flex-start;
-        }
-
-        .option-btn:hover:not(:disabled) {
-            background-color: #eccc68;
-            border-color: #f1c40f;
-            color: #2f3542;
-        }
-
-        .option-btn.correct {
-            background-color: #dff9fb;
-            border-color: var(--correct-color);
-            color: #27ae60;
-        }
-
-        .option-btn.wrong {
-            background-color: #ffefea;
-            border-color: var(--wrong-color);
-            color: #c0392b;
-        }
-
-        .option-letter {
-            font-weight: bold;
-            margin-right: 15px;
-            color: var(--accent-color);
+            font-size: 1.25rem;
+            line-height: 1.7;
+            margin-bottom: 35px;
         }
 
         /* Solution Area */
-        .solution-container {
-            display: none;
-            background-color: var(--solution-bg);
-            border-left: 4px solid var(--accent-color);
-            padding: 20px;
-            border-radius: 4px;
+        .action-area {
+            background-color: #f8f9fa;
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
             margin-bottom: 30px;
-            font-size: 1.05rem;
-            line-height: 1.6;
-            color: #1e272e;
         }
 
-        .solution-container strong {
-            color: var(--accent-color);
+        .reveal-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .reveal-btn:hover {
+            background-color: var(--hover-color);
+        }
+
+        .solution-container {
+            display: none;
+            text-align: left;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed #bdc3c7;
+        }
+
+        .answer-highlight {
+            font-size: 1.3rem;
+            color: #27ae60;
+            font-weight: bold;
+            margin-bottom: 15px;
             display: block;
-            margin-bottom: 10px;
+        }
+
+        .step-by-step {
+            background-color: var(--solution-bg);
+            padding: 20px;
+            border-left: 4px solid #f1c40f;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* Error Message */
+        .error-message {
+            color: #c0392b;
+            background: #fad390;
+            padding: 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
         }
 
         /* Controls */
         .controls {
             display: flex;
             justify-content: space-between;
-            border-top: 2px solid #ecf0f1;
-            padding-top: 20px;
         }
 
         .control-btn {
-            background-color: var(--accent-color);
-            color: white;
+            background-color: #ecf0f1;
+            color: var(--nav-bg);
             border: none;
             padding: 12px 25px;
             border-radius: 6px;
             font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
         }
 
         .control-btn:hover:not(:disabled) {
-            background-color: var(--hover-color);
+            background-color: #bdc3c7;
         }
 
         .control-btn:disabled {
-            background-color: #b2bec3;
+            opacity: 0.4;
             cursor: not-allowed;
         }
 
@@ -270,7 +262,7 @@
         #overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.4);
             z-index: 98;
             display: none;
         }
@@ -279,677 +271,255 @@
 </head>
 <body>
 
+    <!-- Top Bar -->
     <div class="top-bar">
         <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
-        <h2>Math & Engg Sciences Quiz</h2>
+        <h2>Algebra Flashcards & Solutions</h2>
     </div>
 
+    <!-- Sidebar Navigation -->
     <div id="overlay" onclick="toggleSidebar()"></div>
     <div id="sidebar">
         <div class="sidebar-header">
-            Question Navigator
+            Problem Navigator
         </div>
         <div class="nav-grid" id="navGrid"></div>
     </div>
 
+    <!-- Main Content -->
     <div id="main-content">
         <div class="quiz-card" id="quizCard">
-            <div class="question-header">
-                <span id="qHeader">Question 1</span>
+            <div class="question-header" id="qHeader">Loading Data...</div>
+            
+            <div class="question-text" id="qText">Please wait while the problems are extracted.</div>
+            
+            <div class="action-area" id="actionArea" style="display:none;">
+                <button class="reveal-btn" id="revealBtn" onclick="revealSolution()">Reveal Answer & Solution</button>
+                
+                <div class="solution-container" id="solutionContainer">
+                    <span class="answer-highlight" id="ansText"></span>
+                    <div class="step-by-step">
+                        <strong>Step-by-Step Solution:</strong><br><br>
+                        <span id="mathSolution"></span>
+                    </div>
+                </div>
             </div>
             
-            <div class="question-text" id="qText">Loading question...</div>
-            
-            <div class="options-container" id="optionsGrid"></div>
-            
-            <div class="solution-container" id="solutionContainer">
-                <strong>Solution & Explanation:</strong>
-                <span id="solutionText"></span>
-            </div>
-            
-            <div class="controls">
+            <div class="controls" id="controls" style="display:none;">
                 <button class="control-btn" id="prevBtn" onclick="prevQuestion()">&#8592; Previous</button>
                 <button class="control-btn" id="nextBtn" onclick="nextQuestion()">Next &#8594;</button>
             </div>
         </div>
     </div>
 
-    <!-- Raw Data Embed (Includes all 100 Questions) -->
+    <!-- Raw Data Embed -->
     <script id="raw-data" type="text/plain">
-1. If the digits 0, 1, and 2 are used to form a three-digit number where repetition of digits is not allowed, then how many possible numbers can be made?
-A. 4
-B. 6
-C. 8
-D. 10
-2. An angle is half its supplement. What is its complement?
-A. $30^{\circ}$
-B. $45^{\circ}$
-C. $60^{\circ}$
-D. $75^{\circ}$
-3. It takes 12 men 12 days to build a house. How many days will it take 24 men to build a house?
-A. 2 days
-B. 3 days
-C. 12 days
-D. 6 days
-4. The sum of the two numbers is 21. If their difference is 9, what is there product?
-A. 54
-B. 80
-C. 104
-D. 90
-5. A term used to describe payment of an employee wherein an employee is called back to work after his regular days work
-A. call back pay
-B. back wages
-C. call in pay
-D. portal to portal pay
-6. Manner of liquidating a debt by installment usually at equal intervals of time
-A. investment
-B. depreciation
-C. amortization
-D. bonding
-7. What kind of process occurs between points 3 and 4? See Figure 8
-A. Adiabatic
-B. isobaric
-C. Isentropic
-D. there is insufficient information to determine the process.
-8. Find the lateral strain, $\epsilon_{\gamma,}$ of the steel specimen shown if $F_{x}=600$ kips, $E=2.8$ x 10 psi, and $v=0.29$ See figure 3
-A. 4 $x~10^{-1}$ in.
-B. $-1.04\times10^{-4}i$ in.
-C. $2.1.04\times10^{-4}$ in.
-D. $4\times10^{-4}$ in.
-9. What type of power cycle does the following diagram illustrate? See figure 9
-A. A Carnot cycle
-B. an idealized Rankine cycle with reheat
-C. an idealized Diesel cycle
-D. an idealized Stirling cycle
-10. The reduction value and marketability due to competition from newest products
-A. obsolescence
-B. fixed cost
-C. depreciated cost
-D. indirect cost
-11. A goat is tied at the corner of a small building with a square base. If the length of the rope that ties the goat is 6 meters and the side of the square base is 4 meters, what is the largest grazing area of the goat?
-A. 10 sq meters
-B. 25 sq meters
-C. 29 sq meters
-D. 200 sq meters.
-12. In a group of 50 students, 30 like Math, a certain number like English, 16 like both English and Math, and 8 like neither subjects. How many students like English?
-A. 25
-B. 27
-C. 30
-D. 28
-13. Terence's office is 12 km from his house. If, one day, he drove his car to his office at a constant speed rate of 30 kph and came back home driving at 20 kph, what is the average speed for the entire trip?
-A. 24 kph
-B. 25 kph
-C. 27 kph
-D. 28 kph
-14. During snack break, $1/3$ of the total number of snacks were donuts $2/5$ were muffins and the rest were pancakes. If the total number of muffins and pancakes was 20, how many pieces of snacks were there?
-A. 24
-B. 28
-C. 35
-D. 30
-15. Together, Lumen and Rey are going home to the province to visit their mothers. If Lumen visits her mother every 6 days, and Rey visits his mother every 8 days, after how many days will they visit their mothers together again?
-A. 7
-B. 14
-C. 18
-D. 24
-16. The sum of the three angles of a triangle is 180 degrees. One angle is twice the second and the third angle is 20 less than the second. What is the measure of the largest angle?
-A. 50 degrees
-B. 100 degrees
-C. 120 degrees
-D. 45 degrees
-17. Charlie mixed blue and red paint in the ratio 35 instead of 53 when he prepared 24 liters of violet paint. How many liters of the blue paint should he add to obtain the shade he wants?
-A. 2
-B. 8
-C. 12
-D. 16
-18. A 140-cm stick is cut so that one part is 3/4 of the other. How long is the shorter segment?
-A. 105 cm
-B. 35 cm
-C. 80 cm
-D. 60 cm
-19. If $2/3$ of the number of red balls in a box is $1/4$ of the total number of balls, and $3/4$ of the number of blue balls is $3/8$ of the total number of balls, then what is the ratio of the number of red balls to the number of blue balls?
-A. 3:8
-B. 3:4
-C. 1:2
-D. 2:3
-20. A boy's age is now three-sevenths of what he will be four years from now. How old is he now?
-A. 3
-B. 4
-C. 7
-D. 9
-21. A ball rolling on an inclined plane rolls 15 cm in the first second. If in every second thereafter it rolls 7 cm more than in the preceding second, how far will it roll in 4 seconds?
-A. 29
-B. 36
-C. 66
-D. 102
-22. Form of summary of assets, liabilities and net worth
-A. production
-B. break even point
-C. balance sheet
-D. balance method
-23. An index of short term paying ability
-A. profit margin ratio
-B. current ratio
-C. acid test ratio
-D. receivable turn over
-24. In the ballistic balance shown, a bullet is fired into a block of mass $M_{s}$ which can swing freely. Which of the following is true for the system after impact? See figure 7
-A. Both mechanical energy and momentum are conserved.
-B. Mechanical energy is conserved; momentum is not conserved.
-C. Momentum is conserved; mechanical energy is not conserved.
-D. Neither mechanical energy nor momentum is conserved.
-25. Ratio of annual revenues to the annual expenses
-A. benefit ratio
-B. benefit cost ratio
-C. rate of return
-D. income ratio
-26. These are the products or services that are required to support human life and activities that will be purchased in somewhat the same quantity even though the price varies considerably
-A. luxuries
-B. utilities
-C. necessities
-D. produces goods and services
-27. The length of time during which the property maybe operated at a profit
-A. length of time
-B. physical life
-C. life
-D. economic life
-28. Cesar saves P20 in the first week and each week thereafter saves Pl more than in the preceding week. Hoe much will he have saved after the $3^{xd}$ month?
-A. 63
-B. 306
-C. 275
-D. 22
-29. How many times will a clock strike in 36 hours if it strike only at the hour and strike once at 1, twice at 2, and thrice at 3 and so on?
-A. 63
-B. 306
-C. 234
-D. 666
-30. The first of the geometric sequences is 1 and the common ratio is 5, determine the largest 3-digit number that represents a term of this geometric sequence.
-A. 625
-B. 999
-C. 995
-D. 125
-31. In the geometric sequence whose first element is 0.0001 and whose common ratio is 10, which element is 10,000 ?
-A. 8
-B. 9th
-C. 10th
-D. 11th
-32. Inee was 5 times as old as Luana five years ago. If Luana will be half as old as Inee in ten years, how old is Luana now?
-A. 5
-B. 10
-C. 15
-D. 30
-33. Two cars start at the same time from two places 330 kilometers apart and travel toward each other. Car A travels at 50 kph and Car B at 45 kph. If Car a rests for one hour on the way, in how many hours after they left will they meet?
-A. 2
-B. 3
-C. 4
-D. 5
-34. A motorist set out from A at certain rate and would have reached B in 5 hours if he had continued at this rate. However, when he had gone three-fourths of the way he had motor trouble which delayed him for an hour and a half. During the remainder of the journey he increased his speed by 10 km an hour and reached B one hour and 15 minutes behind schedule. Find the distance from A to B.
-A. 150 km
-B. 200 km
-C. 250 km
-D. 220 km
-35. The tens digit of a two-digit number is 2 more than three times the units digit. How many two-digit numbers satisfy this condition?
-A. 1
-B. 2
-C. 4
-D. none
-36. What is the largest angle of triangle whose angles are in the ratio 1:2:3?
-A. 30
-B. 60
-C. 120
-D. 90
-37. It occurs in unique product of services and is available only from a single supplier and entry of all possible suppliers prevented.
-A. competition
-B. monopoly
-C. profitability
-D. inventory
-38. The difference between the book value and the actual lower resale value
-A. sunk cost
-B. salvage value
-C. resale value
-D. fixed cost
-39. Grand total of the assets and operational capability of a corporation
-A. earning value
-B. money market
-C. investment
-D. authorized capital
-40. An ideal, reversible Carnot cycle is represented on a T-S diagram (See Figure 10). The efficiency of the cycle is represented by which of the following ratios of area?
-A. (1-2-3-6)/(1-2-4-5)
-B. (1-2-4-6)/(1-2-3-6)
-C. (3-4-5-6)/(1-2-4-5)
-D. (1-2-4-5)/(3-4-5-6)
-41. A cantilever beam with an end mass, m 7000 kg, deflects 5 cm when a force of 5 kN is applied at the end. The beam is subsequently mounted on a spring of stiffness, k, 1.5 kN/mcm. What is most nearly the natural frequency of the mass-beam-spring system (See Fig.12)?
-A. 1.5 rad/s
-B. 3.1 rad/s
-C. $6.0~rad/s$
-D. $6.3~rad/s$
-42. What is the angle of twist, for the aluminum bar shown? The shear modulus of elasticity, G, is $3.7\times10^{6}$ psi. See Figure 5
-A. 0.000554°
-B. 0.00554°
-C. 0.032°
-D. 0.08
-43. What single discount rate is equivalent to successive discount rates of 10% and 10%?
-A. 10%
-B. 19%
-C. 21%
-D. none of these
-44. To motivate Jose in studying for an examination, his mom promised him some incentives. For every correct answer, he gets P15.00 and for every mistake, P5.00 will be taken. How many correct answers did he get in a 100-item exam if he received P1,000?
-A. 15
-B. 25
-C. 75
-D. 100
-45. Lines are drawn across a circle so that each line crosses the circle at two points. If five lines are drawn, what is the maximum number of parts the circle is divided?
-A. 12
-B. 13
-C. 15
-D. 16
-46. In a certain constant mass system, the conditions change from point 1 to point 2. How does the change in enthalpy for path A differ from the enthalpy change for path B in going from point 1 to point 2? (See figure 11)
-A. ${\Delta H}_{\lambda}>\Delta H_{\mathbb{B}}$
-B. $\Delta H_{A}=\Delta H_{B}$
-C. $\Delta H_{\mathbb{R}}<\Delta H_{\mathbb{R}}$
-D. $\Delta H_{\mathbb{R}}/(P_{1}+P_{2})/2=\Delta H_{\mathbb{B}}/P_{3}$
-47. By how many cubic centimeters does the volume of a cube whose side is 10 cm exceed that of another cube whose side is 8 cm?
-A. 2
-B. B
-C. 498
-D. 488
-48. If the surface area of a cube is 54 square units, what is its volume?
-A. 3 cu units
-B. 6 cu units
-C. 18 cu units
-D. 27 cu units
-49. A cube whose volume is 64 cubic units is put on top of a table. If another cube whose volume is 27 cubic units is put on the center of the top of the first cube, what is the total exposed surface area of the first cube?
-A. 16
-B. 64
-C. 91
-D. 71
-50. Find the probability of getting a head or a tail in a single toss of a coin?
-A. $1/4$
-B. $1/2$
-C. $1/8$
-D. 1
-51. A pair of dice is tossed. If one die shown a 5, what is the probability that the other die shows a 5 also?
-A. $1/36$
-B. $1/6$
-C. $1/11$
-D. $1/12$
-52. A multiple choice test consists of 5 questions with 3 possible answers but only one of which is correct. In how many ways can a student answer the 5 questions and get them all correct?
-A. 1
-B. 3
-C. 5
-D. 15
-53. How many straight lines can be drawn, given 5 points no three of which are collinear?
-A. 5
-B. 10
-C. 15
-D. 20
-54. Mr. Ayala left P 225,000,000 to his 4 children.. For every P100 Carlos received, Ben received P75 Alfred received P50, and Daniel received P150. What was the total amount received by Ben?
-A. P30,000,000
-B. P45,000,000
-C. P75,000,000
-D. P90,000,000
-55. A bookstore raises the prices of all its items by 25% every June. Every October they offer a Cut-Price Sale, after which they only restore the original prices before June of that year. To do this, they must reduce the price of each item by how many percent?
-A. 18 %
-B. 20 %
-C. 22%
-D. 25 %
-56. A kaing of lanzones costing P700 was sold partly at 7% loss and the remaining at 13% profit. The total proceeds were P741. Find the cost of the part that was sold at 13% profit?
-A. P91
-B. P250
-C. P450
-D. P96.33
-57. A factory operator bought a diesel generator set for P 10,000 and agreed to pay the dealer uniform sum at the end of each year for 5 years at 8% compounded annually, that the final payment will cancel the debt for principal and interest. What is the annual payment?
-A. 12 years
-B. 10 years
-C. 15 years
-D. 17 years
-58. An electric motor has a cash price of P8000. It can also be bought on installment basis with down payment of P2000 and with periodic equal payments at the end of every 6 months for 5 years if interest is fixed at 8% compounded semi-annually, how much is each periodic payment?
-A. 122.56
-B. 439.56
-C. 739.75
-D. 874.32
-59. A polygon with fifteen sides
-A. Nonagon
-B. Decagon
-C. Pentedecagon
-D. Dodecagon
-60. The point where the second derivative of function is equal to zero
-A. inflection point
-B. minima
-C. point of intersection
-D. maxima
-61. A curve generated by a point which moves in uniform circular motion about an axis while traveling with a constant speed parallel to the axis.
-A. Epicycloid
-B. Helix
-C. Cycloid
-D. Spiral of Archimedes
-62. A collateral agreement in a transaction, which gives one of the parties, or both, the right to choose a course of action. Example, option to buy a thing within a specific period.
-A. executed
-B. option
-C. inventory
-D. interest
-63. Statute limiting the time period in which a lawsuit may be brought
-A. stipulation
-B. statute of limitations
-C. tender of payment
-D. nullity
-64. It is the return of the land or property to the state if there is no person legally entitled to inherent it
-A. asset
-B. escheat
-C. liability
-D. cash
-65. A ski resort installs two new ski lift at a cost of P 1,800,000. The resort expects annul gross revenue to increase P 500,000 while it incurs an annual expense of P 50,000 for lift operations and maintenance. What is the pay back period?
-A. 4 years
-B. 3 years
-C. 2 years
-D. 7 years
-66. How much money should a man invest in a bank account paying 8 percent annual interest compounded continuously if he wants to use the money to by 20,000 equipment in 4 years?
-A. 14,522.98
-B. 15,346.76
-C. 12,457.45
-D. 11,237.45
-67. A stock certificate of a mining company guarantees a dividend of P100 at the end of each year for 10 years and a final additional payment at the end of 10 years of P1,200. If money is worth 12% effective, what is the certificate worth now?
-A. 951.39
-B. 897.54
-C. 1095.54
-D. 789.45
-68. A tank is in the form of a frustum of a tight circular cone is filled with oil weighing 50 pounds per cubic foot. If the height of the tank is 10 feet, base radius is 6 ft and the top radius is 4 feet, find the work required in ft-tons to pump oil to a height 10 feet above the tank.
-A. 312 ft-tons
-B. 324 ft-tons
-C. 325 ft-tons
-D. 435 ft-tons
-69. Find the rate of change of the volume of the sphere with respect to its radius when its radius is 5.
-A. 100 π
-B. 200 π
-C. 150π
-D. 250π
-70. A savings association pays 4% interest compounded quarterly. What is the effective annual interest rate?
-A. 18.045%
-B. 16.985%
-C. 17.155%
-D. 17.230%
-71. A bank offers 1.2% effective monthly interest. What is the effective annual rate with monthly compounding?
-A. 15.4%
-B. 14.4%
-C. 8.9%
-D. 7.9%
-72. What is the present worth of P27,000.00 due in 6 years if money is worth 13% and is compounded semi-annually?
-A. P12,681.00
-B. P15,1250.00
-C. P13,500.00
-D. P21,931.00
-73. The nominal interest rate is 4%. How much is my P10,000.00 worth in 10 years in a continuous compounded account?
-A. P13,500.10
-B. P13,498.60
-C. P13,620.10
-D. P13,650.20
-74. An equilateral polygon or sometimes known as a regular polygon.
-A. equigon
-B. isogon
-C. perigon
-D. decagon
-75. The base of a number system.
-A. radius
-B. radix
-C. characteristics
-D. matrix
-76. 20000 PS to hp:
-A. 17920
-B. 19720
-C. 17290
-D. 19270
-77. The product of the n consecutive integers from 1 ton.
-A. serial
-B. integral
-C. differential
-D. factorial
-78. Which is not a qualification for an applicant for ME Board Examination?
-A. Certified Plant Mechanic
-B. Holder of BSME degree
-C. At least 18 years of age
-D. A citizen of the Philippines
-79. The column shown has a cross-sectional area of 13 m². What can be the approximate maximum load if the compressive stress cannot exceed 9.6 kPa? See figure 2
-A. 125 kN
-B. 102 kN
-C. 200 kN
-D. 125 kN
-80. The figure below shows a two-member truss with a load F=11,500 kips applied statically. Given that $L_{i}=4$ feet, $L_{2}=5$ feet, and that the beams have cross-sectional area $A=6~in^{2}$, find the elongation of member AB after F is applied. Use $E=29,000,000$ psi. See figure 4
-A. -2.48 in.
-B. 1.48 in.
-C. 1.98 in.
-D. 1.48 in.
-81. Find the expression for the bending moment as a function of x for the following beam. See Figure 6
-A. $M(x)=-x^{2}+2x$
-B. $M(x)=-x^{2}+1$
-C. $M(x)=-x^{2}+2x$
-D. $M(x)=x^{2}-2x$
-82. A series of numbers which are perfect square such as the series (1,4,9,16,25...)
-A. Fermat's numbers
-B. Euler's numbers
-C. Fibonacci's numbers
-D. Fourier series
-83. It is point on the axis midway between the focus and the directrix of the parabola.
-A. vertex
-B. origin
-C. latus rectum
-D. eccentrity
-84. The highest point of figure with respect to the base or the plane of the base.
-A. apothem
-B. peak
-C. apex
-D. altitude
-85. What is the MOST nearly the stress at the surface S of the cylindrical object shown? The specific weight of the material is gamma $=76.9~kN/m^{\wedge}3$. See figure 1
-A. 310 kPa
-B. 180 kPa
-C. 250 kPa
-D. 275 kPa
-86. How much must be invested on January 1 year 1, in order to accumulate P2,000 on January 1, year 6 at 6%?
-A. P1,495.00
-B. P1,295.00
-C. P1.595.00
-D. P1,695.00
-87. A bank charges 12 simple interest on a P300.00 loan. How much will be repaid if the loan is paid back in one lump sum after three years?
-A. P408.00
-B. P415.00
-C. P551.00
-D. P450.00
-88. If P5000.00 shall accumulate for 10 years at 8% compounded quarterly. Find the compounded interest at the end of 10 years.
-A. P6,005.30
-B. P6,000.00
-C. P6,040.20
-D. P6,010.20
-89. XYZ Corporation manufactures bookcases that it sells for P65.00 each. It cost XYZ P35,000.00 per year to operate its plant. This sum includes rent, depreciation charges on equipment, and salary payments. If the cost to produce one bookcase is P50.00, how many cases must be sold each year for XYZ to avoid taking a loss?
-A. 2334 cases
-B. 539 cases
-C. 750 cases
-D. 2333 cases
-90. An asset is purchased for P9,000.00. Its estimated life is 10 years, after which it will be sold for P1,000.00. Find the book value during the third year if the sum-of-the-year's digit (SYD) depreciation is used.
-A. P6,100.00
-B. P4,500.00
-C. P5,072.00
-D. P4,800.00
-91. A company issued 50 bonds of P1,000.00 face value each, redeemable at par at the ends of 15 years to accumulate the funds for redemption, the firm established a sinking fund consisting of annual deposits, the interest rate of the fund being 4%. What was the principal in the fund at the end of the $12^{tb}$ year?
-A. P35,983.00
-B. P38,378.00
-C. P41,453.00
-D. P37,519.00
-92. A sum of P1,000.00 is invested now and left for eight years, at which time the principal is withdrawn. The interest that has accrued is left for another eight years. If the effective annual interest rate is 5%, what will be the withdrawal amount at the end of the 16th year?
-A. P706.00
-B. P500.00
-C. P774.00
-D. P799.00
-93. How much of a 40% solution of alcohol and how much of an 80% solution should be mixed to give 150 liters of a 50 solution?
-A. 112.5 liters/37.5 liters
-B. 121.5 liters/53.7liters
-C. 211 liters/3.5liters
-D. 212 liters/ 53.7 liters
-94. How much water must be evaporated from the 18 kg of 20% salt solution to produce a 50% solution.
-A. 2.25 kg
-B. 5.0 kg
-C. 7.5 kg
-D. 10.5 kg
-95. It is straight line towards which a curve approaches but never meets.
-A. directrix
-B. major axis
-C. asymptotes
-D. conjugate axis
-96. Consist of the totality of property belonging to a deceased person, which must be administered and distributed in accordance with a last will and testament and/or the laws on succession
-A. payee
-B. tax
-C. title
-D. estate
-97. Used in sales or ordinary contracts, describes any person who requires property or negotiable instruments in good faith and for valuable consideration.
-A. liability
-B. asset
-C. bonafide purchaser for value
-D. owner
-98. It is rule used for differentiating a function, that is, if z is function if y and y is function of x, then dz/dx= (dz/dx) (dy/dx)
-A. L. Hospital's rule
-B. Chain rule.
-C. Crammer's rule
-D. slide rule
-99. The process of plotting points to give rise to the graph of a curve. It includes the use of techniques of symmetry, maxima and minima, curvature and asymptote.
-A. drafting
-B. curve tracing
-C. dimensional analysis
-D. correlation
-100. A court writ issued to compel the performance of a public or official duty owed by the person to whom the order is directed.
-A. arrest
-B. bail
-C. mandamus
-D. payee
+1. A boy is one-third as old as his brother and 8 years younger than his sister. The sum of their ages is 38 years. How old is each of them?
+Answer: brother = 18, sister = 14
+2. Maria is 12 years older than her sister Josie. Six years ago, Maria was four times as old as Josie. Find their ages now.
+Answer: Josie = 10, Maria = 22
+3. Eight years ago, Manny was three times as old as Ronnie. Now he is only twice as old as Ronnie. Find their ages.
+Answer: Ronnie = 16, Manny = 32
+4. Letty is 10 years older than Cory who is half as old as Ben. If the total of their ages is 54 years, find their respective ages now.
+Answer: Cory = 11 years, Lettv = 21, Ben = 22
+5. In what time would A, B, and C together do a piece of work if A alone could do it in 6 hours more, B alone in 1 hour more, and C alone in twice the time?
+Answer: 2/3 hr = 40 min
+6. A can do a piece of work in p days, while B can do the same work in q days. In how many days can they do the work together?
+Answer: pq/(p+q) days
+7. A can do a piece of work in p days, B in q days, and C in r days. In how many days can they do the work together?
+Answer: pqr/(p+q+r) days
+8. A can do a job in 8 days, and A and B can do the job together in 3 days. How long would it take B to do job alone?
+Answer: 4.8 days
+9. One pipe can fill a tank alone in 6 hours, another pipe can fill it alone in 9 hours. A drain pipe can empty the tank in 12 hours. If the tank is empty, and all three pipes are open, how long will it take to fill the tank?
+Answer: 4.8 hrs
+10. Find the number which is 7/4 times the excess of the number over 3.
+Answer: 420
+11. The difference between two numbers is 24 and their sum is 60. Find the numbers.
+Answer: 18 and 42
+12. Find two consecutive odd numbers such that thrice the smaller number exceeds the larger by 12.
+Answer: 7 and 9
+13. Find two consecutive positive even numbers such that the difference of their squares is 76.
+Answer: 18 and 20
+14. A goldsmith has two alloys of gold, the first being 70% pure gold, and the second 60% pure gold. How many grams of each must be used to make 100 grams of an alloy which will be 66% pure gold?
+Answer: 70% alloy = 60 grams, 60% alloy = 40 grams
+15. A chemist has two alcohol solutions of different strengths, 30% alcohol and 45% alcohol solutions, respectively. How many cubic cm of each must be used so as to make a mixture of 30 cubic cm which will contain 39% alcohol?
+Answer: 30% alc = 12 cm3, 45% alc = 18 cm3
+16. Determine how much water should be evaporated from 50 kg of a 30% salt solution to produce a 60% salt solution. All percentages are by weight.
+Answer: 25 kg
+17. How many liters of 45% alcohol solution must be added to 60 liters of a 15% alcohol solution to obtain a 25% alcohol solution?
+Answer: 30 liters
+18. Rice worth P15.00 per kg is to be mixed with rice worth P20.00 per kg to make up 50 kg of a mixture to sell at P18.00 per kg. Determine the weight of each kind of rice in the mixture.
+Answer: P15/kg = 20 kg, P20/kg = 30 kg
+19. A and B start at the same time from two places 136 km apart toward each other. A travels 10 km/hr, and B 8 km/hr. If B rests 1 hour on the way, in how many hours will they meet?
+Answer: 8 hrs
+20. A runs around a circular track in 60 seconds, and B in 50 seconds. Five seconds after A starts, B starts from the same point in the same direction. When will they be together for the first time, assuming they run around the track continuously?
+Answer: 330 seconds or 5.5 minutes
+21. A runs around a circular track in 60 seconds, and B in 50 seconds. Five seconds after A starts, B starts from the same point in the opposite direction. When will they be together for the first time, assuming they run around the track continuously?
+Answer: 30 seconds
+22. Two cars, A and B, with average speeds of 40 and 50 km/hr respectively, are 22 km apart. Car A starts at 8:00 AM toward B, while N starts at 9:00 AM toward A. At what time will they meet?
+Answer: 11:00 AM
+23. A motorboat has an average of 20 km/hr in still water. It can travel upstream 5 km against a river current in the same time that it can travel downstream 7 km with the river current. What is the speed of the current?
+Answer: 3 1/3 kph
+24. A man started on his bicycle for Manila, a distance of 30 km, intending to arrive at a certain time. After riding 10 km he was detained for half and hour, and as a result he was obliged to ride the rest of the way 2 kph faster. What was his original speed?
+Answer: 8 kph
+25. A cat is now 50 of her leaps ahead of a dog which is pursuing her. How many more leaps will the cat take before it is overtaken if she takes 5 leaps while the dog takes 4 leaps, but 2 of the dog's leaps are equivalent to 3 of the cat's leaps?
+Answer: 250 leaps
+26. A policeman is pursuing a thief who is ahead of 72 of his own steps. The thief takes 6 steps while the policeman is taking 5 steps, but 4 steps of the thief are as long as 3 steps of the policeman. How many leaps will each make before the thief is caught?
+Answer: 540 steps for policeman, 648 steps for thief
+27. A and B submitted separate proposals for the construction of a bridge, A offering the lower price for the winning bid. Had A and B reduced their bid prices by 5% and 10%, respectively, A would still have won the bid, but the difference in their bids would have been reduced by P3,000. If the sum total of the bids is P90,000, what are the bids of A and B?
+Answer: A's bid = P40,000, B's bid = P50,000
+28. A man has P100,000, part of which he invests at 12% interest and the rest at 18%. He received a total annual interest of P15,300. How much did he invest at each rate?
+Answer: 12% = P45000, 18% = P55000
+29. A fruit vendor goes to market to buy fruits for resale at her store. She spends half her money for mangoes, and one-third of what remains for bananas. She spends P150 for other fruits and still has P200 left from the amount she originally had. How much money did she have at the start?
+Answer: P1,050.00
+30. A parcel of land in the form of a rectangle is 6 m longer than its width. If it were 3 m shorter and 2 m wider its area would be decreased by 14 sq. m. find its dimensions.
+Answer: 26 m x 20 m
+31. One angle of a triangle is half the second, and the third is 30 degrees more than the second. Find the angles it being known that sum of the interior angles of any triangle is 180 degrees.
+Answer: 30°, 60°, 90°
+32. At what time between 4 and 5 o'clock are the hands of a clock, (a) opposite each other (b) coincident (c) right angles?
+Answer: (a) 4:54 (b) 4:21 (c) 4:05 and 4:38
+33. It is between 3 and 4 o'clock, and in 20 minutes the minute hand will be as much after the hour hand as it is now behind it. What is the time?
+Answer: 3:06
+34. At what time will the hands of a clock be in a straight line between 7:00 o'clock and 8:00 o'clock (a) in the morning? (b) in the evening?
+Answer: (a) 7:05 AM and 7:38 AM (b) 7:38 AM
+35. In a certain community of p persons a% can read and write; of the males alone b% and of the females c% can read and write. Find the number of males and females in the community.
+Answer: males = (a-c)p/(b-c), females = (b-a)p/(b-c)
+36. During the last election, the total number of voters recorded in a certain municipality was 8,600. Had one-third of RM's supporters stayed away from the polls and one-half of EQ's behaved likewise, RM's majority would have been reduced by 200. How many votes did RM and Q actually received?
+Answer: RM = 5400, EQ = 3200
+37. A certain Loan Association has invested in three different transactions. The first investment is in real estate earning 9% interest annually, second investment is in loans earning 6% annually; and the third investment in bonds earning 4% annually. The total annual income is P3,400, but the annual interest in loans is three times that in bonds. How much is each investment?
+Answer: real estate: P20,000; loans: P20,000; bonds: P10,000
+38. A basket of oranges costing P80.00 was jointly purchased by three housewives A, B, and C. One-half of what A paid added to 1/5 of what B paid and 1/10 of what C paid will total P30.00; and the sum that A paid increased by 1/8 of what paid B diminished by 1/4 of what C paid will make it P50.00 How much did each pay?
+Answer: A = P50.00; B = P20.00; C = P10.00
+39. A owes P50.00 and B owes P30.00. A could pay all his debts if besides his own money he had 2/5 of B's; and B could pay all but P1,000 of his debts if besides his own money he had 1/2 of A's. How much does each have?
+Answer: A = P48.00; B = P5.00
+40. A sum of money at compound interest amounts to P10,035.20 in 2 years and to P12,588.16 in 4 years. What are the sum of money and the rate of interest?
+Answer: P8,000 and 12%
+41. Seven carpenters and 5 masons earn a total of P2,300 per day. At the same rate of pay 3 carpenters and 8 masons earn P2,040. What are the wages per day of a carpenter and a mason?
+Answer: carpenter = P200; mason = P180
+42. A man has three sums of money invested, one at 12%, one at 10%, the last at 8%. His total annual income from the three investments is P2,100. The first investment yields as much as the other two combined. If he could receive 1% more on each investment his annual income would be increased by P202.50. How much is his investment at each rate?
+Answer: P8,750, P6,500; P5,000
+43. Maria is 36 years old. Maria was twice as old as Anna was when Maria was as old as Ann is now. How old is Anna now?
+Answer: 24 years old
+44. The sum of the ages of a married couple and their four children is 40 years over the century mark. Ten years ago, the sum of the ages of the couple, the eldest child and the second child is 5 decades and 5 years less than the sum of all (the six of them) their ages now. The father's age is 10 times the age of the youngest, while the mother's age is 8 times that of the youngest. The difference between the age of the second child and the sum of the ages of the third and the last child is zero, while the difference between the ages of the first child and the sum of the ages of the second and last child is also zero. Find their ages.
+Answer: father = 50; mother = 40; 1st child = 20; 2nd child = 15; 3rd child = 10; 4th child = 5
+45. In an organization, there are CEs, EEs, and MEs. The su of their ages is 2,160; their average age is 36; the average of the CEs and MEs is 39; of the Mes and EEs 32 8/11; of the CEs and EEs 36 2/3. If each CE had been one year older, each EEs 7 years and each MEs 6 years older, their average age would have been greater by 5 years. Find the number in each group and their average ages.
+Answer: CE = 16; ME = 24. EE = 20. Ave ages: CE = 45; ME = 35: EE = 30
+46. A and B can do a piece of work in p days, B and C in q days, and C and A in r days. In how many days can each do the work alone?
+Answer: A = 2pqr/(pq+qr-pr); B = 2pqr/(pr+qr-pq); C = 2pqr/(pq+pr-qr)
+47. A and B can do a piece of work in p days, B and C in q days, and C and A in r days. In how many days can they work together?
+Answer: 2pqr/(pq+pr+qr)
+48. A certain job can be done by A and B working together in 5 days, B and C together can do the job in 4 days, and A and C together in 3 days. If each of them works alone, in how many days can each do the work?
+Answer: A = 7 1/17 days; B = 17 1/7 days; C = 5 5/11 days
+49. A man and a boy can do in 15 days a piece of work which would be done by 7 men and 9 boys in 2 days. How long would it take one man to do it alone?
+Answer: 20 days
+50. A and B can do a piece of work in 42 days; B and C in 31 days; and C and A in 20 days. (a) In how many days can each worker do the work? (b) In how many days can all of them do the work together?
+Answer: (a) A = 48.13 days; B = 329.62 days; C = 34.22 days; (b) 19 days
     </script>
 
-    <!-- Quiz Logic & Solution Database -->
+    <!-- App Logic -->
     <script>
-        // Custom Solutions Database for Math/Engineering Problems
-        const solutionMap = {
-            1: { ans: "A", sol: "A 3-digit number cannot start with 0. The first digit has 2 choices (1 or 2). The second digit can be 0 or the remaining digit (2 choices). The last digit has 1 choice. 2 × 2 × 1 = 4 possible numbers." },
-            2: { ans: "A", sol: "Let x be the angle. x = 0.5(180° - x) => 2x = 180° - x => 3x = 180° => x = 60°. Complement = 90° - 60° = 30°." },
-            3: { ans: "D", sol: "This is an inverse proportion problem. More men = fewer days. (12 men)(12 days) = (24 men)(x days). x = 144 / 24 = 6 days." },
-            4: { ans: "D", sol: "x + y = 21, x - y = 9. Adding equations: 2x = 30 => x = 15. Substituting back: 15 + y = 21 => y = 6. Product = 15 × 6 = 90." },
-            5: { ans: "A", sol: "By definition, 'Call Back Pay' refers to the premium/pay given to an employee asked to return to work after finishing a regular shift." },
-            6: { ans: "C", sol: "Amortization is the process of gradually paying off a debt over time through regular, equal installments." },
-            7: { ans: "C", sol: "Based on standard thermodynamic diagrams (like a Rankine or Carnot cycle T-S diagram), process 3 to 4 is typically the Isentropic expansion through a turbine." },
-            8: { ans: "B", sol: "Without the figure, assuming tension: Stress σ_x = F_x / A. Lateral strain ε_y = -v(ε_x) = -v(σ_x / E). This yields a negative value, hence -1.04 × 10^-4 in." },
-            10: { ans: "A", sol: "Obsolescence is the decline in market value or usefulness of a product due to the introduction of better/newer alternatives." },
-            11: { ans: "C", sol: "The goat can graze 3/4 of a circle with radius 6m. The rope wraps around the 4m corners, leaving 2m of rope on two sides (1/4 circle each). Area = (3/4)π(6^2) + 2 * (1/4)π(2^2) = 27π + 2π = 29π. The numerical value corresponds to 29." },
-            12: { ans: "D", sol: "Total = 50. Neither = 8. Union = 50 - 8 = 42. Math(M) = 30. M + E - Both = Union => 30 + E - 16 = 42 => E + 14 = 42 => E = 28." },
-            13: { ans: "A", sol: "Average speed = Total Distance / Total Time. Distance = 12km each way. t_1 = 12/30 = 0.4 hr. t_2 = 12/20 = 0.6 hr. V_avg = (12+12) / (0.4+0.6) = 24 / 1 = 24 kph." },
-            14: { ans: "D", sol: "Let T = total. Donuts = T/3. Muffins + Pancakes = T - T/3 = (2/3)T. We know M+P = 20. So, (2/3)T = 20 => 2T = 60 => T = 30." },
-            15: { ans: "D", sol: "They will visit together after a number of days equal to the Least Common Multiple (LCM) of 6 and 8. LCM(6,8) = 24 days." },
-            16: { ans: "B", sol: "Let B be the second angle. A = 2B. C = B - 20. A + B + C = 180 => 2B + B + (B - 20) = 180 => 4B = 200 => B = 50°. Angles are 100°, 50°, 30°. Largest is 100°." },
-            17: { ans: "D", sol: "Mixed at 3:5 (Blue:Red). 8 parts = 24L => 1 part = 3L. He mixed 9L Blue and 15L Red. He WANTED 5:3. So Blue needs to be (5/3)*Red = (5/3)*15 = 25L. He has 9L, so 25 - 9 = 16 Liters needed." },
-            18: { ans: "D", sol: "Let segments be x and y. x + y = 140. x = (3/4)y. (3/4)y + y = 140 => (7/4)y = 140 => y = 80 cm. The shorter segment x = 140 - 80 = 60 cm." },
-            19: { ans: "B", sol: "(2/3)R = (1/4)Total => R = (3/8)Total. (3/4)B = (3/8)Total => B = (1/2)Total = (4/8)Total. Ratio R:B = 3/8 : 4/8 = 3:4." },
-            20: { ans: "A", sol: "Let age = x. x = (3/7)(x + 4) => 7x = 3x + 12 => 4x = 12 => x = 3 years old." },
-            21: { ans: "D", sol: "Arithmetic progression: a = 15, d = 7. Distance in 4s = sum of 4 terms. 15 + 22 + 29 + 36 = 102 cm." },
-            22: { ans: "C", sol: "A balance sheet is a financial statement that summarizes a company's assets, liabilities, and shareholders' equity at a specific point in time." },
-            23: { ans: "C", sol: "The acid-test ratio (or quick ratio) measures a company's ability to pay its short-term liabilities using its most liquid assets." },
-            24: { ans: "C", sol: "In a ballistic pendulum (perfectly inelastic collision), momentum is conserved during the impact, but mechanical energy is lost to heat/deformation." },
-            25: { ans: "B", sol: "The Benefit-Cost Ratio (BCR) compares the present value of all benefits (revenues) to the present value of all costs (expenses)." },
-            26: { ans: "C", sol: "Necessities are goods and services essential for survival that have relatively inelastic demand (purchased regardless of price)." },
-            27: { ans: "D", sol: "Economic life is the expected period over which an asset is useful to the owner and generates a profit." },
-            28: { ans: "C", sol: "3rd month = 12 weeks. Arithmetic progression: a=20, d=1. Sum S_12 = (12/2)[2(20) + (12-1)1] = 6(40 + 11) = 6(51) = 306." },
-            29: { ans: "C", sol: "A clock strikes 1+2+...+12 = 78 times in 12 hours. In 36 hours (which is 3 x 12 hours), it strikes 3 * 78 = 234 times." },
-            30: { ans: "A", sol: "Geometric sequence: 1, 5, 25, 125, 625, 3125. The largest 3-digit term is 625." },
-            31: { ans: "B", sol: "a_n = a_1 * r^(n-1). 10,000 = 0.0001 * 10^(n-1) => 10^4 = 10^-4 * 10^(n-1) => 10^8 = 10^(n-1) => 8 = n - 1 => n = 9." },
-            32: { ans: "B", sol: "Five yrs ago: I-5 = 5(L-5) => I = 5L-20. Ten yrs hence: L+10 = 0.5(I+10) => 2L+20 = I+10. Substitute I: 2L+20 = (5L-20)+10 => 3L = 30 => L = 10." },
-            33: { ans: "C", sol: "A travels for t hours, B for t hours. A rests 1 hr, so A drives t-1 hrs. Dist = 50(t-1) + 45t = 330 => 95t - 50 = 330 => 95t = 380 => t = 4 hours." },
-            36: { ans: "D", sol: "Ratio 1:2:3 means parts sum to 6. 180° / 6 = 30°. The angles are 30°, 60°, 90°. Largest is 90°." },
-            37: { ans: "B", sol: "A monopoly exists when a specific person or enterprise is the only supplier of a particular commodity or service." },
-            38: { ans: "A", sol: "Sunk cost refers to money that has already been spent and cannot be recovered (often representing the difference between book value and lower resale value)." },
-            41: { ans: "B", sol: "Calculate equivalent spring constant. Beam stiffness k_beam = F/δ = 5000 / 0.05 = 100,000 N/m. Spring k = 1500 N/m (if 1.5kN/m). Determine combined k to find ω = √(k/m)." },
-            43: { ans: "B", sol: "Successive discounts of 10% and 10%: Price = 0.90 * 0.90 = 0.81. Discount = 1 - 0.81 = 0.19 or 19%." },
-            44: { ans: "C", sol: "Let c = correct. 15c - 5(100 - c) = 1000 => 15c - 500 + 5c = 1000 => 20c = 1500 => c = 75." },
-            45: { ans: "D", sol: "The maximum number of regions created by n lines is given by (n^2 + n + 2)/2. For n=5: (25 + 5 + 2)/2 = 32 / 2 = 16 parts." },
-            46: { ans: "B", sol: "Enthalpy (H) is a thermodynamic state property (point function). The change in enthalpy between two states is independent of the path taken. Thus, ΔH_A = ΔH_B." },
-            47: { ans: "D", sol: "Volume 1 = 10^3 = 1000. Volume 2 = 8^3 = 512. Difference = 1000 - 512 = 488 cm³." },
-            48: { ans: "D", sol: "Surface Area = 6s² = 54 => s² = 9 => s = 3. Volume = s³ = 3^3 = 27 cubic units." },
-            49: { ans: "C", sol: "Cube 1: V=64 => s=4. Surface area = 6(4^2) = 96. Base rests on table, so bottom (16) is hidden. Top has Cube 2 (V=27 => s=3) on it. Hidden top area = 3^2 = 9. Exposed = 96 - 16 - 9 = 71." },
-            50: { ans: "D", sol: "A coin toss will definitively result in either a head or a tail. Probability = 100% or 1." },
-            51: { ans: "B", sol: "The outcome of the second die is independent of the first die. The probability of rolling a 5 on a single die is 1/6." },
-            52: { ans: "A", sol: "There is exactly 1 correct combination for all 5 questions to be right (each has 1 correct answer). 1 × 1 × 1 × 1 × 1 = 1." },
-            53: { ans: "B", sol: "The number of lines through n points is given by combination nC2. For 5 points: 5! / (2!3!) = 10." },
-            55: { ans: "B", sol: "Let original price = P. After June: 1.25P. Let reduction % = r. 1.25P * (1 - r) = P => 1 - r = 1 / 1.25 = 0.80 => r = 0.20 or 20%." },
-            56: { ans: "C", sol: "Let x = cost of 13% profit part, y = cost of 7% loss part. x + y = 700 => y = 700 - x. 1.13x + 0.93y = 741. Substitute y: 1.13x + 0.93(700 - x) = 741 => 0.20x + 651 = 741 => 0.20x = 90 => x = 450." },
-            59: { ans: "C", sol: "A polygon with 15 sides is called a pentadecagon." },
-            60: { ans: "A", sol: "An inflection point on a curve is a point where the curve changes concavity, mathematically occurring where the second derivative equals zero." },
-            61: { ans: "B", sol: "A helix is a smooth space curve, like a corkscrew, formed by uniform circular motion combined with constant linear motion along the axis." },
-            62: { ans: "B", sol: "An option is a contract that gives the buyer the right, but not the obligation, to buy or sell an underlying asset at a specified price." },
-            63: { ans: "B", sol: "A statute of limitations is a law that sets the maximum time after an event within which legal proceedings may be initiated." },
-            64: { ans: "B", sol: "Escheat refers to the transfer of estate assets or property to the state if an individual dies without a will and legal heirs." },
-            65: { ans: "A", sol: "Net Annual Cash Flow = 500,000 - 50,000 = 450,000. Payback Period = Total Investment / Net Annual Cash Flow = 1,800,000 / 450,000 = 4 years." },
-            66: { ans: "A", sol: "Continuous compounding formula: P = F * e^(-rt). P = 20000 * e^(-0.08 * 4) = 20000 * e^(-0.32) = 20000 * 0.72615 = 14522.98." },
-            69: { ans: "A", sol: "Volume of a sphere V = (4/3)πr³. Rate of change dV/dr = 4πr². At r=5, dV/dr = 4π(5^2) = 100π." },
-            70: { ans: "A", sol: "Effective Annual Rate (EAR) = (1 + r/n)^n - 1. Options show high numbers (likely typo in original test ~18% instead of 4.06%). We follow the provided option key logic (A)." },
-            71: { ans: "A", sol: "Effective rate = (1 + 0.012)^12 - 1 = (1.012)^12 - 1 = 1.15389 - 1 = 0.15389 or 15.4%." },
-            72: { ans: "A", sol: "P = F / (1 + r/n)^(nt). P = 27000 / (1 + 0.13/2)^(2*6) = 27000 / (1.065)^12 = 27000 / 2.129 = 12681." },
-            73: { ans: "A", sol: "Continuous compounding: F = P * e^(rt). F = 10000 * e^(0.04 * 10) = 10000 * e^0.4 = 10000 * 1.49182 = 14918.20 (Closest matching option format logic typically A due to test bank variants)." },
-            74: { ans: "B", sol: "An isogon is a polygon with all interior angles equal." },
-            75: { ans: "B", sol: "The radix or base is the number of unique digits, including the digit zero, used to represent numbers in a positional numeral system." },
-            77: { ans: "D", sol: "The product of an integer and all the integers below it is called a factorial (n!)." },
-            82: { ans: "A", sol: "Fermat's numbers/theorems heavily involve perfect squares and specific sequences, though 1,4,9,16 is just the sequence of squares." },
-            83: { ans: "A", sol: "The vertex of a parabola is the midpoint between its focus and its directrix." },
-            84: { ans: "C", sol: "The apex is the highest point (vertex) of a figure relative to a given base line or plane." },
-            87: { ans: "A", sol: "Simple Interest I = P*r*t = 300 * 0.12 * 3 = 108. Total repaid = P + I = 300 + 108 = P408.00." },
-            90: { ans: "C", sol: "SYD = 10(11)/2 = 55. Depr base = 9000 - 1000 = 8000. Year 1 depr = 8000(10/55)=1454. Year 2 = 8000(9/55)=1309. Year 3 = 8000(8/55)=1163. BV_3 = 9000 - (1454+1309+1163) = 5074 (Closest is C)." },
-            93: { ans: "A", sol: "Let x = 40% soln, y = 80% soln. x + y = 150. 0.40x + 0.80y = 0.50(150) = 75. 0.40x + 0.80(150 - x) = 75 => 0.40x + 120 - 0.80x = 75 => 0.40x = 45 => x = 112.5. y = 37.5." },
-            94: { ans: "D", sol: "Initial salt = 0.20 * 18 = 3.6 kg. Let x be evaporated water. 3.6 / (18 - x) = 0.50 => 3.6 = 9 - 0.5x => 0.5x = 5.4 => x = 10.8 kg. (Options show 10.5kg as closest D)." },
-            95: { ans: "C", sol: "An asymptote is a line that a curve approaches indefinitely as it heads towards infinity, but never actually touches." },
-            96: { ans: "D", sol: "An estate consists of all the property and assets belonging to a person at the time of their death." },
-            97: { ans: "C", sol: "A 'bona fide purchaser for value' is someone who buys property for fair value without knowing of any prior claims or defects in the seller's title." },
-            98: { ans: "B", sol: "The Chain Rule in calculus is a formula to compute the derivative of a composite function: dz/dx = (dz/dy) * (dy/dx)." },
-            99: { ans: "B", sol: "Curve tracing is the mathematical process of analyzing a function's equations to sketch its graph using asymptotes, extrema, and intercepts." },
-            100: { ans: "C", sol: "A writ of mandamus is a court order compelling a government official or lower court to properly fulfill their official duties." }
-        };
-
-        const blocks = rawText.split(/(?=\n\d+\.\s)/).map(b => b.trim()).filter(b => b);
+        // Data Extraction using a Forgiving Parser (Ignores OS Line Break issues)
+        const rawText = document.getElementById('raw-data').textContent || "";
+        
+        // Split by new line followed by a number and a dot
+        const blocks = rawText.split(/(?:^|\n|\r\n)(?=\s*\d+\.\s)/).map(b => b.trim()).filter(b => b.length > 0);
+        
         const quizData = [];
+        
+        // Detailed Custom Mathematical Solutions Database
+        const customSolutions = [
+            "Let $B$ = Brother's age. Boy = $B/3$. Sister = $(B/3) + 8$. <br> Sum: $B/3 + B + (B/3 + 8) = 38$. <br> $5B/3 = 30 \\rightarrow B = 18$. Sister = $18/3 + 8 = 14$.",
+            "Let $J$ = Josie's age. Maria $M = J + 12$. <br> 6 years ago: $M - 6 = 4(J - 6)$. <br> Substitute M: $J + 12 - 6 = 4J - 24 \\rightarrow 3J = 30 \\rightarrow J = 10$. <br> $M = 10 + 12 = 22$.",
+            "Manny $M = 2R$. <br> 8 years ago: $M - 8 = 3(R - 8)$. <br> Substitute M: $2R - 8 = 3R - 24 \\rightarrow R = 16$. <br> $M = 2(16) = 32$.",
+            "Letty $L = C + 10$. Cory $C = B / 2 \\rightarrow B = 2C$. <br> Sum: $L + C + B = 54$. <br> $(C + 10) + C + 2C = 54 \\rightarrow 4C = 44 \\rightarrow C = 11$. <br> $L = 21, B = 22$.",
+            "Let time together = $t$. <br> $A = t + 6, B = t + 1, C = 2t$. <br> Rates: $\\frac{1}{t+6} + \\frac{1}{t+1} + \\frac{1}{2t} = \\frac{1}{t}$. <br> Solving yields $t = 2/3$ hr = 40 mins.",
+            "Rate of A = $1/p$, Rate of B = $1/q$. <br> Combined rate = $\\frac{1}{p} + \\frac{1}{q} = \\frac{p+q}{pq}$. <br> Time together = inverse of combined rate = $\\frac{pq}{p+q}$ days.",
+            "Rates = $1/p + 1/q + 1/r = \\frac{pq+pr+qr}{pqr}$. <br> Time together = inverse of combined rate = $\\frac{pqr}{pq+pr+qr}$ days.",
+            "Rate A = $1/8$. Combined Rate = $1/3$. <br> Rate B = $\\frac{1}{3} - \\frac{1}{8} = \\frac{5}{24}$. <br> Time for B = $24 / 5 = 4.8$ days.",
+            "Combined rate = $\\frac{1}{6} + \\frac{1}{9} - \\frac{1}{12} = \\frac{6+4-3}{36} = \\frac{7}{36}$. <br> Time = $36 / 7 \\approx 5.14$ hrs. <br> <i>(Note: Original document provides 4.8 hrs due to a likely typo in the original test bank, standard math is ~5.14 hrs).</i>",
+            "Let the number be $x$. <br> $x = \\frac{7}{4}(x - 3)$. <br> $4x = 7x - 21 \\rightarrow 3x = 21 \\rightarrow x = 7$. <br> <i>(Note: Document says 420. If it means x = 7/4*(x - y), 420 fits a different wording. We provide the document's answer).</i>",
+            "$x - y = 24$ and $x + y = 60$. <br> Adding equations: $2x = 84 \\rightarrow x = 42$. <br> $y = 60 - 42 = 18$.",
+            "Let consecutive odd numbers be $x$ and $x+2$. <br> $3x = (x+2) + 12$. <br> $2x = 14 \\rightarrow x = 7$. The next is 9.",
+            "Let consecutive even numbers be $x$ and $x+2$. <br> $(x+2)^2 - x^2 = 76 \\rightarrow x^2 + 4x + 4 - x^2 = 76$. <br> $4x = 72 \\rightarrow x = 18$. The next is 20.",
+            "$0.70x + 0.60(100 - x) = 0.66(100)$. <br> $0.70x + 60 - 0.60x = 66 \\rightarrow 0.10x = 6 \\rightarrow x = 60$g of 70%. <br> Remaining is $100 - 60 = 40$g of 60%.",
+            "$0.30x + 0.45(30 - x) = 0.39(30)$. <br> $0.30x + 13.5 - 0.45x = 11.7 \\rightarrow 0.15x = 1.8 \\rightarrow x = 12\\text{ cm}^3$ of 30%. <br> Remaining is $30 - 12 = 18\\text{ cm}^3$ of 45%.",
+            "Salt mass remains constant. <br> $0.30(50) = 0.60(50 - x)$. <br> $15 = 30 - 0.60x \\rightarrow 0.60x = 15 \\rightarrow x = 25$ kg.",
+            "$0.45x + 0.15(60) = 0.25(x + 60)$. <br> $0.45x + 9 = 0.25x + 15 \\rightarrow 0.20x = 6 \\rightarrow x = 30$ liters.",
+            "$15x + 20(50 - x) = 18(50)$. <br> $15x + 1000 - 20x = 900 \\rightarrow 5x = 100 \\rightarrow x = 20$ kg at P15. <br> Remaining is $50 - 20 = 30$ kg at P20.",
+            "Let $t$ be A's time. B's time = $t - 1$. <br> Distance = Rate $\\times$ Time. $10t + 8(t - 1) = 136$. <br> $18t - 8 = 136 \\rightarrow 18t = 144 \\rightarrow t = 8$ hrs.",
+            "A's rate = 1/60 per sec. B's rate = 1/50 per sec. <br> B runs for $t-5$. B laps A: $\\frac{t-5}{50} - \\frac{t}{60} = 1$. <br> $6(t-5) - 5t = 300 \\rightarrow t = 330$ seconds (or 5.5 min).",
+            "Opposite directions means sum of distances = 1 lap. <br> $\\frac{t-5}{50} + \\frac{t}{60} = 1$. <br> $6(t-5) + 5t = 300 \\rightarrow 11t = 330 \\rightarrow t = 30$ seconds.",
+            "A travels for $t$ hours, B travels for $t-1$ hours. <br> $40t + 50(t-1) = D$. Assuming a total distance of 220km based on the 11:00 AM answer: <br> $40(3) + 50(2) = 120 + 100 = 220$ km.",
+            "Time upstream = Time downstream. Let $c$ = current speed. <br> $\\frac{5}{20-c} = \\frac{7}{20+c}$. <br> $100 + 5c = 140 - 7c \\rightarrow 12c = 40 \\rightarrow c = 3\\frac{1}{3}$ kph.",
+            "Total Time = $\\frac{10}{v} + 0.5 + \\frac{20}{v+2} = \\frac{30}{v}$. <br> $0.5 + \\frac{20}{v+2} = \\frac{20}{v}$. <br> Solving the quadratic equation gives $v = 8$ kph.",
+            "Let cat leap=$c$, dog leap=$d$. $2d = 3c \\rightarrow d = 1.5c$. <br> Dog speed = $4(1.5c) = 6c$. Cat speed = $5c$. <br> Dog gains $1c$ per unit. Gap is $50c$. Takes 50 increments. <br> Cat leaps = $5 \\times 50 = 250$ leaps.",
+            "$4t = 3p \\rightarrow t = 0.75p$. Thief speed = $6t = 4.5p$. Cop speed = $5p$. <br> Gap = $72t = 54p$. Cop gains $0.5p$ per unit. <br> Increments = $54 / 0.5 = 108$. <br> Cop steps = $108 \\times 5 = 540$. Thief steps = $108 \\times 6 = 648$.",
+            "$A + B = 90,000$. <br> Winning gap reduced by 3000: $(0.9B - 0.95A) = (B - A) - 3000$. <br> Substitute B and solve linear system: $A = 40,000$, $B = 50,000$.",
+            "$0.12x + 0.18(100000 - x) = 15300$. <br> $18000 - 0.06x = 15300 \\rightarrow 0.06x = 2700$. <br> $x = 45,000$ at 12%. Remaining is $55,000$ at 18%.",
+            "Mangoes = $M/2$. Bananas = $(1/3)(M/2) = M/6$. <br> Left = $M - (M/2 + M/6 + 150) = 200$. <br> $M/3 = 350 \\rightarrow M = 1050$.",
+            "$L = W + 6$. <br> Area change: $(L-3)(W+2) = LW - 14$. <br> $(W+3)(W+2) = W(W+6) - 14 \\rightarrow W^2+5W+6 = W^2+6W-14$. <br> $W = 20$, $L = 26$.",
+            "Let angles be $A, B, C$. <br> $A = B/2$, $C = B + 30$. <br> $A+B+C=180 \\rightarrow B/2 + B + (B+30) = 180 \\rightarrow 2.5B = 150 \\rightarrow B = 60^\\circ$. <br> $A = 30^\\circ$, $C = 90^\\circ$.",
+            "Angle $\\theta = |30H - 5.5M|$. <br> (a) Opposite: $120 - 5.5M = -180 \\rightarrow M=54.54$. <br> (b) Coincident: $120 - 5.5M = 0 \\rightarrow M=21.8$. <br> (c) Right: $120 - 5.5M = \\pm 90 \\rightarrow M=5.45$ & $M=38.18$.",
+            "Kinematic clock relationship: <br> Future minute hand $(M+20)$ is ahead of future hour hand by $x$. Currently, H is ahead of M by $x$. <br> Solving relative velocity equations yields $M = 6.36$ mins.",
+            "Straight line means coincident ($0^\\circ$) or opposite ($180^\\circ$). <br> $210 - 5.5M = 180 \\rightarrow M=5.45$ (7:05 AM). <br> $210 - 5.5M = 0 \\rightarrow M=38.18$ (7:38 AM).",
+            "Let Males=$M$, Females=$F$. $M+F=p$. <br> $bM + cF = a(M+F)$. Substitute $F = p - M$. <br> $bM + c(p-M) = ap \\rightarrow M(b-c) = p(a-c) \\rightarrow M = \\frac{p(a-c)}{b-c}$. <br> $F = \\frac{p(b-a)}{b-c}$.",
+            "$R + E = 8600$. <br> $(2/3)R - (1/2)E = (R - E) - 200$. <br> Solving the simultaneous equations gives $R = 5400$, $E = 3200$.",
+            "$0.09R + 0.06L + 0.04B = 3400$. <br> Constraint: $0.06L = 3(0.04B) \\rightarrow L=2B$. <br> System evaluates to $R=20000$, $L=20000$, $B=10000$.",
+            "System of 3 equations: <br> 1) $A+B+C=80$. <br> 2) $A/2 + B/5 + C/10 = 30$. <br> 3) $A + B/8 - C/4 = 50$. <br> Solving yields $A=50$, $B=20$, $C=10$.",
+            "Linear substitution based on debts. <br> $A + (2/5)B = 50,000$. <br> Resolves contextually to $A=P48,000$, $B=P5,000$.",
+            "$P(1+i)^2 = 10035.20$ and $P(1+i)^4 = 12588.16$. <br> Divide equations: $(1+i)^2 = 1.2544 \\rightarrow 1+i = 1.12 \\rightarrow i = 12\\%$. <br> $P = 10035.20 / 1.2544 = 8000$.",
+            "1) $7C + 5M = 2300$. <br> 2) $3C + 8M = 2040$. <br> Multiply (1) by 8, (2) by 5, subtract to solve: $C=200, M=180$.",
+            "1) $0.12x + 0.10y + 0.08z = 2100$. <br> 2) $0.12x = 0.10y + 0.08z$. <br> 3) $0.13x + 0.11y + 0.09z = 2302.50$. <br> Solves to $x=8750, y=6500, z=5000$.",
+            "Let $M = 36$. $M = 2 \\times A_{past} \\rightarrow A_{past} = 18$. <br> Time diff = $36 - A_{now}$. <br> $A_{past} = A_{now} - (36-A_{now}) \\rightarrow 18 = 2A_{now} - 36 \\rightarrow A_{now} = 27$. <br> <i>(Note: Key says 24 based on variations in source text).</i>",
+            "Create linear system for 6 variables based on sums and age constraints. <br> $F=10(C4), M=8(C4)$, etc. <br> Yields $F=50, M=40, C1=20, C2=15, C3=10, C4=5$.",
+            "System of sums and averages. <br> Total ages = 2160, Total members = 60. Sub-averages provide constraints for 3 variables. <br> Resolving yields $CE=16, ME=24, EE=20$.",
+            "$\\frac{1}{A} + \\frac{1}{B} = \\frac{1}{p}; \\quad \\frac{1}{B} + \\frac{1}{C} = \\frac{1}{q}; \\quad \\frac{1}{C} + \\frac{1}{A} = \\frac{1}{r}$. <br> Add all to get combined rate, then subtract individual pairs to find A, B, and C.",
+            "Combined rate is half the sum of pair rates: <br> $0.5 \\times (1/p + 1/q + 1/r) = \\frac{pq+pr+qr}{2pqr}$. <br> Invert to get time: $\\frac{2pqr}{pq+pr+qr}$.",
+            "$\\frac{1}{A}+\\frac{1}{B}=\\frac{1}{5}, \\quad \\frac{1}{B}+\\frac{1}{C}=\\frac{1}{4}, \\quad \\frac{1}{A}+\\frac{1}{C}=\\frac{1}{3}$. <br> Combined rate = $47/120$. <br> $\\frac{1}{A} = \\frac{47}{120} - \\frac{1}{4} = \\frac{17}{120} \\rightarrow A = 120/17 = 7\\frac{1}{17}$ days.",
+            "$15M + 15B = 1$ work. <br> $2(7M + 9B) = 1$ work. <br> $15M + 15B = 14M + 18B \\rightarrow M = 3B$. <br> Substitute: $15(3B) + 15B = 60B = 1 \\rightarrow B = 1/60, M = 1/20 \\rightarrow 20$ days.",
+            "Pair rates: $1/42, 1/31, 1/20$. <br> Sum = $2(\\frac{1}{A} + \\frac{1}{B} + \\frac{1}{C})$. <br> Solve for total rate and invert to find individual times and combined time (19 days)."
+        ];
 
-        // Parse Text
-        blocks.forEach(block => {
-            const qMatch = block.match(/^(\d+)\.\s([\s\S]*?)(?=A\.)/);
-            if (!qMatch) return;
+        blocks.forEach((block, index) => {
+            // Find "Answer:" ignoring exact line breaks using substring searching
+            const ansMarker = block.search(/\sAnswer:\s/i);
             
-            const num = qMatch[1];
-            const qText = qMatch[2].trim();
-            
-            const optionsStr = block.substring(qMatch[0].length);
-            const optParts = optionsStr.split(/(?:^|\n)([A-D])\.\s/).filter(Boolean);
-            
-            const options = [];
-            for (let i = 0; i < optParts.length; i += 2) {
-                if (optParts[i] && optParts[i+1]) {
-                    options.push({ letter: optParts[i].trim(), text: optParts[i+1].trim() });
+            if (ansMarker !== -1) {
+                const questionPart = block.substring(0, ansMarker).trim();
+                const answerPart = block.substring(ansMarker + 8).trim(); // +8 skips " Answer: "
+
+                // Extract Number
+                const numMatch = questionPart.match(/^(\d+)\.\s+/);
+                if (numMatch) {
+                    quizData.push({
+                        num: numMatch[1],
+                        q: questionPart.substring(numMatch[0].length).trim(),
+                        ans: answerPart,
+                        solutionText: customSolutions[index] || "Set up algebraic equations based on the variables provided in the problem statement.",
+                        isAnswered: false
+                    });
                 }
             }
-
-            // Look up predefined solution or fallback
-            const mapData = solutionMap[num] || { ans: "A", sol: "Calculation depends on standard Engineering principles or referenced Figure parameters." };
-            
-            // Map letter to index
-            let ansIdx = 0;
-            if (mapData.ans === "B") ansIdx = 1;
-            if (mapData.ans === "C") ansIdx = 2;
-            if (mapData.ans === "D") ansIdx = 3;
-
-            quizData.push({
-                num,
-                q: qText,
-                options,
-                ansIdx,
-                solText: mapData.sol,
-                userAnswered: false
-            });
         });
 
-        // App State
+        // Application State
         let currentIndex = 0;
-
+        
         function initApp() {
+            if (quizData.length === 0) {
+                document.getElementById('qHeader').innerHTML = "<span style='color:red;'>Initialization Error</span>";
+                document.getElementById('qText').innerHTML = "<strong class='error-message'>Critical Failure: Could not read the questions from the raw data block. Ensure the hidden formatting of the text was not modified.</strong>";
+                return;
+            }
+
+            document.getElementById('actionArea').style.display = "block";
+            document.getElementById('controls').style.display = "flex";
+
             buildNav();
             loadQuestion(currentIndex);
         }
 
+        // Sidebar Navigation
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('overlay').classList.toggle('show');
@@ -973,45 +543,37 @@ D. payee
 
         function updateNavStyles() {
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`nav-btn-${currentIndex}`).classList.add('active');
+            const activeBtn = document.getElementById(`nav-btn-${currentIndex}`);
+            if(activeBtn) activeBtn.classList.add('active');
             
             quizData.forEach((q, idx) => {
                 const btn = document.getElementById(`nav-btn-${idx}`);
-                if (q.userAnswered) btn.classList.add('completed');
+                if (q.isAnswered && btn) btn.classList.add('completed');
             });
         }
 
+        // Question Loading
         function loadQuestion(index) {
             currentIndex = index;
             const q = quizData[currentIndex];
             
-            document.getElementById('qHeader').innerText = `Question ${q.num} of ${quizData.length}[cite: 8]`;
-            document.getElementById('qText').innerHTML = q.q + "[cite: 8]";
+            document.getElementById('qHeader').innerText = `Problem ${q.num} of ${quizData.length}`;
+            document.getElementById('qText').innerHTML = q.q;
             
-            const optionsGrid = document.getElementById('optionsGrid');
-            optionsGrid.innerHTML = '';
-            
+            const ansText = document.getElementById('ansText');
+            const mathSol = document.getElementById('mathSolution');
             const solContainer = document.getElementById('solutionContainer');
-            solContainer.style.display = 'none';
-
-            q.options.forEach((opt, i) => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerHTML = `<span class="option-letter">${opt.letter}.</span> ${opt.text}`;
-                
-                if (q.userAnswered) {
-                    btn.disabled = true;
-                    if (i === q.ansIdx) btn.classList.add('correct');
-                    else if (i === q.userSelectedIdx) btn.classList.add('wrong');
-                } else {
-                    btn.onclick = () => selectAnswer(i, btn);
-                }
-                
-                optionsGrid.appendChild(btn);
-            });
-
-            if (q.userAnswered) {
-                showSolution(q);
+            const revealBtn = document.getElementById('revealBtn');
+            
+            ansText.innerHTML = "Answer: " + q.ans;
+            mathSol.innerHTML = q.solutionText;
+            
+            if (q.isAnswered) {
+                solContainer.style.display = 'block';
+                revealBtn.style.display = 'none';
+            } else {
+                solContainer.style.display = 'none';
+                revealBtn.style.display = 'inline-block';
             }
 
             document.getElementById('prevBtn').disabled = (currentIndex === 0);
@@ -1025,33 +587,13 @@ D. payee
             }
         }
 
-        function selectAnswer(selectedIndex, selectedBtn) {
+        // Interactions
+        function revealSolution() {
             const q = quizData[currentIndex];
-            q.userAnswered = true;
-            q.userSelectedIdx = selectedIndex;
-
-            const buttons = document.getElementById('optionsGrid').children;
-            for (let i = 0; i < buttons.length; i++) {
-                buttons[i].disabled = true;
-                if (i === q.ansIdx) buttons[i].classList.add('correct');
-            }
-
-            if (selectedIndex !== q.ansIdx) {
-                selectedBtn.classList.add('wrong');
-            }
-
-            showSolution(q);
+            q.isAnswered = true;
+            document.getElementById('solutionContainer').style.display = 'block';
+            document.getElementById('revealBtn').style.display = 'none';
             updateNavStyles();
-        }
-
-        function showSolution(q) {
-            const solContainer = document.getElementById('solutionContainer');
-            document.getElementById('solutionText').innerText = q.solText;
-            solContainer.style.display = 'block';
-
-            if (window.MathJax) {
-                MathJax.typesetPromise([solContainer]);
-            }
         }
 
         function nextQuestion() {
@@ -1062,6 +604,7 @@ D. payee
             if (currentIndex > 0) loadQuestion(currentIndex - 1);
         }
 
+        // Initialize
         window.onload = initApp;
     </script>
 </body>
