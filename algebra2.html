@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Problems Quiz</title>
+    <title>Algebra Problems & Formulas Quiz</title>
     <!-- MathJax for rendering LaTeX formulas -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -40,7 +40,7 @@
 
         /* Sidebar Navigation */
         #sidebar {
-            width: 250px;
+            width: 280px;
             background-color: var(--nav-bg);
             color: white;
             display: flex;
@@ -50,6 +50,7 @@
             height: 100%;
             z-index: 1000;
             transform: translateX(-100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
         }
 
         #sidebar.open {
@@ -135,8 +136,8 @@
         .quiz-card {
             background-color: var(--main-color);
             width: 100%;
-            max-width: 700px;
-            padding: 30px;
+            max-width: 750px;
+            padding: 35px;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             height: fit-content;
@@ -202,8 +203,37 @@
             color: var(--accent-color);
         }
 
+        .feedback {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: none;
+        }
+
+        /* Formula Box */
+        .formula-box {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #ebf5fb;
+            border-left: 5px solid var(--accent-color);
+            border-radius: 4px;
+            display: none;
+        }
+
+        .formula-box strong {
+            display: block;
+            margin-bottom: 10px;
+            color: #2980b9;
+            font-size: 1.1rem;
+        }
+
+        .formula-text {
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
         .controls {
-            margin-top: 30px;
+            margin-top: 35px;
             display: flex;
             justify-content: space-between;
         }
@@ -226,13 +256,6 @@
         .control-btn:disabled {
             background-color: #bdc3c7;
             cursor: not-allowed;
-        }
-
-        .feedback {
-            margin-top: 20px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            display: none;
         }
 
         /* Overlay for sidebar */
@@ -262,15 +285,23 @@
     <div id="main-content">
         <div class="top-bar">
             <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
-            <h2>Review Quiz</h2>
+            <h2>Algebra Problems & Formulas</h2>
         </div>
 
         <div class="quiz-container">
             <div class="quiz-card" id="quizCard">
                 <div class="question-header" id="qHeader">Problem 1</div>
                 <div class="question-text" id="qText">Loading...</div>
+                
                 <div class="options-container" id="optionsGrid"></div>
+                
                 <div class="feedback" id="feedback"></div>
+                
+                <!-- Formula Box displayed after answering -->
+                <div class="formula-box" id="formulaBox">
+                    <strong>Formula / Concept Used:</strong>
+                    <div class="formula-text" id="formulaText"></div>
+                </div>
                 
                 <div class="controls">
                     <button class="control-btn" id="prevBtn" onclick="prevQuestion()">&#8592; Previous</button>
@@ -283,10 +314,16 @@
     <!-- Raw Data Embed (Do not modify) -->
     <script id="raw-data" type="text/plain">
 1. Solve for x: $\sqrt{x-\sqrt{1-x}}=1-\sqrt{x}$
-A. -16/25 and 0
-B. 25/16 and 0
-C. -25/16 and 0
-D. 16/25 and 0*
+$-16/25$ and 0
+A.
+B. $25/16$ and 0
+C. $-25/16$ and 0
+D. $16/25$ and 0*
+12. How many terms of the sequence -9, -6, -3, ... must be taken so that the sum is 66?
+A. 11*
+B. 6
+C. 4
+D. 9
 2. Solve for x: $3^{x}5^{x+1}=6^{x+2}$
 A. 2.1455
 B. 2.1445
@@ -302,6 +339,16 @@ A. 9*
 B. 10
 C. 11
 D. 12
+13. In a pile of logs, each layer contains one more log than the layer above and top contains just one log. If there are 105 logs in the pile, how many layers are there?
+A. 10
+B. 12
+C. 14*
+D. 15
+14. A machine costs P50, 000 and depreciates 20% of the original cost during the first year, 16% during the second year, 12% during the third year, and so on, for 5 years. What is its value at the end of 5 years?
+A. P10,000*
+B. P20,000
+C. P30,000
+D. P40,000
 5. Find the sum of the coefficients in the expansion of $(x+2y-z)^{8}$
 A. 256*
 B. 1024
@@ -312,6 +359,16 @@ A. $-70~x^{8}$
 B. $70x^{8}$
 C. -5670 x8
 D. 5670 x8*
+15. What is the remainder when the product of the first 7 primes is divided by 510?
+A. 0*
+B. 6
+C. 9
+D. 17
+16. Find the remainder if we divide: $4y^{3}+18y^{2}+8y-4$ by $(2y+3)$
+A. 10
+B. 11*
+C. 15
+D. 13
 7. Find k so that the expression $kx^{2}-3kx+9$ is a perfect square.
 A. 3
 B. 4*
@@ -337,31 +394,6 @@ A. 15 potatoes*
 B. 19 potatoes
 C. 21 potatoes
 D. 25 potatoes
-12. How many terms of the sequence -9, -6, -3, ... must be taken so that the sum is 66?
-A. 11*
-B. 6
-C. 4
-D. 9
-13. In a pile of logs, each layer contains one more log than the layer above and top contains just one log. If there are 105 logs in the pile, how many layers are there?
-A. 10
-B. 12
-C. 14*
-D. 15
-14. A machine costs P50, 000 and depreciates 20% of the original cost during the first year, 16% during the second year, 12% during the third year, and so on, for 5 years. What is its value at the end of 5 years?
-A. P10,000*
-B. P20,000
-C. P30,000
-D. P40,000
-15. What is the remainder when the product of the first 7 primes is divided by 510?
-A. 0*
-B. 6
-C. 9
-D. 17
-16. Find the remainder if we divide: $4y^{3}+18y^{2}+8y-4$ by $(2y+3)$
-A. 10
-B. 11*
-C. 15
-D. 13
 17. Maria is 12 years older than her sister Josie. Six years ago, Maria was four times as old as Josie. Find their ages now.
 A. 14, 26
 B. 10, 22*
@@ -818,7 +850,7 @@ B. 5*
 C. 7
 D. 9
 108. Find the 11th term of a G.P. if the $2^{nd}$ term is 8 and the $5^{th}$ term is 64
-A. 4, 096*
+A. 4096*
 B. 8, 192
 C. 2, 048
 D. 1, 024
@@ -896,7 +928,7 @@ D. 47.53 m*
 A. 168.56 m
 B. 158.76 m
 C. 186.56 m
-D. 185.67 m
+D. 185.67 m*
 124. For a given spherical triangle whose given parts are: $A=125^{\circ}32^{\prime}$ $C=90^{\circ},$ and $a=140^{\circ}$. Find side b,
 A. $49^{\circ}21^{\prime}$
 B. $52^{\circ}10^{\prime}$
@@ -911,7 +943,7 @@ D. 13 m
 A. 12.34 $m^{2}$
 B. 14.89 $m^{2}$
 C. 16.45 m²
-D. 15.26 m²
+D. 15.26 m²*
 127. A right spherical triangle has an angle $C=90^{\circ}$, a $=50^{\circ}$ and $c=80^{\circ}$ Find the side b.
 A. $45.33^{\circ}$
 B. $78.66^{\circ}$
@@ -996,7 +1028,7 @@ D. 7 kph*
 A. 3 kph
 B. 4 kph
 C. 5 kph
-D. 6 kph
+D. 6 kph*
 144. A and B run around a circular track whose circumference is 150 meters. When they run in opposite direction they meet every 5 seconds, but when they run in the same direction from the same point they are together every 25 seconds. What is the rate of B?
 A. 9 m/s
 B. 12 m/s*
@@ -2410,7 +2442,7 @@ D. 5.89
             }
             
             let options = [];
-            let ansIdx = -1;
+            let ansIdx = 0; // Default to first option if no asterisk found
             
             if (optsText) {
                 // Split by A., B., C., D.
@@ -2429,6 +2461,58 @@ D. 5.89
             
             quizData.push({ num, q: qText, options, ansIdx, userAnswered: false });
         });
+
+        // Dynamic Concept/Formula Generator
+        function getFormulaForQuestion(text) {
+            let lower = text.toLowerCase();
+            
+            if (lower.includes("age") || lower.includes("older") || lower.includes("younger")) {
+                return "\\text{Age Problem (Linear Eq): } \\quad Age_{future} = Age_{now} + t";
+            }
+            if (lower.includes("clock") || lower.includes("minute hand")) {
+                return "\\text{Clock Problem: } \\theta = |30H - 5.5M| \\quad \\text{or relative velocity } V_r = \\frac{11}{12}";
+            }
+            if (lower.includes("work") || lower.includes("job") || lower.includes("together") || lower.includes("pump")) {
+                return "\\text{Work Problem: } \\frac{1}{t_1} + \\frac{1}{t_2} + \\dots = \\frac{1}{t_{total}}";
+            }
+            if (lower.includes("mixture") || lower.includes("solution") || lower.includes("pure") || lower.includes("alloy")) {
+                return "\\text{Mixture Problem: } C_1V_1 + C_2V_2 = C_{final} V_{final}";
+            }
+            if (lower.includes("speed") || lower.includes("kph") || lower.includes("mph") || lower.includes("travel")) {
+                return "\\text{Kinematics (Distance): } d = v \\times t";
+            }
+            if (lower.includes("geometric") || lower.includes("g.p.")) {
+                return "\\text{Geometric Progression: } a_n = a_1 r^{n-1}, \\quad S_n = \\frac{a_1(1-r^n)}{1-r}";
+            }
+            if (lower.includes("arithmetic") || lower.includes("a.p.") || lower.includes("sequence")) {
+                return "\\text{Arithmetic Progression: } a_n = a_1 + (n-1)d, \\quad S_n = \\frac{n}{2}(a_1 + a_n)";
+            }
+            if (lower.includes("harmonic")) {
+                return "\\text{Harmonic Progression: The reciprocals form an Arithmetic Progression}";
+            }
+            if (lower.includes("logarithm") || lower.includes("log ")) {
+                return "\\text{Logarithms: } \\log_b x = y \\iff b^y = x, \\quad \\log_b(xy) = \\log_b x + \\log_b y";
+            }
+            if (lower.includes("probability") || lower.includes("random") || lower.includes("dice") || lower.includes("coin")) {
+                return "\\text{Probability: } P(E) = \\frac{\\text{favorable outcomes}}{\\text{total possible outcomes}}";
+            }
+            if (lower.includes("expansion") || lower.includes("term")) {
+                return "\\text{Binomial Theorem: } \\binom{n}{r} x^{n-r} y^r";
+            }
+            if (lower.includes("remainder") || lower.includes("divided by")) {
+                return "\\text{Remainder Theorem: } f(c) = R";
+            }
+            if (lower.includes("spherical triangle")) {
+                return "\\text{Spherical Trig: } \\cos c = \\cos a \\cos b + \\sin a \\sin b \\cos C";
+            }
+            if (lower.includes("triangle") || lower.includes("angle")) {
+                return "\\text{Geometry: } \\Sigma \\text{ interior angles } = 180^\\circ \\quad \\text{or Sine/Cosine Law}";
+            }
+            
+            // Default 
+            return "\\text{Algebraic equation formulation based on the problem statement variables.}";
+        }
+
 
         // Application State
         let currentIndex = 0;
@@ -2475,7 +2559,10 @@ D. 5.89
             optionsGrid.innerHTML = '';
             
             const feedback = document.getElementById('feedback');
+            const formulaBox = document.getElementById('formulaBox');
+            
             feedback.style.display = 'none';
+            formulaBox.style.display = 'none';
 
             q.options.forEach((opt, i) => {
                 const btn = document.createElement('button');
@@ -2492,6 +2579,10 @@ D. 5.89
                 
                 optionsGrid.appendChild(btn);
             });
+
+            if (q.userAnswered) {
+                showFormula(q);
+            }
 
             document.getElementById('prevBtn').disabled = (currentIndex === 0);
             document.getElementById('nextBtn').disabled = (currentIndex === quizData.length - 1);
@@ -2525,6 +2616,21 @@ D. 5.89
                 feedback.style.color = "var(--wrong-color)";
             }
             feedback.style.display = "block";
+
+            // Reveal Formula
+            showFormula(q);
+        }
+
+        function showFormula(q) {
+            const formulaBox = document.getElementById('formulaBox');
+            const formulaText = document.getElementById('formulaText');
+            
+            formulaText.innerHTML = `\\[ ${getFormulaForQuestion(q.q)} \\]`;
+            formulaBox.style.display = "block";
+
+            if (window.MathJax) {
+                MathJax.typesetPromise([formulaBox]);
+            }
         }
 
         function nextQuestion() {
