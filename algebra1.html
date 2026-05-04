@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebra Problems Quiz</title>
+    <!-- MathJax for rendering LaTeX formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+        };
+    </script>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --text-main: #333333;
+            --text-muted: #7f8c8d;
+            --border-color: #e0e6ed;
+            --correct-color: #2ecc71;
+            --hover-color: #f7f9fa;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            margin-right: 20px;
+        }
+
+        .top-bar h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            width: 250px;
+            background-color: #fff;
+            position: fixed;
+            top: 60px; /* Below top bar */
+            left: -250px;
+            height: calc(100vh - 60px);
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: left 0.3s ease;
+            z-index: 99;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 15px;
+            background-color: var(--hover-color);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .nav-grid {
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            overflow-y: auto;
+        }
+
+        .nav-btn {
+            background-color: white;
+            border: 1px solid var(--border-color);
+            padding: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            color: var(--primary-color);
+        }
+
+        .nav-btn:hover {
+            background-color: var(--hover-color);
+        }
+
+        .nav-btn.active {
+            background-color: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .nav-btn.answered {
+            border-bottom: 3px solid var(--correct-color);
+        }
+
+        /* Main Content Area */
+        #main-content {
+            flex: 1;
+            margin-top: 60px;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease;
+        }
+
+        .quiz-card {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .question-num {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: var(--text-main);
+        }
+
+        /* Answer Section (Direct Answer Input) */
+        .answer-section {
+            background-color: var(--hover-color);
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .answer-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+            color: var(--primary-color);
+        }
+
+        .show-answer-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .show-answer-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .answer-reveal {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border-color);
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--correct-color);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover:not(:disabled) {
+            background-color: var(--hover-color);
+            border-color: #bdc3c7;
+        }
+
+        .control-btn:disabled {
+            color: var(--text-muted);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        /* Overlay */
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 98;
+            display: none;
+        }
+        #overlay.show { display: block; }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h1>Algebra Problems Review</h1>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header">Problems List</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content">
+        <div class="quiz-card" id="quizCard">
+            <div class="question-header">
+                <span class="question-num" id="qNum">Problem 1</span>
+            </div>
+            
+            <div class="question-text" id="qText">Loading problem...</div>
+            
+            <div class="answer-section">
+                <span class="answer-label">Solution:</span>
+                <button class="show-answer-btn" id="showAnsBtn" onclick="revealAnswer()">Show Answer</button>
+                <div class="answer-reveal" id="answerReveal"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="control-btn" id="prevBtn" onclick="prevQuestion()">&#8592; Previous</button>
+                <button class="control-btn" id="nextBtn" onclick="nextQuestion()">Next &#8594;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Raw Data Embed (Exact extraction from the provided source) -->
+    <script id="raw-data" type="text/plain">
+1. A boy is one-third as old as his brother and 8 years younger than his sister. The sum of their ages is 38 years. How old is each of them?
+Answer: brother = 18, sister = 14
+2. Maria is 12 years older than her sister Josie. Six years ago, Maria was four times as old as Josie. Find their ages now.
+Answer: Josie = 10, Maria = 22
+3. Eight years ago, Manny was three times as old as Ronnie. Now he is only twice as old as Ronnie. Find their ages.
+Answer: Ronnie = 16, Manny = 32
+4. Letty is 10 years older than Cory who is half as old as Ben. If the total of their ages is 54 years, find their respective ages now.
+Answer: Cory = 11 years, Lettv = 21, Ben = 22
+5. In what time would A, B, and C together do a piece of work if A alone could do it in 6 hours more, B alone in 1 hour more, and C alone in twice the time?
+Answer: 2/3 hr = 40 min
+6. A can do a piece of work in p days, while B can do the same work in q days. In how many days can they do the work together?
+Answer: pq/(p+q) days
+7. A can do a piece of work in p days, B in q days, and C in r days. In how many days can they do the work together?
+Answer: pqr/(p+q+r) days
+8. A can do a job in 8 days, and A and B can do the job together in 3 days. How long would it take B to do job alone?
+Answer: 4.8 days
+9. One pipe can fill a tank alone in 6 hours, another pipe can fill it alone in 9 hours. A drain pipe can empty the tank in 12 hours. If the tank is empty, and all three pipes are open, how long will it take to fill the tank?
+Answer: 4.8 hrs
+10. Find the number which is 7/4 times the excess of the number over 3.
+Answer: 420
+11. The difference between two numbers is 24 and their sum is 60. Find the numbers.
+Answer: 18 and 42
+12. Find two consecutive odd numbers such that thrice the smaller number exceeds the larger by 12.
+Answer: 7 and 9
+13. Find two consecutive positive even numbers such that the difference of their squares is 76.
+Answer: 18 and 20
+14. A goldsmith has two alloys of gold, the first being 70% pure gold, and the second 60% pure gold. How many grams of each must be used to make 100 grams of an alloy which will be 66% pure gold?
+Answer: 70% alloy = 60 grams, 60% alloy = 40 grams
+15. A chemist has two alcohol solutions of different strengths, 30% alcohol and 45% alcohol solutions, respectively. How many cubic cm of each must be used so as to make a mixture of 30 cubic cm which will contain 39% alcohol?
+Answer: 30% alc = 12 cm3, 45% alc = 18 cm3
+16. Determine how much water should be evaporated from 50 kg of a 30% salt solution to produce a 60% salt solution. All percentages are by weight.
+Answer: 25 kg
+17. How many liters of 45% alcohol solution must be added to 60 liters of a 15% alcohol solution to obtain a 25% alcohol solution?
+Answer: 30 liters
+18. Rice worth P15.00 per kg is to be mixed with rice worth P20.00 per kg to make up 50 kg of a mixture to sell at P18.00 per kg. Determine the weight of each kind of rice in the mixture.
+Answer: P15/kg = 20 kg, P20/kg = 30 kg
+19. A and B start at the same time from two places 136 km apart toward each other. A travels 10 km/hr, and B 8 km/hr. If B rests 1 hour on the way, in how many hours will they meet?
+Answer: 8 hrs
+20. A runs around a circular track in 60 seconds, and B in 50 seconds. Five seconds after A starts, B starts from the same point in the same direction. When will they be together for the first time, assuming they run around the track continuously?
+Answer: 330 seconds or 5.5 minutes
+21. A runs around a circular track in 60 seconds, and B in 50 seconds. Five seconds after A starts, B starts from the same point in the opposite direction. When will they be together for the first time, assuming they run around the track continuously?
+Answer: 30 seconds
+22. Two cars, A and B, with average speeds of 40 and 50 km/hr respectively, are 22 km apart. Car A starts at 8:00 AM toward B, while N starts at 9:00 AM toward A. At what time will they meet?
+Answer: 11:00 AM
+23. A motorboat has an average of 20 km/hr in still water. It can travel upstream 5 km against a river current in the same time that it can travel downstream 7 km with the river current. What is the speed of the current?
+Answer: 3 1/3 kph
+24. A man started on his bicycle for Manila, a distance of 30 km, intending to arrive at a certain time. After riding 10 km he was detained for half and hour, and as a result he was obliged to ride the rest of the way 2 kph faster. What was his original speed?
+Answer: 8 kph
+25. A cat is now 50 of her leaps ahead of a dog which is pursuing her. How many more leaps will the cat take before it is overtaken if she takes 5 leaps while the dog takes 4 leaps, but 2 of the dog's leaps are equivalent to 3 of the cat's leaps?
+Answer: 250 leaps
+26. A policeman is pursuing a thief who is ahead of 72 of his own steps. The thief takes 6 steps while the policeman is taking 5 steps, but 4 steps of the thief are as long as 3 steps of the policeman. How many leaps will each make before the thief is caught?
+Answer: 540 steps for policeman, 648 steps for thief
+27. A and B submitted separate proposals for the construction of a bridge, A offering the lower price for the winning bid. Had A and B reduced their bid prices by 5% and 10%, respectively, A would still have won the bid, but the difference in their bids would have been reduced by P3,000. If the sum total of the bids is P90,000, what are the bids of A and B?
+Answer: A's bid = P40,000, B's bid = P50,000
+28. A man has P100,000, part of which he invests at 12% interest and the rest at 18%. He received a total annual interest of P15,300. How much did he invest at each rate?
+Answer: 12% = P45000, 18% = P55000
+29. A fruit vendor goes to market to buy fruits for resale at her store. She spends half her money for mangoes, and one-third of what remains for bananas. She spends P150 for other fruits and still has P200 left from the amount she originally had. How much money did she have at the start?
+Answer: P1,050.00
+30. A parcel of land in the form of a rectangle is 6 m longer than its width. If it were 3 m shorter and 2 m wider its area would be decreased by 14 sq. m. find its dimensions.
+Answer: 26 m x 20 m
+31. One angle of a triangle is half the second, and the third is 30 degrees more than the second. Find the angles it being known that sum of the interior angles of any triangle is 180 degrees.
+Answer: 30°, 60°, 90°
+32. At what time between 4 and 5 o'clock are the hands of a clock, (a) opposite each other (b) coincident (c) right angles?
+Answer: (a) 4:54 (b) 4:21 (c) 4:05 and 4:38
+33. It is between 3 and 4 o'clock, and in 20 minutes the minute hand will be as much after the hour hand as it is now behind it. What is the time?
+Answer: 3:06
+34. At what time will the hands of a clock be in a straight line between 7:00 o'clock and 8:00 o'clock (a) in the morning? (b) in the evening?
+Answer: (a) 7:05 AM and 7:38 AM (b) 7:38 PM
+35. In a certain community of p persons a% can read and write; of the males alone b% and of the females c% can read and write. Find the number of males and females in the community.
+Answer: males = (a-c)p/(b-c), females = (b-a)p/(b-c)
+36. During the last election, the total number of voters recorded in a certain municipality was 8,600. Had one-third of RM's supporters stayed away from the polls and one-half of EQ's behaved likewise, RM's majority would have been reduced by 200. How many votes did RM and Q actually received?
+Answer: RM = 5400, EQ = 3200
+37. A certain Loan Association has invested in three different transactions. The first investment is in real estate earning 9% interest annually, second investment is in loans earning 6% annually; and the third investment in bonds earning 4% annually. The total annual income is P3,400, but the annual interest in loans is three times that in bonds. How much is each investment?
+Answer: real estate: P20,000; loans: P20,000; bonds: P10,000
+38. A basket of oranges costing P80.00 was jointly purchased by three housewives A, B, and C. One-half of what A paid added to 1/5 of what B paid and 1/10 of what C paid will total P30.00; and the sum that A paid increased by 1/8 of what paid B diminished by 1/4 of what C paid will make it P50.00 How much did each pay?
+Answer: A = P50.00; B = P20.00; C = P10.00
+39. A owes P50.00 and B owes P30.00. A could pay all his debts if besides his own money he had 2/5 of B's; and B could pay all but P1,000 of his debts if besides his own money he had 1/2 of A's. How much does each have?
+Answer: A = P48.00; B = P5.00
+40. A sum of money at compound interest amounts to P10,035.20 in 2 years and to P12,588.16 in 4 years. What are the sum of money and the rate of interest?
+Answer: P8,000 and 12%
+41. Seven carpenters and 5 masons earn a total of P2,300 per day. At the same rate of pay 3 carpenters and 8 masons earn P2,040. What are the wages per day of a carpenter and a mason?
+Answer: carpenter = P200; mason = P180
+42. A man has three sums of money invested, one at 12%, one at 10%, the last at 8%. His total annual income from the three investments is P2,100. The first investment yields as much as the other two combined. If he could receive 1% more on each investment his annual income would be increased by P202.50. How much is his investment at each rate?
+Answer: P8,750, P6,500; P5,000
+43. Maria is 36 years old. Maria was twice as old as Anna was when Maria was as old as Ann is now. How old is Anna now?
+Answer: 24 years old
+44. The sum of the ages of a married couple and their four children is 40 years over the century mark. Ten years ago, the sum of the ages of the couple, the eldest child and the second child is 5 decades and 5 years less than the sum of all (the six of them) their ages now. The father's age is 10 times the age of the youngest, while the mother's age is 8 times that of the youngest. The difference between the age of the second child and the sum of the ages of the third and the last child is zero, while the difference between the ages of the first child and the sum of the ages of the second and last child is also zero. Find their ages.
+Answer: father = 50; mother = 40; 1st child = 20; 2nd child = 15; 3rd child = 10; 4th child = 5
+45. In an organization, there are CEs, EEs, and MEs. The su of their ages is 2,160; their average age is 36; the average of the CEs and MEs is 39; of the Mes and EEs 32 8/11; of the CEs and EEs 36 2/3. If each CE had been one year older, each EEs 7 years and each MEs 6 years older, their average age would have been greater by 5 years. Find the number in each group and their average ages.
+Answer: CE = 16; ME = 24. EE = 20. Ave ages: CE = 45; ME = 35: EE = 30
+46. A and B can do a piece of work in p days, B and C in q days, and C and A in r days. In how many days can each do the work alone?
+Answer: A = 2pqr/(pq+qr-pr); B = 2pqr/(pr+qr-pq); C = 2pqr/(pq+pr-qr)
+47. A and B can do a piece of work in p days, B and C in q days, and C and A in r days. In how many days can they work together?
+Answer: 2pqr/(pq+pr+qr)
+48. A certain job can be done by A and B working together in 5 days, B and C together can do the job in 4 days, and A and C together in 3 days. If each of them works alone, in how many days can each do the work?
+Answer: A = 7 1/17 days; B = 17 1/7 days; C = 5 5/11 days
+49. A man and a boy can do in 15 days a piece of work which would be done by 7 men and 9 boys in 2 days. How long would it take one man to do it alone?
+Answer: 20 days
+50. A and B can do a piece of work in 42 days; B and C in 31 days; and C and A in 20 days. (a) In how many days can each worker do the work? (b) In how many days can all of them do the work together?
+Answer: (a) A = 48.13 days; B = 329.62 days; C = 34.22 days; (b) 19 days
+    </script>
+
+    <!-- Quiz Logic -->
+    <script>
+        // Data Parser
+        const rawText = document.getElementById('raw-data').textContent.trim();
+        // Split text by lines starting with a number and a dot
+        const blocks = rawText.split(/(?=\n\d+\.\s)/).map(b => b.trim()).filter(b => b);
+        
+        const quizData = [];
+
+        blocks.forEach(block => {
+            // Match the number, the question, and the answer
+            const match = block.match(/^(\d+)\.\s([\s\S]+?)\nAnswer:\s([\s\S]+)$/);
+            if (match) {
+                quizData.push({
+                    num: match[1],
+                    q: match[2].trim(),
+                    ans: match[3].trim(),
+                    isAnswered: false
+                });
+            }
+        });
+
+        // Application State
+        let currentIndex = 0;
+        
+        function initApp() {
+            buildNav();
+            loadQuestion(currentIndex);
+        }
+
+        // Sidebar Navigation
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            grid.innerHTML = '';
+            quizData.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-btn';
+                btn.id = `nav-btn-${idx}`;
+                btn.innerText = q.num;
+                btn.onclick = () => {
+                    loadQuestion(idx);
+                    toggleSidebar();
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateNavStyles() {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById(`nav-btn-${currentIndex}`);
+            if(activeBtn) activeBtn.classList.add('active');
+            
+            // Mark answered
+            quizData.forEach((q, idx) => {
+                const btn = document.getElementById(`nav-btn-${idx}`);
+                if (q.isAnswered && btn) btn.classList.add('answered');
+            });
+        }
+
+        // Question Loading
+        function loadQuestion(index) {
+            currentIndex = index;
+            const q = quizData[currentIndex];
+            
+            document.getElementById('qNum').innerText = `Problem ${q.num} of ${quizData.length}`;
+            document.getElementById('qText').innerHTML = q.q;
+            
+            const ansReveal = document.getElementById('answerReveal');
+            const showBtn = document.getElementById('showAnsBtn');
+            
+            ansReveal.innerHTML = q.ans;
+            
+            if (q.isAnswered) {
+                ansReveal.style.display = 'block';
+                showBtn.style.display = 'none';
+            } else {
+                ansReveal.style.display = 'none';
+                showBtn.style.display = 'inline-block';
+            }
+
+            document.getElementById('prevBtn').disabled = (currentIndex === 0);
+            document.getElementById('nextBtn').disabled = (currentIndex === quizData.length - 1);
+            
+            updateNavStyles();
+
+            // Re-render LaTeX
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('quizCard')]);
+            }
+        }
+
+        // Interactions
+        function revealAnswer() {
+            const q = quizData[currentIndex];
+            q.isAnswered = true;
+            document.getElementById('answerReveal').style.display = 'block';
+            document.getElementById('showAnsBtn').style.display = 'none';
+            updateNavStyles();
+        }
+
+        function nextQuestion() {
+            if (currentIndex < quizData.length - 1) loadQuestion(currentIndex + 1);
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) loadQuestion(currentIndex - 1);
+        }
+
+        // Initialize
+        window.onload = initApp;
+    </script>
+</body>
+</html>
