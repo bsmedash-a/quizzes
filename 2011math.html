@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>General Economics, Mathematics & Applied Sciences Quiz</title>
+    <title>General Economics, Mathematics and Applied Sciences Quiz</title>
     <!-- MathJax for rendering LaTeX formulas -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>
-        window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
-        };
+        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
     </script>
     <style>
         :root {
-            --bg-color: #f0f2f5;
+            --bg-color: #f1f2f6;
             --main-color: #ffffff;
             --text-color: #2f3542;
             --accent-color: #3742fa;
@@ -22,7 +20,6 @@
             --correct-color: #2ed573;
             --wrong-color: #ff4757;
             --nav-bg: #2f3542;
-            --solution-bg: #dfe4ea;
         }
 
         * {
@@ -43,7 +40,7 @@
         .top-bar {
             background-color: var(--main-color);
             padding: 15px 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             display: flex;
             align-items: center;
             position: fixed;
@@ -60,19 +57,13 @@
             cursor: pointer;
             color: var(--text-color);
             margin-right: 20px;
-            transition: color 0.2s;
-        }
-
-        .hamburger:hover {
-            color: var(--accent-color);
         }
 
         .top-bar h2 {
             margin: 0;
             font-size: 1.3rem;
             color: var(--nav-bg);
-            font-weight: 700;
-            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         /* Sidebar Navigation */
@@ -91,9 +82,7 @@
             box-shadow: 2px 0 10px rgba(0,0,0,0.2);
         }
 
-        #sidebar.open {
-            transform: translateX(0);
-        }
+        #sidebar.open { transform: translateX(0); }
 
         .sidebar-header {
             padding: 20px;
@@ -125,19 +114,9 @@
             transition: all 0.2s;
         }
 
-        .nav-item:hover {
-            background-color: #747d8c;
-        }
-
-        .nav-item.active {
-            background-color: var(--accent-color);
-            box-shadow: inset 0 0 0 2px white;
-        }
-
-        .nav-item.completed {
-            background-color: #2ed573;
-            color: #2f3542;
-        }
+        .nav-item:hover { background-color: #747d8c; }
+        .nav-item.active { background-color: var(--accent-color); box-shadow: inset 0 0 0 2px white; }
+        .nav-item.completed { background-color: #2ed573; color: #2f3542; }
 
         /* Main Content */
         #main-content {
@@ -156,7 +135,7 @@
             max-width: 850px;
             padding: 40px;
             border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
             height: fit-content;
         }
 
@@ -169,7 +148,6 @@
             font-weight: 700;
             display: flex;
             justify-content: space-between;
-            text-transform: uppercase;
         }
 
         .question-text {
@@ -184,7 +162,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .option-btn {
@@ -226,27 +204,25 @@
             color: var(--accent-color);
         }
 
-        /* Solution Area */
-        .solution-container {
+        .feedback-message {
+            padding: 20px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
             display: none;
-            background-color: var(--solution-bg);
-            border-left: 5px solid var(--accent-color);
-            padding: 25px;
-            border-radius: 0 6px 6px 0;
-            margin-bottom: 30px;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: #2f3542;
         }
 
-        .solution-container strong {
-            color: var(--accent-color);
-            display: block;
-            margin-bottom: 12px;
-            font-size: 1.2rem;
-            border-bottom: 1px dashed #a4b0be;
-            padding-bottom: 5px;
-            text-transform: uppercase;
+        .feedback-message.success {
+            background-color: #e8f8f5;
+            color: #27ae60;
+            border-left: 5px solid #2ecc71;
+        }
+
+        .feedback-message.error {
+            background-color: #ffefea;
+            color: #c0392b;
+            border-left: 5px solid #ff4757;
         }
 
         /* Controls */
@@ -266,21 +242,12 @@
             font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s;
             text-transform: uppercase;
         }
 
-        .control-btn:hover:not(:disabled) {
-            background-color: var(--hover-color);
-        }
+        .control-btn:hover:not(:disabled) { background-color: var(--hover-color); }
+        .control-btn:disabled { background-color: #ced6e0; color: #747d8c; cursor: not-allowed; }
 
-        .control-btn:disabled {
-            background-color: #ced6e0;
-            color: #747d8c;
-            cursor: not-allowed;
-        }
-
-        /* Overlay */
         #overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -289,23 +256,18 @@
             display: none;
         }
         #overlay.show { display: block; }
-        
-        .error-message {
-            color: #ff4757;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
         <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
-        <h2>Board Exam Reviewer (Sequential)</h2>
+        <h2>Board Exam Reviewer | Sequential</h2>
     </div>
 
     <div id="overlay" onclick="toggleSidebar()"></div>
     <div id="sidebar">
-        <div class="sidebar-header">Problems Navigator</div>
+        <div class="sidebar-header">100 Problems Navigator</div>
         <div class="nav-grid" id="navGrid"></div>
     </div>
 
@@ -313,16 +275,12 @@
         <div class="quiz-card" id="quizCard">
             <div class="question-header">
                 <span id="qHeader">Initializing...</span>
+                <span id="scoreTracker" style="color: var(--accent-color);">Score: 0</span>
             </div>
             
             <div class="question-text" id="qText">Extracting problem set...</div>
-            
             <div class="options-container" id="optionsGrid"></div>
-            
-            <div class="solution-container" id="solutionContainer">
-                <strong>Solution / Concept:</strong>
-                <span id="solutionText"></span>
-            </div>
+            <div class="feedback-message" id="feedbackMessage"></div>
             
             <div class="controls" id="controls" style="display:none;">
                 <button class="control-btn" id="prevBtn" onclick="prevQuestion()">&#8592; Previous</button>
@@ -820,67 +778,71 @@ b) A random point
 d) A finite set
     </script>
 
-    <!-- Quiz Logic & Math Solutions -->
     <script>
-        // Custom Math/Engineering Solutions mapped to question numbers
-        const solutionMap = {
-            1: { ans: "B", sol: "Standard acceleration due to gravity in English units is $32.2 \\text{ ft/s}^2$." },
-            2: { ans: "A", sol: "Let $M$ = Mother's age, $D$ = Daughter's age. Eq 1: $2M = 6D + 8 \\rightarrow M = 3D + 4$. Eq 2: $(M-10) + (D-10) = 44 \\rightarrow M + D = 64$. Substitute M: $(3D + 4) + D = 64 \\rightarrow 4D = 60 \\rightarrow D = 15$." },
-            3: { ans: "A", sol: "Compound Interest: $F = P(1 + i/m)^{mt} = 2000(1 + 0.11/4)^{4 \\times 5} = 2000(1.0275)^{20} \\approx 3440.85$. Closest option is P3,440.00." },
-            4: { ans: "C", sol: "Discount = $2000 - 1950 = 50$. Rate of discount $d = \\frac{\\text{Discount}}{\\text{Principal}} = \\frac{50}{2000} = 0.025$ or $2.5\\%$." },
-            5: { ans: "A", sol: "For the infinite power tower $x^{x^{\\dots}} = 10$, we set $x^{10} = 10 \\rightarrow x = 10^{1/10} \\approx 1.258925$." },
-            6: { ans: "A", sol: "Resultant $R = F_1 + F_2 + F_3 = (4+9+5)i + (7+2-3)j + (6+11-8)k = 18i + 6j + 9k$. Magnitude $|R| = \\sqrt{18^2 + 6^2 + 9^2} = \\sqrt{324 + 36 + 81} = \\sqrt{441} = 21$." },
-            7: { ans: "D", sol: "Complete the square: $(x^2 - 6x + 9) + (y^2 + 4y + 4) = 12 + 9 + 4 \\rightarrow (x-3)^2 + (y+2)^2 = 25$. Radius $r = \\sqrt{25} = 5$. Diameter $d = 2r = 10$." },
-            8: { ans: "B", sol: "Absolute value of complex number $a + bi = \\sqrt{a^2 + b^2} = \\sqrt{3^2 + 4^2} = \\sqrt{9 + 16} = 5$." },
-            9: { ans: "B", sol: "Free fall distance: $h = \\frac{1}{2}gt^2 \\rightarrow 60 = \\frac{1}{2}(9.81)t^2 \\rightarrow t^2 = 12.23 \\rightarrow t \\approx 3.5$ seconds." },
-            10: { ans: "A", sol: "Using clock kinematics between 3 and 4. The relative positions of the hands are calculated resulting in 3:06.36." },
-            50: { ans: "A", sol: "Specific volume $v = 1/\\gamma$. Given $\\gamma = 58.5 \\text{ lbf/ft}^3$. First convert to metric: $58.5 \\text{ lbf/ft}^3 = 0.936 \\text{ g/cm}^3$. $v = 1/0.936 = 1.0675 \\text{ cm}^3\\text{/g}$." },
-            51: { ans: "B", sol: "Compound Interest: $P(1+i)^n = F$. The effective rate mathematically corresponds to standard periodic interest compounding evaluated roughly at 4.06% based on problem figures." },
-            53: { ans: "D", sol: "Initial state: ladder $L_1 = 5$, base $x = 3$. Height $y_1 = \\sqrt{5^2 - 3^2} = 4$m. New state: base $x=3$ stays same, height $y_2 = 4 + 1 = 5$m. New ladder $L_2 = \\sqrt{3^2 + 5^2} = \\sqrt{34} = 5.83095$m. Extension = $5.83095 - 5 = 0.83095$m." },
-            54: { ans: "A", sol: "Interior angle of regular polygon $= \\frac{180(n-2)}{n}$. For pentagon $n=5$, angle $= \\frac{180(3)}{5} = 108^\\circ$." },
-            55: { ans: "D", sol: "Present Worth of Annuity: $P_a = A\\left[\\frac{1 - (1+i)^{-n}}{i}\\right]$. $i = 0.12/12 = 0.01$. $n = 5 \\times 12 = 60$. $P_a = 5000[1 - (1.01)^{-60}] / 0.01 = 5000(44.955) = 224,775.19$. Total Cash Price = Downpayment + $P_a = 30000 + 224775.19 = 254,775.19$." },
-            56: { ans: "B", sol: "Sinking Fund: $A = F \\left[\\frac{i}{(1+i)^n - 1}\\right]$. $F = 25000$, $i = 0.12/4 = 0.03$, $n = 8 \\times 4 = 32$. $A = 25000[0.03 / ((1.03)^{32} - 1)] = 25000[0.03 / 1.575] = 476.17$." },
-            73: { ans: "D", sol: "Equivalent rates: $(1 + r_s/2)^2 = (1 + r_q/4)^4$. $(1 + 0.14/2)^2 = (1 + r_q/4)^4 \\rightarrow 1.07^2 = (1 + r_q/4)^4 \\rightarrow 1.1449 = (1 + r_q/4)^4 \\rightarrow 1 + r_q/4 = 1.0344 \\rightarrow r_q = 0.1376$ or $13.76\\%$." },
-            78: { ans: "C", sol: "Let angles be $A, B, C$. Eq1: $A+B = C$. Eq2: $A-B = (2/3)C$. Since $A+B+C=180$, and $A+B=C$, then $C+C=180 \\rightarrow 2C=180 \\rightarrow C=90^\\circ$." },
-            81: { ans: "A", sol: "Prime numbers between 1 and 15: 2, 3, 5, 7, 11, 13. Sum = $2+3+5+7+11+13 = 41$." },
-            85: { ans: "A", sol: "$i^{1997} + i^{1999}$. Divide exponent by 4 to find remainder. $1997/4 = 499$ rem 1, so $i^{1997} = i^1 = i$. $1999/4 = 499$ rem 3, so $i^{1999} = i^3 = -i$. Sum $= i + (-i) = 0$." }
-        };
-
+        // Data Extraction Engine
         const rawTextData = document.getElementById('raw-data').textContent || "";
+        
+        // Find question boundaries dynamically
         const blocks = rawTextData.split(/(?:^|\n|\r\n)(?=\s*\d+\.\s)/).map(b => b.trim()).filter(b => b.length > 0);
+        
         const quizData = [];
+        let totalScore = 0;
 
-        // Parser
-        blocks.forEach((block, index) => {
-            const qMatch = block.match(/^(\d+)\.\s([\s\S]*?)(?=(?:a|A|\.a)\.?\s|\n(?:a|A)\.)/);
-            if (!qMatch) return;
+        blocks.forEach((block) => {
+            // Locate where options begin (A., B., C., D., a., b., c., d., a), b), c), d))
+            const optStartMatch = block.match(/\n\s*[A-Da-d][\.\)]\s/);
+            if (!optStartMatch) return; 
             
-            const num = qMatch[1];
-            const qText = qMatch[2].trim();
-            const optionsStr = block.substring(qMatch[0].length);
-            const optParts = optionsStr.split(/(?:^|\n)([a-d]|[A-D])\)?\s|\.\s/).filter(Boolean);
+            const optIndex = optStartMatch.index;
+            const questionPart = block.substring(0, optIndex).trim();
+            const optionsStr = block.substring(optIndex).trim();
             
-            const options = [];
-            let ansIdx = 0;
+            // Extract the question number and text
+            const numMatch = questionPart.match(/^(\d+)\.\s+/);
+            if (!numMatch) return;
             
-            for (let i = 0; i < optParts.length; i += 2) {
-                let letter = optParts[i];
-                if (letter && letter.length === 1) { // A, B, C, D, a, b, c, d
-                    let text = (optParts[i+1] || "").trim();
-                    if (text.includes('*')) {
-                        ansIdx = options.length;
-                        text = text.replace(/\*/g, '').trim();
-                    }
-                    options.push({ letter: letter.toUpperCase(), text: text });
-                }
+            const numText = numMatch[1];
+            const qText = questionPart.substring(numMatch[0].length).trim();
+            
+            // Extract Options
+            const optRegex = /(?:^|\n)\s*([A-Da-d])[\.\)]\s/g;
+            let match;
+            let indices = [];
+            while ((match = optRegex.exec(optionsStr)) !== null) {
+                indices.push({ letter: match[1].toUpperCase(), index: match.index, matchLength: match[0].length });
             }
 
-            const mapData = solutionMap[num] || { sol: "Theoretical concept derived from general engineering, economics, or mathematics principles." };
+            const options = [];
+            let ansIdx = 0; // Default fallback
+
+            for (let i = 0; i < indices.length; i++) {
+                let start = indices[i].index + indices[i].matchLength;
+                let end = (i + 1 < indices.length) ? indices[i+1].index : optionsStr.length;
+                let text = optionsStr.substring(start, end).trim();
+                
+                // Identify correct answer by the asterisk
+                if (text.includes('*') || indices[i].letter.includes('*')) {
+                    ansIdx = i;
+                    text = text.replace(/\*/g, '').trim();
+                }
+                options.push({ letter: indices[i].letter, text: text });
+            }
             
-            quizData.push({
-                num, q: qText, options, ansIdx, solText: mapData.sol, userAnswered: false
-            });
+            if (options.length > 0) {
+                quizData.push({
+                    num: parseInt(numText, 10), // Use integer for stable sequencing
+                    originalNum: numText,
+                    q: qText, 
+                    options: options, 
+                    ansIdx: ansIdx, 
+                    userAnswered: false,
+                    isCorrect: false
+                });
+            }
         });
+
+        // Ensure perfect sequential 1 to 100 ordering
+        quizData.sort((a, b) => a.num - b.num);
 
         let currentIndex = 0;
 
@@ -907,7 +869,7 @@ d) A finite set
                 const btn = document.createElement('button');
                 btn.className = 'nav-item';
                 btn.id = `nav-btn-${idx}`;
-                btn.innerText = q.num;
+                btn.innerText = idx + 1; // Display 1 to 100 clearly
                 btn.onclick = () => { loadQuestion(idx); toggleSidebar(); };
                 grid.appendChild(btn);
             });
@@ -916,24 +878,29 @@ d) A finite set
         function updateNavStyles() {
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`nav-btn-${currentIndex}`).classList.add('active');
+            
             quizData.forEach((q, idx) => {
                 const btn = document.getElementById(`nav-btn-${idx}`);
                 if (q.userAnswered) btn.classList.add('completed');
             });
         }
 
+        function updateScore() {
+            document.getElementById('scoreTracker').innerText = `Score: ${totalScore} / ${quizData.length}`;
+        }
+
         function loadQuestion(index) {
             currentIndex = index;
             const q = quizData[currentIndex];
             
-            document.getElementById('qHeader').innerText = `Question ${q.num} of ${quizData.length}[cite: 12]`;
+            document.getElementById('qHeader').innerHTML = `Problem ${index + 1} of ${quizData.length}`;
             document.getElementById('qText').innerHTML = q.q;
             
             const optionsGrid = document.getElementById('optionsGrid');
             optionsGrid.innerHTML = '';
             
-            const solContainer = document.getElementById('solutionContainer');
-            solContainer.style.display = 'none';
+            const feedbackMsg = document.getElementById('feedbackMessage');
+            feedbackMsg.style.display = 'none';
 
             q.options.forEach((opt, i) => {
                 const btn = document.createElement('button');
@@ -942,20 +909,26 @@ d) A finite set
                 
                 if (q.userAnswered) {
                     btn.disabled = true;
-                    if (i === q.ansIdx) btn.classList.add('correct');
-                    else if (i === q.userSelectedIdx) btn.classList.add('wrong');
+                    if (i === q.ansIdx) {
+                        btn.classList.add('correct');
+                    } else if (i === q.userSelectedIdx) {
+                        btn.classList.add('wrong');
+                    }
                 } else {
                     btn.onclick = () => selectAnswer(i, btn);
                 }
                 optionsGrid.appendChild(btn);
             });
 
-            if (q.userAnswered) showSolution(q);
+            if (q.userAnswered) {
+                showFeedback(q.isCorrect, q);
+            }
 
             document.getElementById('prevBtn').disabled = (currentIndex === 0);
             document.getElementById('nextBtn').disabled = (currentIndex === quizData.length - 1);
             
             updateNavStyles();
+            updateScore();
 
             if (window.MathJax) {
                 MathJax.typesetPromise([document.getElementById('quizCard')]);
@@ -966,6 +939,9 @@ d) A finite set
             const q = quizData[currentIndex];
             q.userAnswered = true;
             q.userSelectedIdx = selectedIndex;
+            q.isCorrect = (selectedIndex === q.ansIdx);
+
+            if (q.isCorrect) totalScore++;
 
             const buttons = document.getElementById('optionsGrid').children;
             for (let i = 0; i < buttons.length; i++) {
@@ -973,19 +949,28 @@ d) A finite set
                 if (i === q.ansIdx) buttons[i].classList.add('correct');
             }
 
-            if (selectedIndex !== q.ansIdx) selectedBtn.classList.add('wrong');
+            if (!q.isCorrect) selectedBtn.classList.add('wrong');
 
-            showSolution(q);
+            showFeedback(q.isCorrect, q);
             updateNavStyles();
+            updateScore();
         }
 
-        function showSolution(q) {
-            const solContainer = document.getElementById('solutionContainer');
-            document.getElementById('solutionText').innerText = q.solText;
-            solContainer.style.display = 'block';
-
+        function showFeedback(isCorrect, q) {
+            const feedbackMsg = document.getElementById('feedbackMessage');
+            feedbackMsg.className = 'feedback-message ' + (isCorrect ? 'success' : 'error');
+            
+            const correctOpt = q.options[q.ansIdx];
+            
+            if (isCorrect) {
+                feedbackMsg.innerHTML = "Correct! The answer is <strong>" + correctOpt.letter + ". " + correctOpt.text + "</strong>";
+            } else {
+                feedbackMsg.innerHTML = "Incorrect! The correct answer is <strong>" + correctOpt.letter + ". " + correctOpt.text + "</strong>";
+            }
+            feedbackMsg.style.display = "block";
+            
             if (window.MathJax) {
-                MathJax.typesetPromise([solContainer]);
+                MathJax.typesetPromise([feedbackMsg]);
             }
         }
 
