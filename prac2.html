@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Design Elements | Questions 1-100</title>
+    <!-- MathJax for rendering equations -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --main-color: #ffffff;
+            --text-color: #2c3e50;
+            --accent-color: #1a252f;
+            --highlight-color: #3498db;
+            --correct-color: #27ae60;
+            --wrong-color: #e74c3c;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            border-bottom: 4px solid var(--highlight-color);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: white;
+            margin-right: 20px;
+            transition: color 0.2s;
+        }
+
+        .hamburger:hover { color: var(--highlight-color); }
+
+        .top-bar h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            width: 320px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            position: fixed;
+            height: calc(100% - 60px);
+            top: 60px;
+            z-index: 99;
+            transform: translateX(-100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        #sidebar.open { transform: translateX(0); }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background-color: #1a252f;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .nav-grid {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .nav-btn {
+            background-color: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover { background-color: #95a5a6; }
+        .nav-btn.active { background-color: var(--highlight-color); box-shadow: inset 0 0 0 2px white; }
+        .nav-btn.correct { background-color: var(--correct-color); color: white; }
+        .nav-btn.wrong { background-color: var(--wrong-color); color: white; }
+
+        /* Main Content */
+        #main-content {
+            flex: 1;
+            margin-top: 60px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .quiz-card {
+            background-color: var(--main-color);
+            width: 100%;
+            max-width: 900px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            height: fit-content;
+            margin-bottom: 40px;
+        }
+
+        .question-header {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: var(--text-color);
+            white-space: pre-wrap;
+        }
+
+        /* 2-Column Layout for Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+
+        .option {
+            background-color: #f8f9fa;
+            border: 2px solid #bdc3c7;
+            padding: 16px 20px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            color: var(--text-color);
+        }
+
+        .option:hover:not(.disabled) {
+            background-color: #ebf5fb;
+            border-color: var(--highlight-color);
+        }
+
+        .option.actual-correct {
+            background-color: #e8f8f5;
+            border-color: var(--correct-color);
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .option.selected-wrong {
+            background-color: #fdedec;
+            border-color: var(--wrong-color);
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .option.disabled { cursor: default; }
+
+        .opt-letter {
+            font-weight: bold;
+            margin-right: 15px;
+            color: var(--highlight-color);
+        }
+
+        .feedback {
+            padding: 20px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .feedback.success { background-color: #e8f8f5; color: #27ae60; border: 1px solid var(--correct-color); display: block; }
+        .feedback.error { background-color: #fdedec; color: #c0392b; border: 1px solid var(--wrong-color); display: block; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            border-top: 2px solid #ecf0f1;
+            padding-top: 20px;
+        }
+
+        .btn {
+            background-color: var(--highlight-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+
+        .btn:hover:not(:disabled) { background-color: #2980b9; }
+        .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        
+        .btn-retake { background-color: #e67e22; }
+        .btn-retake:hover { background-color: #d35400; }
+
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 98; display: none; }
+        #overlay.show { display: block; }
+        
+        .error-message { color: var(--wrong-color); font-weight: bold; text-align: center; display: block; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h1>Machine Design Elements | Questions 1-100</h1>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header" id="nav-header">Loading...</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div id="main-content">
+        <div class="quiz-card" id="quizCard">
+            <div class="question-header">
+                <span id="q-num">Initializing...</span>
+                <span id="score-display" style="color: var(--highlight-color);">Score: 0</span>
+            </div>
+            
+            <div class="question-text" id="q-text">Parsing problem set (this may take a moment)...</div>
+            <div class="options-grid" id="opt-grid"></div>
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="controls" id="controls" style="display:none;">
+                <button class="btn" id="btn-prev" onclick="prevQ()">&#8592; Previous</button>
+                <button class="btn btn-retake" id="btn-retake" style="display:none;" onclick="retakeQuiz()">Retake Quiz</button>
+                <button class="btn" id="btn-next" onclick="nextQ()">Next &#8594;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Raw Data Embed: Injecting exactly as specified -->
+    <script id="raw-data" type="text/plain">
+1. This radial distance in a gear is measured between the addendum and dedendum circle, and is the sum of the addendum and the dedendum? How do you call this distance?
+a) Addendum
+b) Whole depth*
+c) Working depth
+d) Space width
+
+2. What is the polar section modulus of a solid shaft with a diameter of $101.6~mm?$
+a) $209.5~cm^{3}$
+b) $209.5~cm^{4}$
+c) $205.9~cm^{3}$*
+d) $205.9~cm^{4}$
+
+3. This minimum distance is measured between the non-driving side of a tooth and the adjacent side of the mating tooth. It is the amount by which the width of a tooth space exceeds the thickness of the engaging tooth measured on the pitch circle. What is this distance?
+a) Circular pitch
+b) Whole depth
+c) Backlash*
+d) Space width
+
+4. With the water interruptions prevailing in your town, you have been asked to design an upright cylindrical water tank 6 meters in diameter and 6 meters high, vented, and to be filled completely with water. Determine the minimum thickness of the tank plate if the stress is limited to 40 Mpa.
+a) 3.3 mm
+b) 4.4 mm*
+c) 5.5 mm
+d) 8.8 mm
+
+5. What is the algebraic difference between the maximum limit and the corresponding basic size?
+a) Fundamental deviation
+b) Upper deviation*
+c) Lower deviation
+d) Tolerance
+
+6. A steel shaft 1.75 inches in diameter transmits 40 Hp at 1800 rpm. Assuming a modulus of rigidity of $12\times10^{6}$ psi, find the torsional deflection of the shaft in degrees per foot length.
+a) 0.0073*
+b) 0.0037
+c) 0.0063
+d) 0.00013
+
+7. What is the algebraic difference between the minimum limit and the corresponding basic size?
+a) Fundamental deviation
+b) Upper deviation
+c) Lower deviation*
+d) Tolerance
+
+8. A helical-coil spring has a mean coil diameter of 1 inch and a wire diameter of $1/8$ inch. Determine the curve correction factor of the spring.
+a) 1.144
+b) 1.44
+c) 1.1144*
+d) 1.1414
+
+9. This is either the upper or the lower deviation, depending on which is closer to the basic size. How do you call this deviation?
+a) Fundamental deviation*
+b) Upper deviation
+c) Lower deviation
+d) Tolerance
+
+10. A vise is equipped with a 1-inch single square thread, with 4 threads per inch. The frictional radius of the collar is 0.5 inch. The coefficient of friction for both the collar and threads is 0.20. How much external torque must be applied to produce a force of 200 lb against the jaws of the vise?
+a) 39.73 in-lb
+b) 33.97 in-lb
+c) 37.93 in-lb*
+d) 39.37 in-lb
+
+11. What is the difference between the maximum and minimum size limits of a part?
+a) Allowance
+b) Tolerance*
+c) Deviation
+d) Basic size
+
+12. A helical-coil spring has a mean coil diameter of 1 inch and a wire diameter of $1/8$ inch. Determine the Wahl factor of the spring.
+a) 1.148
+b) 1.184*
+c) 1.418
+d) 1.814
+
+13. It is the capacity of a material to absorb energy when it is deformed elastically and then, upon unloading, to increase this energy. What is this capacity of a material?
+a) Resilience*
+b) Toughness
+c) Rigidity
+d) Ductility
+
+14. A helical-coil spring has a mean coil diameter of 1 inch and a wire diameter of $1/8$ inch. Determine the value of Bergstrassar factor of the spring.
+a) 1.172*
+b) 1.712
+c) 1.217
+d) 1.271
+
+15. How do you call the strain energy per unit volume required to stress a material from an unloaded state to the point of yielding?
+a) Modulus of roughness
+b) Modulus of elasticity
+c) Modulus of rigidity
+d) Modulus of resilience*
+
+16. Compute the tooth thickness of a 14.5° spur gear with diametral pitch of 5.
+a) 0.23140 inch
+b) 0.31416 inch*
+c) 0.43140 inch
+d) 0.03140 inch
+
+17. How do you call a structural member designed to support loads perpendicular to its longitudinal axis?
+a) Cantilever beam
+b) Beam*
+c) Overhanging beam
+d) Column
+
+18. Compute the speed of the gear mounted on a 52.5 mm diameter shaft receiving power from a driving motor with 250 Hp.
+a) 2 182 rpm
+b) 2 071 rpm
+c) 2 265 rpm*
+d) 2 341 rpm
+
+19. It is a load applied transversely to longitudinal axis of member. How do you call this load?
+a) Bending load*
+b) Combined load
+c) Distributed load
+d) Cyclic load
+
+20. What is a load distributed over an entire area?
+a) Bending load
+b) Combined load
+c) Distributed load*
+d) Cyclic load
+
+21. Compute the working strength of 1 inch bolt which is screwed up tightly in packed joint when the allowable working stress is 13000 psi.
+a) 3 600 lb
+b) 3 950 lb
+c) 3 900 lb*
+d) 3 800 lb
+
+22. It is a design approach where no catastrophic loss can occur as a result of a component failure. What is this design approach?
+a) Fail-safe design approach*
+b) Fault free analysis approach
+c) Manifest danger approach
+d) Redundancy approach
+
+23. It is the condition of a machine element when it is completely inoperable, cannot perform its intended function adequately, or is unreliable for continued safe use. What do you call this condition?
+a) Fail-safe condition
+b) Failure condition*
+c) Critical condition
+d) Salvage condition
+
+24. Compute the nominal shear stress at the surface, in MPa, for a 50 mm diameter shaft that is subjected to a torque of 0.48 kN-m.
+a) 16.95
+b) 21.65
+c) 19.56*
+d) 25.12
+
+25. How do you call a statistical data used to identify the most likely failure modes?
+a) Finite element analysis
+b) Fault free analysis*
+c) Failure analysis
+d) Random analysis
+
+26. A hollow iron pipe to be designed as a column has an outside diameter of 240 mm and is subjected to a force of 80 KN. Find the pipe thickness if the compressive stress is limited to 16 MPa.
+a) 5.85 mm
+b) 6.85 mm*
+c) 7.85 mm
+d) 8.85 mm
+
+27. It is a computational method used for solving complex shapes, such as those found in machinery; replaces the complex shape with a set of simple elements interconnected at a finite set of a specific purpose. What is this computational method?
+a) Finite element analysis*
+b) Numerical method of analysis
+c) Fault free analysis
+d) Synthesis
+
+28. A uniform beam 12 meters long is fixed at one end. It has a uniform weight of $50~kg/m$ along its length. A load of 20 kgs. is suspended on the beam 4 m from the free end. The moment at the fixed end is
+a) 3760 kg-m*
+b) 0.0 kg-m
+c) 60 kg-m
+d) 4800 kg-m
+
+29. When a hot part is cooled suddenly by quenching, there is momentarily a high temperature gradient that induces a stress gradient. Some metal parts under certain conditions crack as a result. How do you call this phenomenon?
+a) Thermal-shock failure*
+b) Thermal fatigue
+c) Honing
+d) Quenching
+
+30. A 20° straight-tooth bevel pinion having 14 teeth and a diametral pitch of $6~teeth/inch$ drives a 42-tooth gear. The two shafts are at right angles and in the same plane. Find the pitch angle of the pinion.
+a) 18.4°*
+b) 20°
+c) 14.5°
+d) 20.5°
+
+31. How do you call the diameter of the imaginary cylinder that bounds the crest of an external thread and the roots of an internal thread?
+a) Mean diameter
+b) Stress diameter
+c) Minor diameter
+d) Major diameter*
+
+32. A 20º straight-tooth bevel pinion having 14 teeth and a diametral pitch of $6~teeth/inch$ drives a 32-tooth gear. The two shafts are at right angles and in the same plane. The pinion is to transmit 1800 rpm and transmitting 50 hp. Determine the pitch diameters of the gears.
+a) 2.33 inches and 5.36 inches*
+b) 3.23 inches and 3.56 inches
+c) 5.36 inches and 6.36 inches
+d) 2.33 inches and 2.33 inches
+
+33. It is a measure of the change in length of a material subjected to a change in temperature. How do you call this property of the material?
+a) Toughness
+b) Coefficient of thermal expansion*
+c) Thermal conductivity
+d) Electric Resistivity
+
+34. A 1-inch diameter shaft has a single disc weighing 75 lb mounted midway between two bearings $20^{\prime\prime}$ apart. Find the lowest critical speed in rpm. Neglect the weight of the shaft. Assume that the modulus of elasticity is $30\times10^{6}$ psi.
+a) 2038 rpm*
+b) 2308 rpm
+c) 2380 rpm
+d) 2803 rpm
+
+35. What is a condition where one surface is comparatively free of stress?
+a) Octahedral plane
+b) Biaxial or Plane stress*
+c) Strain plane
+d) Principal normal stress
+
+36. A flywheel weighing 457 kg has a radius of 375 mm. How much energy, in N-m, does the flywheel loss from 3 rps to 2.8 rps?
+a) 368
+b) 150
+c) 1474*
+d) 38
+
+37. How do you call the circle on a gear that corresponds to the contact surface of the friction wheel?
+a) Addendum circle
+b) Root circle
+c) Pitch circle*
+d) Base circle
+
+38. A triple threaded worm has a pitch diameter of 3 inches. The wheel has 25 teeth and a pitch diameter of 5 inches. Material for both the wheel and the wheel is phosphor bronze. Determine the helix angle of the gear.
+a) 11.31°*
+b) 13.11°
+c) 11.13°
+d) 10.13°
+
+39. This material is the most popular alloy spring steel for conditions involving higher stresses than can be used with the high-carbon steels and for use where fatigue resistance and long endurance are needed; this is also good for shock and impact loads.
+a) Chrome silicon
+b) Chrome vanadium*
+c) hard-drawn wire
+d) Oil-tempered wire
+
+40. What is the largest roller chain size that can be used for power transmission at a sprocket speed of 1000 rpm?
+a) RC 35
+b) RC 50
+c) RC 80
+d) RC 60*
+
+41. These are gears with teeth formed on conical surfaces and are used mostly for transmitting motion between intersecting shafts. How do you call these gears?
+a) Spur gears
+b) Helical gears
+c) Bevel gears*
+d) Worm gearings
+
+42. A single square thread power screw is to raise a load of 70 kN. The screw has a major diameter of 36 mm and a pitch of 6 mm. The coefficient of thread friction and collar friction are 0.13 and 0.10 respectively. If the collar mean diameter is 90 mm and the screw turns at 60 rpm, find the axial linear speed of the screw.
+a) $5~mm/s$
+b) $6~mm/s$*
+c) $7~mm/s$
+d) $5.5~mm/s$
+
+43. A double thread ACME screw driven by a motor at 400 rpm raises the attached load of 900 kg at a speed of $10~m/min.$ The screw has a pitch diameter of 36 mm; the coefficient of friction on threads is 0.15. The friction torque on the thrust bearing of the motor is taken as 20% of the total input. Determine the lead angle.
+a) $12.465^{\circ}$*
+b) $14.265^{o}$
+c) $15.462^{\circ}$
+d) 16.452°
+
+44. What Hp can a 1-inch diameter short shaft transmit at 380 rpm?
+a) 3 Hp
+b) 18 Hp
+c) 10 Hp*
+d) 7.1 Hp
+
+45. A spur pinion rotates at 600 rpm and transmits 25 kW to a mating gear. The pitch diameter of the pinion is 100 mm, and the pressure angle is $20^{\circ}$ Determine the tangential load, in N.
+a) 7660
+b) 6790
+c) 3900
+d) 7958*
+
+46. A bearing that primarily guides the motion of a machine member without specific regard to the direction of load application.
+a) Journal bearing
+b) Clearance bearing
+c) Guide bearing*
+d) Thrust bearing
+
+47. A multiple-disk clutch, composed of three plates with a small diameter of 150 mm and large diameter of 200 mm, is designed to transmit 100 kW at 3000 rpm at a coefficient of friction of 0.5. Determine the spring force needed to engage the clutch.
+a) 2820 N
+b) 2428 N
+c) 5460 N
+d) 3638 N*
+
+48. A wire rope lifts a load of 10 kips at a maximum speed of 1000 feet per minute, attained in 5 seconds starting from rest. The rope has a metallic cross sectional area of $0.4~in^{2}.$ Determine the maximum tensile stress on the rope in ksi.
+a) 26.2
+b) 25.0
+c) 27.6*
+d) 32.4
+
+49. What is the bursting steam pressure of a hemispherical steel shell with a diameter of 100 inches and made of 0.0635-m thick steel plate, if the joint efficiency is 70% and the tensile strength is 60 000 psi?
+a) 4 020 psi
+b) 4 200 psi*
+c) 2 400 psi
+d) 2 040 psi
+
+50. A cylinder having an internal diameter if 508 mm and external diameter if 914.4 mm is subjected to an internal pressure of 69 MPa and an external pressure of 14 MPa. Determine the hoop stress at the inner surface of the cylinder.
+a) 90.11 MPa*
+b) 91.10 MPa
+c) 911.0 MPa
+d) 19.10 Mpa
+
+51. What length of a square key is required for a 4-in diameter shaft transmitting 1000 hp at 1000 rpm? The allowable shear and compressive stresses in the key are 15 ksi and 30 ksi, respectively.
+a) 2.1 inches*
+b) 2.8 inches
+c) 3.2 inches
+d) 4.2 inches
+
+52. Which of the following are the compositions of stainless steel 302?
+a) 18% chromium and 8% nickel*
+b) 18% nickel and 8% chromium
+c) 18% chromium and 8% phosphor bronze
+d) 18% bronze and 8% vanadium
+
+53. The root diameter of a double square thread is 0.55 inch. The screw has a pitch of 0.2 inch. Find the number of thread per inch.
+a) $0.2~threads/inch$
+b) $10~threads/inch$
+c) $5~threads/inch$*
+d) $2.5~threads/inch$
+
+54. A single square thread power screw is to raise a load of 70 kN. The screw has a major diameter of 36 mm and a pitch of 6 mm. The coefficient of thread friction and collar friction are 0.13 and 0.10 respectively. If the collar mean diameter is 90 mm and the screw turns at 60 rpm, find the combined efficiency of the screw and collar.
+a) 15.32%
+b) 12.53%*
+c) 13.52%
+d) 15.97%
+
+55. Determine the power capacity of a cone clutch under uniform pressure and assuming the following conditions: major diameter $=250$ mm; minor diameter $=200$ mm; length of conical elements in contact $=125$ mm; rotational speed $=870$ rpm; coefficient of friction $=0.30$ and allowable pressure $=70~kPa$
+a) 25.74 Hp*
+b) 24.75 Hp
+c) 27.45 Hp
+d) 24.57 Hp
+
+56. Three extension springs are hooked in series that support a single weight of 100 kg. The first spring is rated at 4 kN/m and the other two springs are rated $6~kN/m$ each. Determine the equivalent stiffness of the three springs.
+a) $1.71~kN/m$*
+b) $5~kN/m$
+c) $2.71~kN/m$
+d) $3.71~kN/m$
+
+57. These springs are made from one or more flat strips of brass, bronze, steel or other materials loaded as cantilevers or simple beam.
+a) Torsion springs
+b) Leaf springs*
+c) Garter springs
+d) Drawbar springs
+
+58. A flat belt is 6 inches wide and $1/3$ inch thick and transmits 20 Hp. The center distance is 8 ft. The driving pulley is 6 inches in diameter and rotates at 2 000 rpm such that the loose side of the belt is on top. The driven pulley is 18 inches in diameter. The belt material is 0.035 $5~lb/in^{3}$ and the coefficient of friction is 0.30. Determine the belt net tension.
+a) 201 lb
+b) 210 lb*
+c) 102 lb
+d) 120 lb
+
+59. A pulley 600 mm in diameter transmits 40 kW at 500 rpm. The arc of contact between the belt and pulley is $155^{\circ}$, the coefficient of friction between belt and pulley is 0.35 and the safe working stress of the belt is 2.1 MPa. Determine the belt tensions ratio, neglecting the effect of centrifugal force.
+a) 2.578*
+b) 2.857
+c) 5.287
+d) 5.782
+
+60. This refers to the space between adjacent coils when the spring is compressed to its operating length.
+a) Coil clearance*
+b) Pitch
+c) Lead
+d) Deflection
+
+61. Select a deep-groove ball bearing to carry a radial load $F_{x}=800$ lb and a thrust load $F_{z}=700$ lb at 1750 rpm. The service is $8~hr/day,$ but it is not continuous; design for 20 000 hr. The operation is smooth with little vibration; the outer ring rotates. Determine the design life in mr with no more than 10% failure.
+a) 20100 mr
+b) 2100 mr*
+c) 2001 mr
+d) 1200 mr
+
+62. Determine the Hp lost when a collar is loaded with 2000 lb, rotates at 50 rpm, and has a coefficient of friction of 0.15. The outside diameter of the collar is 4 inches and the inside diameter is 2 inches.
+a) 0.7314 Hp
+b) 0.3714 Hp*
+c) 0.4713 Hp
+d) 0.4371 Hp
+
+63. In a lathe machine, it is the diameter of the largest workpiece it can rotate in a chuck or between centers without hitting the bed.
+a) Chuck diameter
+b) Swing*
+c) Distance between centers
+d) Spindle diameter
+
+64. What load in N must be applied to a 25 mm round steel bar 2.5 m long $(E=207~Gpa)$ to stretch the bar 1.3 mm?
+a) 42 000 N
+b) 52 840 N*
+c) 53 000 N
+d) 60 000 N
+
+65. This is a general term that refers to the mating of cylindrical parts such as bolt or a hole; it is used only when the internal member is smaller that the external member. How do you call this?
+a) Clearance*
+b) Interference
+c) Allowance
+d) Tolerance
+
+66. A 50-mm diameter shaft is to transmit 12 kW power at a speed of 500 rpm, determine the mean diameter of the pin, under double shear, for a material having a safe unit stress of $40~N/mm^{2}.$
+a) 11.08 mm
+b) 12.08 mm*
+c) 13.08 mm
+d) 10.08 mm
+
+67. This is a lubrication condition where non-conformal surfaces are completely separated by lubricant film and no asperities are in contact. How do you call this lubrication condition?
+a) Elastohydrodynamic lubrication*
+b) Boundary lubrication
+c) Hydrodynamic lubrication
+d) Hydrostatic lubrication
+
+68. A 1200 mm cast iron pulley is fastened to 112.5 mm shaft by means of a 28.13 mm square key 175 mm long. The key and shaft have a shearing stress of 14 000 psi. Determine the force acting at the pulley that will shear the key.
+a) 10 015 lb*
+b) 11 005 lb
+c) 11 050 lb
+d) 10 501 lb
+
+69. A 75-mm diameter shaft is transmitting 350 kW at 650 rpm. A flange coupling is used and has 6 bolts, each 18 mm in diameter. Find the required diameter of the bolts circle based on an average shearing stress of 27.5 MPa.
+a) 245 mm*
+b) 254 mm
+c) 452 mm
+d) 425 mm
+
+70. How do you call the flattened end of a shank, and intended to fit into a driving slot in the socket?
+a) Handle
+b) Tang*
+c) Relief
+d) Tip
+
+71. If a sleeve bearing has an outside diameter of 38.1 mm and a length of 50.8 mm, the wall thickness is $3/16$ inch. The bearing is subjected to a radial load of 500 kg. What is the bearing pressure, in psi?
+a) 904 psi
+b) 409 psi
+c) 490 psi*
+d) 940 psi
+
+72. This material is the most popular alloy spring steel for conditions involving higher stresses than can be used with the high-carbon steels and for use where fatigue resistance and long endurance are needed; this is also good for shock and impact loads.
+a) Chrome silicon
+b) Chrome vanadium*
+c) hard-drawn wire
+d) Oil-tempered wire
+
+73. Determine the minimum whole depth of spur gear of 14.5 involute type with diametral pitch of 24 and circular pitch of 0.1309 inch.
+a) 0.09000 inch
+b) 0.08900 inch
+c) 0.0899 inch*
+d) 0.089758 inch
+
+74. A parallel helical gear set was a 17-tooth pinion driving a 34-tooth gear. The pinion has a right-hand helix angle of $30^{\circ}$ a normal pressure angle of $20^{\circ}$, and a normal diametral pitch of $5~teeth/in$ Find the axial circular pitches.
+a) $1.2566~inches/tooth$*
+b) $1.6625~inches/tooth$
+c) 1.6526 inches/tooth
+d) $1.6256~inches/tooth$
+
+75. For an American Standard Screw Threads, what does 6-32 UNC designate?
+a) Size 6, 32 threads per inch, coarse thread*
+b) 6 inches basic diameter, 32 threads per inch, coarse thread
+c) Size 6, 32 threads per inch, fine thread
+d) 32 inches basic diameter, 6 threads per inch, coarse thread
+
+76. Determine the Poisson's ratio of a material whose modulus of elasticity is 200 GPa and whose modulus of rigidity is 80 GPa.
+a) 0.33
+b) 0.25*
+c) 0.38
+d) 0.22
+
+77. A steel has a $BHN=300$ What is its approximate ultimate strength in ksi?
+a) 300 ksi
+b) 150 ksi*
+c) 75 ksi
+d) 200 ksi
+
+78. If the angular deformation of a solid shaft should not to exceed 1º in a length of 1.8 m and the allowable shearing stress is 83 MMa, what is the diameter of the shaft? Assume that the shaft material has $G=77\times10^{6}kPa$.
+a) 222.34 mm*
+b) 234.22 mm
+c) 23.42 cm
+d) 24.22 cm
+
+79. How do you call the process of producing the residual compressive stress of machine parts, which is performed by directing the a high velocity stream of hardened balls or pellets at the surface to be treated.
+a) Nitriding
+b) Shot blasting*
+c) Peening
+d) Tempering
+
+80. Determine the Hp lost when a collar is loaded with 2000 lb, rotates at 50 rpm, and has a coefficient of friction of 0.15. The outside diameter of the collar is 4 inches and the inside diameter is 2 inches.
+a) 0.7314 Hp
+b) 0.3714 Hp*
+c) 0.4713 Hp
+d) 0.4371 Hp
+
+81. It is a process that produces residual compressive stress on the machine part, which uses a series of hammer blows on the surface.
+a) Nitriding
+b) Shot blasting
+c) Peening*
+d) Tempering
+
+82. Two shafts 3.6 m between centers carry pulleys 1.2 m in diameter and 0.91 m in diameter respectively, connected by a crossed belt. It is desired to put the belt on as an open belt. How long a piece must be cut of it?
+a) 303.3 mm*
+b) 330 mm
+c) 333.0 mm
+d) 330.3 mm
+
+83. It is a surface-hardening process for alloy steels in which the material is heated to $950^{\circ}F$ in a nitrogen atmosphere, typically ammonia gas, followed by slow cooling.
+a) Quenching
+b) Nitriding*
+c) Shot blasting
+d) Peening
+
+84. A 20-tooth motor sprocket, running at 1200 rpm, drives a blower at a speed ratio of 4:1. Using the largest permissible chain size and the largest permissible center distance of 80 pitches, what length of chain in pitches is required to connect the sprockets?
+a) 200 pitches
+b) 212 pitches*
+c) 216 pitches
+d) 220 pitches
+
+85. Which of the following gases is typically used in nitriding process of surface hardening?
+a) Nitrogen gas
+b) Carbon dioxide
+c) Ammonia gas*
+d) Hydrogen gas
+
+86. A 20-kW motor, running at 1200 rpm, drives a 400 mm diameter pulley at a belt tension ratio of 2.4. If the belt's tight side tension is only 1200 N, determine the transmission efficiency.
+a) 87.97%*
+b) 84.58%
+c) 85.66%
+d) 86.55%
+
+87. A right-handed single-thread hardened-steel worm has a catalog rating of 2.25 kW at 650 rpm when meshed with a 48-tooth cast-steel gear. The axial pitch of the worm is 25 mm, normal pressure angle is 14.5°, and the pitch diameter of the worm is 100 mm. The coefficient of friction is 0.085. Determine the shafts center distance.
+a) 241 mm*
+b) 142 mm
+c) 412 mm
+d) 124 mm
+
+88. Which of the following is the benefit in using nitriding as a surface-hardening process for alloy steels?
+a) Improvement of endurance strength, 50% or more*
+b) Improvement of endurance strength, less than 50%
+c) Improvement of endurance strength, more than 50%
+d) 80% improvement on the endurance strenght
+
+89. A $20^{\circ}$ straight-tooth bevel pinion having 14 teeth and a diametral pitch of $6~teeth/inch$ drives a 42-tooth gear. The two shafts are at right angles and in the same plane. Find the pitch angle of the pinion.
+a) $18.4^{\circ}$*
+b) 20°
+c) $14.5^{\circ}$
+d) $20.5^{\circ}$
+
+90. A triple-thread worm has a lead angle of $17^{\circ}$ and a pitch diameter of 2.2802 inches. Find the center distance when the worm is mated with a wheel of 48 teeth.
+a) 6.72 inches*
+b) 7.26 inches
+c) 6.27 inches
+d) 7.62 inches
+
+91. A double-thread worm has a pitch diameter of 3 inches. The wheel has 20 teeth and a pitch diameter of 5 inches. Find the gear helix angle.
+a) $4.69^{\circ}$
+b) $9.46^{\circ}$*
+c) $6.49^{\circ}$
+d) 6.94°
+
+92. A 36-tooth pinion turning at 300 rpm drives 120-tooth gear of 14.5 involute full depth pressure angle. Determine the rpm of the driven gear.
+a) 60 rpm
+b) 45 rpm
+c) 75 rpm
+d) 90 rpm*
+
+93. If two parallel shafts are connected by cylinders in pure rolling contact and turning in the same direction, and having a speed ratio of 2.75, what is the Center distance of the two shafts assuming that the diameter of the smaller cylinder is 22 cm?
+a) 18.25 cm
+b) 19.25 cm*
+c) 20.25 cm
+d) 17.25 cm
+
+94. In estimating the actual endurance strength of steel parts, one of the factors to be considered is the material factor, which of the following is the recommended material factor for cast steel?
+a) 0.70*
+b) 0.80
+c) 0.75
+d) 1.0
+
+95. How do you call the level of stress that the part will be permitted to see under operating conditions?
+a) Yield stress
+b) Endurance stress
+c) Design stress*
+d) Ultimate stress
+
+96. Which of the following column formulas is applicable to cast iron columns?
+a) Euler's formula
+b) J.B.Johnson's formula
+c) Secant formula
+d) Straight line formula*
+
+97. Which of the following ferrous metals has the lowest carbon content?
+a) Carbon steel
+b) Wrought iron*
+c) Cast iron
+d) SAE 4140
+
+98. Two extension coil springs are hooked in series that support a single weight of 100 kg. The first spring is rated at $4~kN/m$ and the other spring is rated at $6~kN/m$ Determine the total deflection of the springs.
+a) 408.6 mm*
+b) 486.0 mm
+c) 480.6 mm
+d) 460.8 mm
+
+99. If the ultimate shear strength of a steel plates is 42 000 psi, what force is necessary to punch a 0.75 inch diameter hole in a 0.625 inch thick plate?
+a) 61 850 lb*
+b) 65 810 lb
+c) 61 580 lb
+d) 60 185 lb
+
+100. If stiffness is the main criterion in selecting a material, which of the following is the most economical choice?
+a) SAE 3130
+b) SAE 1020*
+c) SAE 6150
+d) AISI 301, hard stainless steel
+    </script>
+
+    <script>
+        const rawText = document.getElementById('raw-data').textContent.trim();
+        const quizData = [];
+        let totalScore = 0;
+        let currentIdx = 0;
+
+        function initApp() {
+            const lines = rawText.split('\n');
+            let currentQuestion = null;
+
+            // Simple parser assuming a specific block format
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if (line === '') continue;
+
+                // Check for question start (e.g., "1. What is...")
+                const qMatch = line.match(/^(\d+)\.\s+(.*)/);
+                if (qMatch) {
+                    if (currentQuestion && currentQuestion.options.length > 0) {
+                        quizData.push(currentQuestion);
+                    }
+                    currentQuestion = {
+                        num: parseInt(qMatch[1]),
+                        qText: qMatch[2],
+                        options: [],
+                        ans: 'A', // default
+                        userAnswer: null
+                    };
+                } else if (currentQuestion && line.match(/^[a-d]\)\s+(.*)/)) {
+                    // Match options like "a) Text"
+                    const optMatch = line.match(/^([a-d])\)\s+(.*)/);
+                    let optLetter = optMatch[1].toUpperCase();
+                    let optText = optMatch[2];
+
+                    if (optText.endsWith('*')) {
+                        currentQuestion.ans = optLetter;
+                        optText = optText.replace(/\*$/, '').trim();
+                    }
+
+                    currentQuestion.options.push({
+                        letter: optLetter,
+                        text: optText
+                    });
+                } else if (currentQuestion && line.startsWith('Answer:')) {
+                     // Failsafe or additional answer catch if needed
+                     // (The asterisk parsing is generally more robust for this data)
+                     const ansMatch = line.match(/Answer:\s*([a-d])\)/i);
+                     if (ansMatch) {
+                         currentQuestion.ans = ansMatch[1].toUpperCase();
+                     }
+                } else if (currentQuestion) {
+                     // Multi-line question text append
+                     if(currentQuestion.options.length === 0) {
+                         currentQuestion.qText += " " + line;
+                     }
+                }
+            }
+            if (currentQuestion && currentQuestion.options.length > 0) {
+                quizData.push(currentQuestion);
+            }
+
+            if (quizData.length === 0) {
+                document.getElementById('q-text').innerHTML = "<span class='error-message'>Parse Error: Could not extract questions from the provided file.</span>";
+                return;
+            }
+            
+            document.getElementById('nav-header').innerText = `1 to 100 Navigator`;
+            document.getElementById('controls').style.display = 'flex';
+            buildNav();
+            renderQuestion();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            grid.innerHTML = '';
+            quizData.forEach((q, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-btn';
+                btn.id = `nav-${i}`;
+                btn.innerText = q.num;
+                btn.onclick = () => { 
+                    currentIdx = i; 
+                    renderQuestion(); 
+                    if(window.innerWidth <= 768) toggleSidebar(); 
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateNavStyles() {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${currentIdx}`).classList.add('active');
+        }
+
+        function renderQuestion() {
+            const q = quizData[currentIdx];
+            document.getElementById('q-num').innerText = `Question ${q.num} (Problem ${currentIdx + 1} of ${quizData.length})`;
+            document.getElementById('q-text').innerText = q.qText;
+            
+            const grid = document.getElementById('opt-grid');
+            grid.innerHTML = '';
+            
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'feedback';
+            feedback.innerText = '';
+            feedback.style.display = 'none';
+
+            q.options.forEach((opt) => {
+                const btn = document.createElement('div');
+                btn.className = 'option';
+                btn.innerHTML = `<span class="opt-letter">${opt.letter}.</span> ${opt.text}`;
+                
+                if (q.userAnswer) {
+                    btn.classList.add('disabled');
+                    if (opt.letter === q.ans) {
+                        btn.classList.add('actual-correct');
+                    }
+                    if (opt.letter === q.userAnswer && q.userAnswer !== q.ans) {
+                        btn.classList.add('selected-wrong');
+                    }
+                } else {
+                    btn.onclick = () => handleAnswer(opt.letter);
+                }
+                grid.appendChild(btn);
+            });
+
+            if (q.userAnswer) {
+                feedback.style.display = 'block';
+                if (q.userAnswer === q.ans) {
+                    feedback.className = 'feedback success';
+                    feedback.innerText = 'Correct!';
+                } else {
+                    feedback.className = 'feedback error';
+                    feedback.innerText = `Incorrect! The correct answer is ${q.ans}.`;
+                }
+            }
+
+            // Update Controls
+            document.getElementById('btn-prev').disabled = currentIdx === 0;
+            
+            const btnNext = document.getElementById('btn-next');
+            const btnRetake = document.getElementById('btn-retake');
+
+            if (currentIdx === quizData.length - 1) {
+                btnNext.style.display = 'none';
+                btnRetake.style.display = 'inline-block';
+            } else {
+                btnNext.style.display = 'inline-block';
+                btnRetake.style.display = 'none';
+            }
+
+            updateNavStyles();
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('quizCard')]);
+            }
+        }
+
+        function handleAnswer(letter) {
+            const q = quizData[currentIdx];
+            q.userAnswer = letter;
+            
+            const navBtn = document.getElementById(`nav-${currentIdx}`);
+            if (letter === q.ans) {
+                totalScore++;
+                navBtn.classList.add('correct');
+            } else {
+                navBtn.classList.add('wrong');
+            }
+            
+            document.getElementById('score-display').innerText = `Score: ${totalScore}`;
+            renderQuestion();
+        }
+
+        function nextQ() { if (currentIdx < quizData.length - 1) { currentIdx++; renderQuestion(); } }
+        function prevQ() { if (currentIdx > 0) { currentIdx--; renderQuestion(); } }
+
+        function retakeQuiz() {
+            quizData.forEach(q => { q.userAnswer = null; });
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('correct');
+                b.classList.remove('wrong');
+            });
+            totalScore = 0;
+            currentIdx = 0;
+            document.getElementById('score-display').innerText = `Score: 0`;
+            renderQuestion();
+            document.getElementById('main-content').scrollTo(0,0);
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
