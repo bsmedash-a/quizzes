@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Design Elements | Questions 301-350</title>
+    <!-- MathJax for rendering equations -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --main-color: #ffffff;
+            --text-color: #2c3e50;
+            --accent-color: #1a252f;
+            --highlight-color: #3498db;
+            --correct-color: #27ae60;
+            --wrong-color: #e74c3c;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            border-bottom: 4px solid var(--highlight-color);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: white;
+            margin-right: 20px;
+            transition: color 0.2s;
+        }
+
+        .hamburger:hover { color: var(--highlight-color); }
+
+        .top-bar h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            width: 320px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            position: fixed;
+            height: calc(100% - 60px);
+            top: 60px;
+            z-index: 99;
+            transform: translateX(-100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        #sidebar.open { transform: translateX(0); }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background-color: #1a252f;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .nav-grid {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .nav-btn {
+            background-color: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover { background-color: #95a5a6; }
+        .nav-btn.active { background-color: var(--highlight-color); box-shadow: inset 0 0 0 2px white; }
+        .nav-btn.correct { background-color: var(--correct-color); color: white; }
+        .nav-btn.wrong { background-color: var(--wrong-color); color: white; }
+
+        /* Main Content */
+        #main-content {
+            flex: 1;
+            margin-top: 60px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .quiz-card {
+            background-color: var(--main-color);
+            width: 100%;
+            max-width: 900px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            height: fit-content;
+            margin-bottom: 40px;
+        }
+
+        .question-header {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: var(--text-color);
+            white-space: pre-wrap;
+        }
+
+        /* 2-Column Layout for Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+
+        .option {
+            background-color: #f8f9fa;
+            border: 2px solid #bdc3c7;
+            padding: 16px 20px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            color: var(--text-color);
+        }
+
+        .option:hover:not(.disabled) {
+            background-color: #ebf5fb;
+            border-color: var(--highlight-color);
+        }
+
+        .option.actual-correct {
+            background-color: #e8f8f5;
+            border-color: var(--correct-color);
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .option.selected-wrong {
+            background-color: #fdedec;
+            border-color: var(--wrong-color);
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .option.disabled { cursor: default; }
+
+        .opt-letter {
+            font-weight: bold;
+            margin-right: 15px;
+            color: var(--highlight-color);
+        }
+
+        .feedback {
+            padding: 20px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .feedback.success { background-color: #e8f8f5; color: #27ae60; border: 1px solid var(--correct-color); display: block; }
+        .feedback.error { background-color: #fdedec; color: #c0392b; border: 1px solid var(--wrong-color); display: block; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            border-top: 2px solid #ecf0f1;
+            padding-top: 20px;
+        }
+
+        .btn {
+            background-color: var(--highlight-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+
+        .btn:hover:not(:disabled) { background-color: #2980b9; }
+        .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        
+        .btn-retake { background-color: #e67e22; }
+        .btn-retake:hover { background-color: #d35400; }
+
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 98; display: none; }
+        #overlay.show { display: block; }
+        
+        .error-message { color: var(--wrong-color); font-weight: bold; text-align: center; display: block; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h1>Machine Design Elements | Questions 301-350</h1>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header" id="nav-header">Loading...</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div id="main-content">
+        <div class="quiz-card" id="quizCard">
+            <div class="question-header">
+                <span id="q-num">Initializing...</span>
+                <span id="score-display" style="color: var(--highlight-color);">Score: 0</span>
+            </div>
+            
+            <div class="question-text" id="q-text">Loading problem set (301-350)...</div>
+            <div class="options-grid" id="opt-grid"></div>
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="controls" id="controls" style="display:none;">
+                <button class="btn" id="btn-prev" onclick="prevQ()">&#8592; Previous</button>
+                <button class="btn btn-retake" id="btn-retake" style="display:none;" onclick="retakeQuiz()">Retake Quiz</button>
+                <button class="btn" id="btn-next" onclick="nextQ()">Next &#8594;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Injection strictly for questions 301-350 -->
+    <script id="raw-data" type="text/plain">
+301|Determine the average time to cut by automatic oxy-acetylene (machine) crosswise a 4ft. x 8 ft x 4 in thick steel plate.|6.85 min.|318 sec|10 min|360 sec|D
+302|Compute for the induced/compressive stress, in kPa, of a steel solid shafting of 50 mm diameter and 800 mm in length that is subjected to an increase of temperature by 80 deg C|181,816|242,816|218,182|196,560|D
+303|A mass weighing 56 lbs. rests on a horizontal surface. The force needed to move along the surface is 20 lbs. determine the coefficient of friction|0.0|0.112|0.36|0.28|C
+304|Determine the time in seconds, to saw a rectangular magnesium bar 5 in. wide and 2 in. thick if the length of cut is 5 in. The power hacksaw does 120 strokes/min and the feed/stroke is 0.127 mm|189|500|99|20|B
+305|A car travels with an initial velocity of 10 m/sec or 36 km/hr. If it is decelerating at rate of 3 m/sec-se, how far in meters does it travel before stopping?|17|21|19|15|A
+306|Compute for the twisting moment in inlb -developed when the shaft delivers 20Hp at 1200 rpm|1166|915|1050|945|C
+307|In an Oxy-Acetylene manual welding method to weld a 3 1/2 ft. long seam in a 0.375" thick steel plate at a consumption rate of 9 ft³/ft for oxygen and 7 ft³/ ft for acetylene. Compute for the total combined gas consumption in ft³|48|24.5|56|31.5|C
+308|A cylinder tank with 10 inches inside diameter contains oxygen gas at 2500 psi. Calculate the required wall thickness in millimeter under stress of 28000 psi|10.54|11.34|10.24|12.24|B
+309|Compute for the load in kN on a 3 cm diameter, 100 cm long steel rod if its maximum elongation exceed 0.12 cm|178|196|148|287|A
+310|A baseball is thrown straight upward with a velocity of 20 m/s Compute for the time elapsed for the baseball to return. Assume for a zero drag.|1.84|2.2|2.50|2.04|D
+311|Compute for the polar section modulus of an SAE 1060 shafting having a diameter of 3 inches. Use a factor of safety of 2 and design stress at 8000 psi|4.7|6.1|4.2|5.3|D
+312|Find the torsional deflection, in degrees of a solid steel shaft 110 mm OD 1.4 m long subjected to 3.1 x 10^6 N-mm. The torsional modulus of elasticity is 80,000 N/mm-mm|0.22|0.195|0.28|0.24|A
+313|A short shaft transmits 200 hp at 300 rpm. Determine the diameter of the shaft in inches.|5|2|4|3|D
+314|Forces not on the same plane are called|Component|Resolution|Non-coplanar|Composition of forces|C
+315|The distance between the center of oscillation and the point of suspension is called|center of percussion|center of gravity|radius of oscillation|Fix axis|A
+316|If the velocity is variable and regularly/constantly increasing the rate of change is called|Moment|Motion|Constant work|Acceleration|D
+317|is a kinematic chain in which one link is considered fixed for the purpose of analysis but motion is possible in other links|Sprocket chain|Belting|Mechanism|Frame|D
+318|is one of the rigid members/bodies joined together to form a kinematic chain|All of these|Link|Frame|Coplanar|B
+319|The resultant of a pair of equal forces but opposite in direction is called|Non-concurrent|Concurrent|Resultant|Couple|D
+320|The helical and herringbone gear teeth cut after heat treatment should have a hardness in the range of 210/300 BHN. The pinion gear teeth hardness, on the other hand ideally/normally should be at BHN|250/320|350/380|400|340/350|D
+321|As a rule the center to center distance between sprocket should not be less than times the diameter of the bigger sprocket and not less than 30 times the pitch nor more than about 50 times to pitch|2.5|2|3|1.5|D
+322|A single forces which produces the same effect upon a mass as two or several forces acting together is called|components|resultant|composition of forces|resolution of forces|B
+323|All forces in the same plane are called|Parallel|Coplanar|Couple|Resultant|B
+324|The forces of attraction between two bodies is directly proportional to the product of their masses and inversely proportional to distance square between their centers. This law is|Law of motion|Law of gravitation|Newton's law|Hook's law|B
+325|Gears are manufactured usually in the following processes: milling, generating, shaving, grinding and which is also used.|Blanking|Heat treatment|Molding|Dinking|A
+326|Any object thrown upward will return to earth with the magnitude of the terminal velocity equal to|50% of the initial velocity|80% of the initially velocity|About 90% of the initial velocity|the initial velocity|D
+327|Flat belt that is too tight will induce strain on the bearing and belt|result to uneconomical operation|suffer/shafter|life will be shortened|will be sheared/cut|C
+328|The resulting cross-sectional area of the tensile test specimen divided by the specimen original area is called|% elongation|impact test|charpy test|izod test|A
+329|SAE 51xxx belongs to the steel family|chromium|Carbon|Manganese|Nickel|A
+330|In itself, it is a lubricant and usually one of the important elements in casting non-ferrous metals like bronze, for example|Antimony|Lead|Zinc|Babbit|B
+331|Gasket material which should avoid hot liquid/steam application.|Asbestos fiber|Rubberized|Wool|Nylon fiber|B
+332|The same material properties all over/direction and at any particular point in a structural member is|Isentropic|Homogenous|Isotropic|All of these|C
+333|Arc produced by two tungsten electrodes into which a jet of hydrogen is directed|Hydrogen lancing|All of these|Electro-beam welding|Atomic hydrogen welding|D
+334|What is the carbon content range of SAE 4140 chrome-Moly steel after heat treatment?|0.30/0.45|0.38/0.45|0.30/0.50|0.38/0.43|D
+335|Actual torque ratio of a gear set divided by its gear ratio|clearance|contact ratio|efficiency|approach ratio|C
+336|A low coefficient of expansion, corrosion resistant weak in strength and used for non-ferrous application as an alloying element|Aluminum|copper oxide|copper|aluminum oxide|A
+337|For better mounting of bearing it is preferred to heat the inner ring the range of 200°F and but never more than °F as overheating might reduce the ring hardness|280|250|300|320|B
+338|For large speed ratio and large sprocket utilized it is recommended cast material since the large sprocket teeth are having fewer engagement.|alloyed steel|iron|malleable iron|heat treated steel|B
+339|Roller bearing is utilized on carrying capacity and is better than ball bearing in this condition|high temperature load|heavy load|low load|reversing load|B
+340|To enhance mechanical properties, fabrication characteristic or any other attributes of steel, some elements are added in melting in specific ranges or minimum aside from carbon and generally termed|Bessemer steel|Alloy steel|AISI steel|SAE steel|B
+341|Materials having thermal expansion of about 10 times higher than those of metals and has more heat generated during machining is ?|Aluminum|Plastic|Asbestos|PVC|B
+342|To hold to minimum the axial direction of deflection/movement, a separate thrust bearing or pre-loaded bearing capable of absorbing considerable load is required. The type of bearing to use is a bearing|Double row angular contact|Wide type self-aligning|Tapered roller bearing|Deep groove ball|A
+343|Pulley made of ordinarily is 45 to 55% less in weight and 2.35 to 2.70% less slippage compared with, pulley|wood/iron|iron/steel|steel/iron|wood/steel|C
+344|To avoid scoring in the bearing surface and the shaft due to contamination/absorption of the fine dirt in the bearing during operation/lubrication, the bearing material to apply should have good properties|corrosion resistance confermability|corrosion resistance|embeddability|anti-scoring|C
+345|What do impact tests measure?|plasticity|toughness|ductility|compactness|B
+346|Corresponding piping color for alkaline|red|violet|green|blue|B
+347|Type of gear that transmits power at an angle|bevel|herringbone|spur|helix|A
+348|Which of the following gasket material is not used for high temperature steam?|wool|asbestos|plastic nylon|rubberized|D
+349|A plane perpendicular to the gear axis.|pitch plane|normal plane|plane of rotation|radius of gyration|C
+350|Specification of molybdenum alloy|SAE 3xxx|SAE 4xxx|SAE 5xxx|SAE 6xxx|B
+    </script>
+
+    <script>
+        const rawText = document.getElementById('raw-data').textContent.trim();
+        const quizData = [];
+        let totalScore = 0;
+        let currentIdx = 0;
+
+        function initApp() {
+            const lines = rawText.split('\n');
+            lines.forEach(line => {
+                if (line.trim() === '') return;
+                const parts = line.split('|');
+                if (parts.length === 7) {
+                    quizData.push({
+                        num: parseInt(parts[0]),
+                        qText: parts[1].trim(),
+                        options: [
+                            { letter: 'A', text: parts[2].trim() },
+                            { letter: 'B', text: parts[3].trim() },
+                            { letter: 'C', text: parts[4].trim() },
+                            { letter: 'D', text: parts[5].trim() }
+                        ],
+                        ans: parts[6].trim().toUpperCase(),
+                        userAnswer: null
+                    });
+                }
+            });
+
+            if (quizData.length === 0) {
+                document.getElementById('q-text').innerHTML = "<span class='error-message'>Parse Error: Could not extract questions from the provided file.</span>";
+                return;
+            }
+            
+            document.getElementById('nav-header').innerText = `301 to 350 Navigator`;
+            document.getElementById('controls').style.display = 'flex';
+            buildNav();
+            renderQuestion();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            grid.innerHTML = '';
+            quizData.forEach((q, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-btn';
+                btn.id = `nav-${i}`;
+                btn.innerText = q.num;
+                btn.onclick = () => { 
+                    currentIdx = i; 
+                    renderQuestion(); 
+                    if(window.innerWidth <= 768) toggleSidebar(); 
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateNavStyles() {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${currentIdx}`).classList.add('active');
+        }
+
+        function renderQuestion() {
+            const q = quizData[currentIdx];
+            document.getElementById('q-num').innerText = `Question ${q.num} (Problem ${currentIdx + 1} of ${quizData.length})`;
+            document.getElementById('q-text').innerText = q.qText;
+            
+            const grid = document.getElementById('opt-grid');
+            grid.innerHTML = '';
+            
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'feedback';
+            feedback.innerText = '';
+            feedback.style.display = 'none';
+
+            q.options.forEach((opt) => {
+                const btn = document.createElement('div');
+                btn.className = 'option';
+                btn.innerHTML = `<span class="opt-letter">${opt.letter}.</span> ${opt.text}`;
+                
+                if (q.userAnswer) {
+                    btn.classList.add('disabled');
+                    if (opt.letter === q.ans) {
+                        btn.classList.add('actual-correct');
+                    }
+                    if (opt.letter === q.userAnswer && q.userAnswer !== q.ans) {
+                        btn.classList.add('selected-wrong');
+                    }
+                } else {
+                    btn.onclick = () => handleAnswer(opt.letter);
+                }
+                grid.appendChild(btn);
+            });
+
+            if (q.userAnswer) {
+                feedback.style.display = 'block';
+                if (q.userAnswer === q.ans) {
+                    feedback.className = 'feedback success';
+                    feedback.innerText = 'Correct!';
+                } else {
+                    feedback.className = 'feedback error';
+                    feedback.innerText = `Incorrect! The correct answer is ${q.ans}.`;
+                }
+            }
+
+            // Update Controls
+            document.getElementById('btn-prev').disabled = currentIdx === 0;
+            
+            const btnNext = document.getElementById('btn-next');
+            const btnRetake = document.getElementById('btn-retake');
+
+            if (currentIdx === quizData.length - 1) {
+                btnNext.style.display = 'none';
+                btnRetake.style.display = 'inline-block';
+            } else {
+                btnNext.style.display = 'inline-block';
+                btnRetake.style.display = 'none';
+            }
+
+            updateNavStyles();
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('quizCard')]);
+            }
+        }
+
+        function handleAnswer(letter) {
+            const q = quizData[currentIdx];
+            q.userAnswer = letter;
+            
+            const navBtn = document.getElementById(`nav-${currentIdx}`);
+            if (letter === q.ans) {
+                totalScore++;
+                navBtn.classList.add('correct');
+            } else {
+                navBtn.classList.add('wrong');
+            }
+            
+            document.getElementById('score-display').innerText = `Score: ${totalScore}`;
+            renderQuestion();
+        }
+
+        function nextQ() { if (currentIdx < quizData.length - 1) { currentIdx++; renderQuestion(); } }
+        function prevQ() { if (currentIdx > 0) { currentIdx--; renderQuestion(); } }
+
+        function retakeQuiz() {
+            quizData.forEach(q => { q.userAnswer = null; });
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('correct');
+                b.classList.remove('wrong');
+            });
+            totalScore = 0;
+            currentIdx = 0;
+            document.getElementById('score-display').innerText = `Score: 0`;
+            renderQuestion();
+            document.getElementById('main-content').scrollTo(0,0);
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
