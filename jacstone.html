@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Design | Sequential Reviewer</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --main-color: #ffffff;
+            --text-color: #2c3e50;
+            --accent-color: #34495e;
+            --highlight-color: #3498db;
+            --correct-color: #27ae60;
+            --wrong-color: #e74c3c;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            border-bottom: 4px solid var(--highlight-color);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: white;
+            margin-right: 20px;
+            transition: color 0.2s;
+        }
+
+        .hamburger:hover { color: var(--highlight-color); }
+
+        .top-bar h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            width: 320px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            position: fixed;
+            height: calc(100% - 60px);
+            top: 60px;
+            z-index: 99;
+            transform: translateX(-100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        #sidebar.open { transform: translateX(0); }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background-color: #1a252f;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .nav-grid {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .nav-btn {
+            background-color: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover { background-color: #95a5a6; }
+        .nav-btn.active { background-color: var(--highlight-color); box-shadow: inset 0 0 0 2px white; }
+        .nav-btn.correct { background-color: var(--correct-color); color: white; }
+        .nav-btn.wrong { background-color: var(--wrong-color); color: white; }
+
+        /* Main Content */
+        #main-content {
+            flex: 1;
+            margin-top: 60px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .quiz-card {
+            background-color: var(--main-color);
+            width: 100%;
+            max-width: 900px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            height: fit-content;
+            margin-bottom: 40px;
+        }
+
+        .question-header {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: var(--text-color);
+            white-space: pre-wrap;
+        }
+
+        /* 2-Column Layout for Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+
+        .option {
+            background-color: #f8f9fa;
+            border: 2px solid #bdc3c7;
+            padding: 16px 20px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            color: var(--text-color);
+        }
+
+        .option:hover:not(.disabled) {
+            background-color: #ebf5fb;
+            border-color: var(--highlight-color);
+        }
+
+        .option.actual-correct {
+            background-color: #e8f8f5;
+            border-color: var(--correct-color);
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .option.selected-wrong {
+            background-color: #fdedec;
+            border-color: var(--wrong-color);
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .option.disabled { cursor: default; }
+
+        .opt-letter {
+            font-weight: bold;
+            margin-right: 15px;
+            color: var(--highlight-color);
+        }
+
+        .feedback {
+            padding: 20px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .feedback.success { background-color: #e8f8f5; color: #27ae60; border: 1px solid var(--correct-color); display: block; }
+        .feedback.error { background-color: #fdedec; color: #c0392b; border: 1px solid var(--wrong-color); display: block; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            border-top: 2px solid #ecf0f1;
+            padding-top: 20px;
+        }
+
+        .btn {
+            background-color: var(--highlight-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+
+        .btn:hover:not(:disabled) { background-color: #2980b9; }
+        .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        
+        .btn-retake { background-color: #e67e22; }
+        .btn-retake:hover { background-color: #d35400; }
+
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 98; display: none; }
+        #overlay.show { display: block; }
+        
+        .error-message { color: var(--wrong-color); font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h1>Machine Design | Sequential Reviewer</h1>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header" id="nav-header">Loading...</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div id="main-content">
+        <div class="quiz-card" id="quizCard">
+            <div class="question-header">
+                <span id="q-num">Initializing...</span>
+                <span id="score-display" style="color: var(--highlight-color);">Score: 0</span>
+            </div>
+            
+            <div class="question-text" id="q-text">Extracting problem set...</div>
+            <div class="options-grid" id="opt-grid"></div>
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="controls" id="controls" style="display:none;">
+                <button class="btn" id="btn-prev" onclick="prevQ()">&#8592; Previous</button>
+                <button class="btn btn-retake" onclick="retakeQuiz()">Retake Quiz</button>
+                <button class="btn" id="btn-next" onclick="nextQ()">Next &#8594;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Raw Data Embed: The Javascript will parse this exactly as written -->
+    <script id="raw-data" type="text/plain">
+MACHINE DESIGN
+PART I
+BY: JACSTONE REVIEW CENTER
+Chuck used on turret lathe is
+A. collet chuck
+B. four jaw self centering chuck
+C. Magnetic Chuck
+D. Three jaw independent chuck
+Answer: D
+Angle plate is used for
+A. cutting gears in a shaper
+B. cutting gears in a milling
+C. cutting tapers in a lathe
+D. fixing job cut angles is grinder
+Answer: A
+For machining the flange of 90 elbow on a
+lathe, which of the following device is
+used?
+A. Angle plate
+B. Catch Plate
+C. Face Plate
+D. Lathe plate
+Answer: C
+Angle Plate is used for
+A.
+B.
+cutting gears in a shaper
+cutting gears in a milling
+c.
+cutting tapers in a lathe
+D. fixing job cut angles is a grinder
+Answer A
+A sine bar can not be used without a/ an
+micrometer
+A.
+angle gage
+B.
+C.
+D.
+slip gage
+vernier caliper
+Answer: A
+The operation of finishing a drilled hole
+to the correct size is known as
+A. counting boring
+B. counter sinking
+C. reaming
+D. spot facing
+Answer: C
+Carbon steel drill should be operated at
+A. speed less than that when using a high
+speed drill
+B. speed greater than that when using a
+high speed drill
+C. the different speed as that when using
+high speed drill
+D. the same speed as that when using a high
+speed drill
+Answer: B
+When cutting material in a lathe, the
+harder the material being cut, the tool bit
+should have
+A. less side rake
+B. more side rake
+C. more top rake
+D. no side rake
+Answer: A
+On xx heavy pipe the extra metal is added
+in the
+A. outside
+B. inside
+C. half on the inside, half on the outside
+D. three quarters on the outside, one
+quarter on the inside
+Answer: B
+Valve seats are usually:
+A. screwed in
+B. dropped in
+C. pressure in
+D. A or C
+Answer: D
+When grinding in valves the disc is secured
+to the stem by:
+A. inserting a cotter pin
+B. placing emery cloth between stem and
+disc
+C. welding
+D. A or B
+Answer: D
+A fresh-water tank is located at the top.
+What will the pressure on it outlet in the
+engine room 50' below the tank?
+A. 20 psi
+B. 21.7 psi
+C. 23 psi
+D. 25 psi
+Answer: B
+In a duplex reciprocating pump:
+A. the slide valve for the one cylinder is
+controlled in the piston of the other
+cylinder
+B.both slide valves operate simultaneously
+C. each slide valve is controlled by its
+own piston rod
+D. one slide valve operates the other slide
+valve
+Answer: A
+The jerky operation of a reciprocating pump
+may be caused by
+A. small leaks in the suction line
+B. suction valve only partially open
+C. dirty suction valve
+D. any of the above
+Answer: D
+It is used in the production of the flat
+surface on pieces two large or too heavy to
+hold in a shaper.
+A. Grinder
+B. Planer
+C. Shaper
+D. Shaver
+Answer: B
+A machine tool used to produce a variety of
+surface of surfaces by using a circular
+type cutter with multiple teeth called
+A. broaching machine
+B. grinding
+C. lathe machine
+D. milling machine
+Answer D
+Cutting tool used to finish internal and
+external surfaces by the use of cutter
+called a broach, which has a series of
+cutting edges of teeth.
+A. Broaching machine
+B. Lathe machine
+C. Planer
+D. Shaper
+Answer: A
+Group of thin steel strips used for
+measuring clearances.
+A. Tachometer
+B. Micrometer
+C. Feeler gage
+D. Caliper
+Answer C
+Bind of chuck, which should not be used
+where accuracy desired called
+A. collet chuck
+B. four jaw shuck
+C. magnetic chuck
+D. universal chuck
+Answer: C
+The system used for breaking scale from the
+evaporator coils while the evaporator is in
+operation is called:
+A. recirculating
+B. blowing-down
+C. cracking-off
+D. dumping
+Answer: C
+The coils in the evaporator are attached to
+the headers by:
+A. pipe nipples
+B. union type fitting
+C. welding
+D. bolted flanges
+Answers: B
+When distilling salt water the cooling
+water discharge from the distiller is fed
+back to the evaporator as feedwater:
+A. to cut down on the amount of cooling
+water needed
+B. to prevent n excess amount of cooling
+water from being discharge to the bilges
+C. to supply hot water to the evaporator
+for more economical operation
+D. none of the above
+Answer: C
+An "offset" in pipe fitting refers to:
+A. a cut-off running at right angles to the
+original piping
+B. two pipes running parallel to each other
+C. a bend in the pipe
+D. two sizes of pipe in the same run
+Answer: C
+If a piston-type flush valve is not
+operating properly, the most likely cause
+would be:
+A. a plugged by
+pass hole
+B. a cracked diaphragm
+C. a stuck pilot valve
+D. any of the above
+Answer D
+The process used to retard compression
+trust on iron pipe and fitting is called:
+A. timming
+B. soldering
+C. galvanizing
+D. sulphurizing
+Answer: A
+Before installing a new flange gasket be
+sure that the:
+A. flange faces are painted
+B. isolating valves are open
+C. flange faces are absolutely clean
+D. old gasket is in place
+Answer: C
+What is a standard wire gage:
+A. #10 larger
+B. #25 is smaller than #20
+C. # 1 is smaller than # 2
+D. # 30 is larger than # 25
+Answer: B
+Which of the following tools would be most
+useful when taking leads on bearings
+A. dividers
+B. outside calipers
+C. micrometer
+D. center gage
+Answer: C
+The wrench size for a 4" nut is:
+A. 1-1/4
+B.
+1-1/2
+C. 3/4
+D. 10/24
+Answer: A
+Which of the following would cause hot
+bearings?
+A. improper oil
+B. dirt in oil
+C. improper alignment
+D. all of the above
+Answer: D
+Melting point of Babbit is approximately:
+A. 1000 deg. F
+B. 650 deg. F
+C. 750 deg. F
+D. 500 deg. F
+Answer: B
+The operation of machining the end of a
+work piece to make a square with the axis.
+A. Buffing
+B. Honing
+C. Lapping
+D. Squaring
+Answer: D
+The operation of enlarging a hole by means
+of an adjustable cutting tool with only one
+cutting edge.
+A. Boring
+B. Broaching
+C. Drilling
+D. Milling
+Answer: A
+It is used to true and align machine tools
+fixtures and works is at and inspect size
+trueness of finished work, and to compare
+measurements either heights or depths or
+many other measurements.
+A. Dial Gage
+B. Dial Indicator
+C. Tachometer
+D. Speedometer
+Answer: B
+A tool used for measuring diameters.
+A. Caliper
+B. Manometer
+C. Tachometer
+D. Pyrometer
+Answer: A
+A process of forming metals by the use of
+dies after the metal is forced to its
+plastic range.
+A. Casting
+B. Forging
+C. Rolling
+D. Slotter
+Answer: B
+What is pouring Babbit in:
+A.can be poured in several pourings
+B. must be poured all at one time
+C. can be done at intervals
+D. must be done in cool place
+Answer: B
+A machine tool, which is very similar to a
+shaper except the ram reciprocals
+vertically rather that horizontally
+A. Lathe
+B. Grinder
+C. Planer
+D. Turning
+Answer: C
+Which of the following does not have to be
+lubricated when drilling?
+A.
+Steel
+B. Brass
+C. Monel
+D. Tool Steel
+Answer: B
+The tool to use when cutting a hole in the
+side of a round piece of metal is called a:
+A. vine
+B. jaw holder
+C. "V" block
+D. chuck
+Answer: C
+When measuring a drill for size measure
+across the:
+A. margin
+B. flutes
+C. shank
+D. point
+Answer: A
+N.C. stands for:
+A. neutral cut
+B. national coarse
+C. national cut
+D. not center
+Answers: B
+N.F. stands for:
+A. national file
+B. national fine
+C. neutral file
+D. not found
+Answer: B
+The tool used in precision work to smooth
+or enlarge holes is called a:
+A. round out
+B. drift pin
+C. reamer
+D. protractor
+Answer: C
+Which of the following chisels would be
+used for cutting oil grooves?
+A. diamond-point chisel
+B. cold chisel
+C. round-nose chisel
+D. hot chisel
+Answer: C
+Recommended best cutting angle of drill for
+work on steel or cast iron is
+degrees
+A. 48
+B. 50
+C. 59
+D. 63
+Answer: C
+What is the common shop practice to prevent
+soldering from running away from surface to
+be joined?
+A. All of these
+B. Introduce around the work rolled wet
+cloth
+C. Put asbestos sheeting around the work
+D. Surround the work with clay
+Answer: A
+A machinery operation where by done with
+the work accurately fastened has a
+reciprocating motion and the tool head is
+stationary is called:
+A. planning
+B. reaming
+C. shaping
+D. turning
+Answer: A
+What is the difference between the shaper
+and a planer?
+A. The shaper can perform slotting
+operation while the planer cannot
+B. The shaper handles large pieces while
+the planer handles only small pieces
+C. The tool of the shaper moves while the
+planer is stationary
+D. The tool of the shaper moves in
+reciprocating motion while the tool in the
+planer moves in rotary motion.
+Answer: C
+Test sometimes referred to as upsetting
+test called
+A. bend
+B. crush
+C. flange
+D. flaring
+Answer: C
+A mechanism, which usually does the
+indexing in a machine tool is called:
+A. dividing head
+B. indexing
+C. slotter
+D. universal chuck
+Answer: A
+Valve stem packing is measured from thin:
+A. O. D. of the valve stem to the bottom of
+the packing gland.
+B. Top of the packing gland to the bottom
+of the gland
+C. O. D. of the valve stem to the I. D. of
+the packing box
+D. I. D. of the valve stem to the to the
+bottom of the gland
+Answer: C
+Tool used to cut threads on pipe is called
+a:
+A. pipe tool
+B. pipe stock
+C. pipe vise
+D. pipe cutter
+Answer: B
+The pipe fitting which has two opening and
+provides a turn of 90 deg. Is called:
+A. an elbow
+B. a toe
+C. a coupling
+D. a union
+Answer: A
+A plug cock offers:
+A. more resistance to flow than a globe
+valve
+B. the same resistance to flow as a globe
+valve
+C. less resistance to flow than a globe
+valve
+D. the same resistance to flow as a angle
+valve
+Answer: C
+The most common flux to use when soldering
+brass, copper or tin is:
+A. hallowW
+B. rosin
+C. borax
+D. salt ammonia
+Answers: B
+One turn of the screw on a micrometer moves
+the spindle:
+A.
+.25
+B.
+.205
+C. .0205
+D. .2005
+Answer: A
+Which of the following tools does not
+belong to the group?.
+A. Divides
+B. Double VEE block
+C. Caliper
+D. Trammel
+Answer: B
+In machine shop had forging operation of
+lengthening a piece of stock while reducing
+the cross-sectional area of work is called:
+A. bloating
+B. draining
+C. spreading
+D. upsetting
+Answer: D
+Which of the following services is not
+considered to be a work of a machinist?
+A. grinding
+B. Honing
+C. Overhauling
+D. Reboring
+Answer: C
+Common defects encountered in the foundry
+shop steel
+casting operation and also in welding
+practices
+A. Blow / pin holes
+B. Cold shot
+C. Cracks
+D. Parting line
+Answers: A
+Lathe operator to remove the taper shank
+from the taper hole drift. It is also
+called:
+A. chuck taper
+B. Morse taper
+C. tapered key
+D. tong
+Answer: B
+The process used to retard corrosion on
+iron pipe is called:
+A. soldering
+B. annealing
+C. tempering
+D. galvanizing
+Answer: D
+Before drilling a hole in a piece of metal,
+It should be
+A. mark with chalk
+B. center-punch
+C. scribed
+D. protracted
+Answer B
+A tap or die marked 4-20 indicates:
+A. 4 radius
+20 cm. long
+B.
+radian
+20 threads per in.
+C.
+diameter 20 threads per in.
+D.
+20 times
+turn
+Answer: C
+When cutting material in a lathe, the
+harder the material being cut, the tool bit
+should have:
+A. more side rake
+B. less side rake
+C. more top rake
+D. no side rake
+Answer: A
+After a piece
+of piece of pipe has been
+cut, the hole is cleaned out with a:
+A. piper reamer
+B. pipe cleaner
+C. pipe taper
+D. hole cleaner
+Answer: A
+The tool used for cutting pipe threads is
+called a:
+A. pipe cutter
+B. pipe stock and die
+C. pipe threader
+D. pipe ratcher cutter
+Answer: B
+The tool used when working with larger
+sizes of pipe is called a:
+A. chain pipe wrench
+B. chain tongs
+C. chain holder
+D. A or B
+Answer: D
+The tool used when preparing to put
+fittings on copper tubing is called a:
+A. tube spreader
+B. flaring tool
+C. tube retarder
+D. tube countersink
+Answer: B
+Which of the following is not a standard
+thread form?
+A. Square
+B. American national
+C. Double Flute
+D. 60 deg. Sharp V
+Answer: B
+Knurling is done to:
+A. smooth material
+B. polish material
+C. roughen material
+D. sharpen material
+Answer: C
+Removing the sharp edges from a piece of
+stock is reffered to as:
+A. knurling
+B. chamfering
+C. planning
+D. turning
+Answer: B
+Carbon steel drills should be operated at:
+A. speeds greater than that when using a
+high-speed drill
+B. speeds less than that when using a
+high-speed drill
+C. the same speed as that when using a
+high-speed drill
+D. none of the above
+Answer: B
+When extreme outer corners of the cutting
+edges of a drill was away too rapidly, it
+is an indication of:
+A. not enough speed
+B. too much rake angle
+C. too high speed
+D. B or C
+Answer: C
+When turning a piece of round metal in a
+lathe, the front clearance should be
+smaller for:
+A. large-diameter cutting
+B. small-diameter cutting
+C. cutting angles
+D. none of the above
+Answer: D
+It is an operation of stretching or
+spreading over the metal by means of the
+plane of the hammer.
+A. Bending
+B. Peening
+C. Swaging
+D. Upsetting
+Answer: B
+The good quality of a measuring tool
+A. should be easy to handle
+B. should be easy to read
+C. should be wear resistance
+D. all of the above
+Answer: D
+Soda added to water is used for cooling
+instead of plain water because:
+A. it reduces the amount of heat generated
+B. it improves the finish.
+C. it overcome rusting
+D. all of the above
+Answer: D
+The flatness of surface can be checked
+A. by using straight edge
+B. by using surface plate
+C. by using dial test indicator
+D. all of the above
+Answer: D
+If a drill speed is too great, it will:
+A. cut faster
+B. lose its temper
+C. cut slower
+D. not cut
+Answer: B
+A holding device which is used to hold or
+grip work piece, while filling, chipping or
+any other bench work or while machining or
+drilling them
+A. clamp
+B. grid
+C. pressed
+D. vise
+Answer: D
+The lip clearance of a drill should be
+approximately:
+A. 20 deg.
+25 deg.
+B. 5 deg.
+10 deg.
+C. 12 deg.
+15 deg.
+D. 15 deg.
+20 deg.
+Answer: C
+A multi pointed hand anything tool used to
+removed material from metallic and
+non-metallic work pieces to match with
+drawing, shape and size.
+A. Cold chisel
+B. File
+C. Hacksaw
+D. Hammer
+Answer: B
+A side-cutting tool used for accurately
+finishing the straight or tapered holes
+already drilled or bored.
+A. Peering
+B. Reamer
+C. Swaging
+D. Tapping
+Answer: B
+If the angle on a drill is less than 59
+deg.:
+A. the drill will make a large hole
+B. the drill will make a smaller hole
+C. the hole will take longer to drill and
+more power is required to drive the drill
+D. the drill will not center properly
+Answer: C
+If the cutting edges of a drill are cut at
+different angles:
+A. the drill will not cut
+B. the hole will be larger than the drill
+C. the hole will be smaller than the drill
+D. none of the above
+Answer: B
+The correct cutting angle on a drill for
+ordinary work is:
+A. 45 deg.
+B. 50 deg.
+C. 59 deg.
+D. 65 deg.
+Answer: C
+Which of the following gives greater
+hardness, cutting toughness and dine grain
+structure?
+A. Chromium
+B. Nickel
+C. Tungsten
+D. Vanadium
+Answer: C
+It is a process to impact maximum hardness
+to the steel part.
+A. Annealing
+B. Hardening
+C. Normalizing
+D. Tempering
+Answer: B
+The size by which it is referred to as a
+matter of convenience called:
+A. actual size
+B. basic size
+C. effective size
+D. nominal size
+Answer: D
+The relation between two mating parts with
+reference to ease the assembly is called
+A. allowance
+B. clearance
+C. tolerance
+D. fits
+Answer: D
+It is an operation of finishing cylindrical
+surfaces to a fine degree of accuracy buy
+means of abrasive sticks.
+A. Honing
+B. Lapping
+C. Planing
+D. Shaping
+Answer: A
+It is device, which hold the job in
+position and guide the cutting tool.
+A. clamp
+B. grip
+C. jig
+D. vise
+Answer: C
+A tool bit for cutting an American National
+thread should be ground with a:
+A. 45 deg. angle
+B. 90 deg. angle
+C. 60 deg. angle
+D. 30 deg. angle
+Answer: C
+An approximate safe rule for cutting new
+piston rings for steam pumps is to make the
+ring:
+A.
+.002" between piston and cylindrical
+for each inch diameter of piston
+B.
+.001" between piston and cylinder for
+each inch diameter
+C.
+.010 between piston and cylinder for
+each inch diameter of piston
+D. .0001" between piston and cylinder for
+each inch diameter of piston
+Answer: B
+An approximate safe rule for cutting new
+piston rings for steam pumps is to make the
+ring:
+A. 1/32" larger in diameter per inch
+diameter of cylinder
+B. 1/16" larger in diameter than that of
+the cylinder
+C. 1/16" larger in diameter per inch
+diameter of cylinder
+D. .005" larger in diameter per inch
+diameter of cylinder
+Answer: C
+The gap clearance for new piston rings for
+steam pumps should be approximately:
+A. .003" for each inch diameter of cylinder
+B.
+.001" for each inch diameter of cylinder
+C.
+.010" for each inch diameter of cylinder
+D. .050" for each inch diameter of cylinder
+Answer: A
+In referring to threads, "pitch" is:
+A. the distance of the full length of the
+thread
+B. the distance from a point on one thread
+to a corresponding point on the next thread
+measured parallel to the
+axis
+C. the distance from the top of one thread
+to the bottom of the next thread
+D. the distance from the bottom of a head
+on a bolt to the first thread
+Answer: B
+What does 3/8-16 mean to you?
+A. 16 pieces, 3/8"long
+B. gear with 16 teeth and a 3/8" arbor
+hole
+C.
+3/8" square, 16" long
+D. 3/8" diameter. 16 threads per inch
+Answer: D
+When using a drill press the work should be
+held with:
+A. the hand
+B. a gloved hand
+C. a vise or clamp
+D. pliers
+Answer: C
+Tapered shanks are used on large drfill
+presses so that:
+A. the drill can be centered more easily
+B. the drill can be easily forced out of
+the sleeve with a drift
+C. the shank will not turn when cutting
+D. the shank can be reground when worn
+Answer: B
+Which of the following is not a common
+drill shank?
+A. straight
+B. taper
+C. fluted
+D. bit
+Answer: D
+The process of extracting iron in a blast
+furnace is called
+A. casting
+B. manufacturing
+C. smelting
+D. sintering
+Answer: C
+Which of the following is a product of
+blast furnace?
+A. cast iron
+B. gray iron
+C. pig iron
+D. wrought iron
+Answer: C
+The cutting angle on a drill for drilling
+mild steel should be:
+A. 39 deg.
+B. 49 deg.
+C. 59 deg.
+D. 69 deg.
+Answer: C
+A product of paddling furnace which
+contains less than 0.104 carbon, is called
+A. cast iron
+B. gray cast iron
+C. pig iron
+D. wrought iron
+Answer: D
+A device used to fix two or more parts.
+A. clamp
+B. fastener
+C. fixtures
+D. jigs
+Answer: D
+Which of the following is a property of
+wrought iron?
+A. brittle
+B. can not be forged
+C. can be easily cast into different shapes
+D. ductile
+Answer: D
+A machine element inserted parallel to the
+axis of a shaft.
+A.
+cutter
+B.
+fastener
+C. key
+D. reamer
+Answer: C
+A machine element inserted at right angle
+to the axis of shaft is known as
+A. clamp
+B. cutter
+C. fastener
+D. key
+Answer: B
+A piece of stock 8" long is 4" diameter on
+one end and 1" diameter on the other end.
+The taper per foot is:
+A. 4"
+B.
+4-1 -1/2"
+C. 4-1 -1/4"
+D.
+-1/16"
+Answer: B
+A piece of stock 8" long is 3 3" diameter at
+ine end and 1-1q\prime diameter at the other
+end. The taper per inch is:
+A. 32"
+B. 4"
+C. 3/16"
+D.
+5/16"
+Answer: C
+A piece of stock 6" long is 2 2" diameter at
+one end and is cut with a taper of 2" to
+the foot. The diameter of the smaller end
+will be:
+A. 1
+B. 1-3_4\prime
+C. 1-4g\prime
+D. 2"
+Answer: B
+If a piston ring is to be made 1/64" larger
+in diameter per inch diameter of the
+cylinder which it is to fit, the required
+diameter for a piston ring to fit an 8"
+cylinder will be:
+A. 8-14"
+B. 8-1/8"
+C. 8 3/16"
+D.
+3-5/32"
+Answer: B
+When cutting. A drill will "squeal" due to:
+A. drill being ground improperly
+B. drill being too hot
+C. insufficient lubrication
+D. any of the above
+Answer: D
+"Center drilling" is the operation of:
+A. drilling a center in an odd-shaped piece
+of metal
+B. drilling and countersinking with one
+tool
+C. centering with one tool and drilling
+with another
+D. drilling a center in a piece of stock in
+a drill press
+Answer: B
+The type and number of bearings to be used
+for spindles of machine tool depend on
+A. type of spindle
+B. type of machine tool
+C. load on the ring
+D. load on the bearing
+Answer: A
+Which of the following has its angle 60 and
+is used for dotting after marking the lines
+on general works?
+A. center punch
+B. dot punch
+C. hollow punch
+D. prick punch
+Answer: B
+Which of the following has its angle 90 and
+is used to give deep marks for the location
+of drill?
+A. center punch
+B. dot punch
+C. hollow punch
+D. prick punch
+Answer: A
+It is used on soft metals and non-metals
+for making holes.
+A. center punch
+B. dot punch
+C. hollow punch
+D. prick punch
+Answer: C
+Reason why cast iron selected for the
+manufacture of surface of surface plate
+A. it is cheaper
+B. it is easy for machinery
+C. it has less wear and tear
+D. all of the above
+Answer: D
+The common measuring tools are
+A. micrometer
+B. steel rule
+C. vernier caliper
+D. all of the above
+Answer: D
+Which of the following has its angle 30 and
+is used for dotting after marking the lines
+on general works?
+A. center punch
+B. dot punch
+C. hollow punch
+D. prick punch
+Answer: D
+Which of the following is not a kind of
+mandrel?
+A. contraction
+B. expanded
+C. extended
+D. taper
+Answer: D
+An act of cutting out a piece of metal at a
+desired shape and size is known as
+A. blanking
+B. broaching
+C. dinking
+D. slitting
+Answer: A
+Safety features that must be placed and
+maintained at machine, black smith welding
+and foundry shops called
+A. safety goggles
+B. safety notices
+C. safety notices in markers / boards
+D. walkway shops
+Answer: C
+In cutting tool the cutting end can also be
+generally called
+A. back rake
+B. end cutting edge
+C. nose
+D. side rake
+Answers: C
+A machine shop equipment that can flatter
+horizontally, vertically or angular plane
+called
+A. drill machine
+B. power saw
+C. shaper machine
+D. welding machine
+Answer: C
+To check the speed of a motor or other
+rotary machine, one wold
+A. speed indicator
+B. micrometer
+C. tachometer
+D. A or C
+Answer: D
+It is the best instrument for measuring a
+thousandth of an inch
+A. Caliper
+B. Micrometer
+C. Pyrometer
+D. Tachometer
+Answer: B
+What tool will be used in making wood
+pattern in the foundry shop?
+A. Sand saw
+B. Drill machine
+C. Hammer
+D. Saw and chisel
+Answer: D
+Machine tool used for laying straight lines
+on metal surfaces made of sharp tool steel
+is called
+A. divider
+B. hermaphrodite caliper
+C. plain scriber
+D. trammel
+Answer: C
+A lathe machine threading mechanism is
+called
+A. anvil
+B. changed stud gear
+C. reverse gear and lever
+D. spindle gear
+Answer: C
+Which of the following is not used to
+resemble the shape of tool bit?
+A. center cut
+B. round nose
+C. square nose
+D. thread cutting
+Answer: A
+Tubing is measured by:
+A. inside diameter
+B. outside diameter
+C. thickness of wall
+D. wire gage
+Answer: B
+"Water Hammer" is caused by:
+A. hitting water pipe with hammer
+B. too much water in pipe system
+C. water in steam line
+D. steam in water line
+Answer: C
+Insulation is used on piping to:
+A. held in heat
+B. held in cold
+C. cut down heat losses
+D. steam in water line
+Answer: A
+A lathe with multiple cutting stations
+called:
+A. engine lathe
+B. manual lathe
+C. semi-manual lathe
+D. turret lathe
+Answer: D
+It is a machine used for the testing of
+very thin steel or surface layers.
+A. Charpy test
+B. Description test
+C. Izod test
+D. Rockwell test
+Answer: D
+Device used to measure accurately speed
+called
+A. dial gage
+B. dial indicator
+C. speedometer
+D. tachometer
+Answer: D
+It is a test for pipe used for coiling in
+sizes 2 inches.
+A. bend
+B. crush
+C. flange
+D. flaring
+Answer: D
+A pipe wrench (Stilleon) is designed for
+use on:
+A. hexagonal objects
+B. round objects
+C. square objects
+D. flat objects
+Answer: B
+Pipe is measured by:
+A. inside diameter
+B. outside diameter
+C. thickness of wall
+D. wire gage
+Answer: A
+Milling machine accessories are used to
+hold milling cutter in the milling machine
+called:
+A. milling machine arbors
+B. milling machine size
+C. spindle
+nose tooling
+D. vertical milling attachment
+Answer: A
+An important accessories of milling
+machine.
+A.
+cutters
+B. milling machine vise
+C. ram
+D. vertical milling attachment
+Answer: A
+The machine, which can flatter surface on
+horizontal, vertical or angular plane.
+A. drilling machine
+B. lathe machine
+C. power saw
+D. shaper machine
+Answer: D
+Which of the following is not part on a
+lathe machine?
+A. carriage
+B.fan
+C. headstock
+D. tail stock
+Answer: B
+Which tools does not belong to the group?
+A. adjustable wrench
+B. feeler gage
+C. torque wrench
+D. vice grip
+Answer: B
+The tool used to cut threads in a hole is
+called a:
+A. top
+B. tap
+C. bit
+D. reamer
+Answer: B
+Hand taps are provided in sets of three
+called:
+A. taper, plug and end
+B. short, taper and bottom
+C. taper, plug and bottom
+D. short, medium and long
+Answer: C
+Which of the following taps should be used
+to start a thread?
+A. plug
+B. short
+C. bottom
+D. taper
+Answer: D
+When preparing to tap a hole, the size of
+the drill will be:
+A. equal to the size of the tap
+B. larger than the size of the tap
+C. smaller than the size of the tap
+D. none of the above
+Answer: C
+Pipe taps are:
+A. the same size from end to end
+B. not fluted
+C. tapered
+D. not hardened
+Answer: C
+When preparing to tap a hole for a pipe
+fitting the size of the drill will be:
+A. larger than the tap size
+B. equal to the size of the tap
+C. smaller than the tap size
+D. none of the above
+Answer: C
+A machine tool used to out metal parts a
+lift, medium and large section using a
+reciprocating hacksaw blade.
+A. planer
+B.power saw
+C. shaper
+D. tool grinder
+Answer: B
+A cold chisel is made of
+A. cast iron
+B.german silver
+C. high carbon silver
+D. high speed steel
+Answer: C
+Trimming is a process associated with
+A. electroplating
+B. forging
+C. machining of metals
+D. press work
+Answer: B
+A twist drill is specified by
+A. its diameter and lip angle
+B. it shank and diameter
+C. shank, material and diameter
+D. shank, material and flute size
+Answer: B
+The tool used for cleaning files is called
+a:
+A. file cleaner
+B. file card
+C. file oilstone
+D. scraper
+Answer: B
+Which of the following is the smallest size
+drill?
+A. # 80
+B. # 60
+C. # 1
+D. # 0
+Answer: A
+The usual value of helix angle of a drill
+is:
+A. 30*
+B. 60*
+C. 110*
+D. 120*
+Answer: A
+Which of the following is the largest size
+drill?
+A. A
+B. X
+c.
+Z
+D. XX
+Answer: C
+The helix angle on a high-speed steel twist
+drill for drilling cast iron if of the
+order of
+A. 12-22
+B. 24-32
+C. 35-40
+D. 40-45
+Answer: B
+The size of drill is stamped on the:
+A. point
+B. shank
+C. margin
+D. flute
+Answer: B
+Wiping is the process of
+A. applying flux during welding process
+B. cleaning the welded surface after the
+welding operation is over
+C. connecting load pipes by soldering alloy
+D. low temperature welding
+Answer: C
+Which of the following safety precautions
+should be followed when pouring Babbitt?
+A. operator must wear goggles
+B. the surface to be babbitted must be free
+of moisture
+C. the surface to be babbitted must be
+clean
+D. all of the above
+Answer: D
+Which of the following is not a cut of
+file?
+A. smooth
+B. second cut
+C. half-round
+D. bastard
+Answer: C
+Which of the following safety precaution
+should be followed when renewing a flange
+gasket?
+A. drain the line thoroughly
+B. isolate the section to be worked on
+C. tie down isolation valves
+D. all of the above
+Answers: D
+Brazing requires:
+A. hard solder
+B. soft solder
+C. more heat
+D. A and C
+Answer: D
+Lead is used in solder because:
+A. it has a high melting point
+B. it has a low melting point
+C. it is cheap
+D. B and C
+Answer: B
+A machine tool in which an abrasive wheel
+is used as a cutting tool to obtain a very
+smooth finish.
+A. Broaching machine
+B. Milling Machine
+C.
+Planer
+D. Tool Grinder
+Answer: D
+The name of the taper shank used on drills
+is:
+A. Miller
+B. Morse
+C. Starret
+D. Stanley
+Answer: B
+A machine too used principally to machine
+flat or plane surfaces with a single
+pointed tool.
+A. Drill
+B. Planer
+C. Power Saw
+D. Shaper
+Answer: D
+The higher the melting point of the solder,
+the:
+A. weaker the solder joint
+B. softer the solder joint
+C. stronger the solder joint
+D. harder the solder joint
+Answer: C
+A tool with hardened steel point used for
+scribing or laying of distances.
+A. Divider
+B. Hermaphrodite
+C. Plain scriber
+D. Trammel
+Answer: A
+Which of the following is not part of the
+headstock?
+A. Anvil
+B. Back pressure
+C. Motor
+D. Spindle
+Answer: A
+A machining operation whereby the tool
+reciprocates and the feed is stationary.
+A. Planing
+B. Reaming
+C. Shaping
+D. Turning
+Answer: C
+The cylinder of piston type steam engine
+are counterbored to:
+A. give a larger head clearance
+B. prevent piston rings from wearing a
+coove in the cylinder at the end of the
+stroke
+C. give a larger volumetric clearance
+D. prevent piston rings from slipping on
+the piston
+Answer: B
+The kind of center, which is being attached
+and meshed to he tailstock spindle, which
+is also static while the work, is rotating
+is know as:
+A. dead center
+B. focal center
+C. live center
+D. work center
+Answer: A
+When installing packing in a packing box:
+A. leave one old turn at the bottom of the
+packing box
+B. remove one turn and install one new turn
+of packing
+C. leave sufficient end clearance on each
+turn to allow for expansion
+D. place and cuts directly in line with
+each other
+Answer: C
+An instrument consisting of a wet and dry
+- bulb thermometer (used in air
+conditioning) is called a:
+A. hygrometer
+B. pyrometer
+C. psychrometer
+D. A or C
+Answer: C
+Feeler gage are used for measuring the
+A. clearance between mating parts
+B. pitch of screw threads
+C. radius of curvature
+D. thickness of plates
+Answer: A
+Sheet metal of # 18 gage is heavier than:
+A. 12 gage
+B. 14 gage
+C. 22 gage
+D. 16 gage
+Answer: C
+Shims are used to:
+A. separate fresh
+B. replace fuses
+c.
+and salt water lines
+adjust cylinder liners
+D. adjust bearing clearances
+Answer: D
+Quick return motion is used in a
+A. drilling machine
+B. grinder
+C. lathe
+D. shaper
+Answer: D
+The operation of enlarging a hole is called
+A. boring
+B. counter sinking
+C. drilling
+D. reaming
+Answer: A
+In up cut milling the work piece is fed
+A. against the rotating cutter
+B. at an angle of $60^{*}$ to the cutter
+C. at right angle to the cutter
+D. in the direction of the cutter
+Answer: A
+Rapping allowance is provided on a patter
+to take care of
+A. distortion
+B. easy withdrawal
+C. machining
+D. shrinkage
+Answer: B
+When working on bearing and checking for
+high spots, it is customary to apply:
+A. white lead
+B. red lead
+C. dykem blue
+D. Prussian blue
+Answer: D
+If you wanted to check the face of a pump
+slide valve or other flat face valve, you
+would check for trueness on a:
+A. flat board
+B. surface plate
+C. piece of glass
+D. bearing plate
+Answer: B
+To keep a metal clean while soldering, one
+would use a:
+A. flax
+B. torch
+C. flux
+D. insulated
+Answer: C
+Before splicing electric wires, they should
+be:
+A. tinned
+B. cleaned and tinned
+C. soldered
+D. insulated
+Answer: B
+Which of the following is an unsafe
+condition in operating a lathe machine?
+A. operating with safety gloves
+B. wearing a canvass apron
+C. wearing denim pants / safety shoes
+D. wearing safety goggles / hearing aid
+Answer: A
+The instrument used to remove old packing
+from packing glands and stuffing boxes are
+called:
+A. packing tools
+B. packing bits
+C. gland box cleaners
+D. packing screws
+Answer: A
+    </script>
+
+    <script>
+        const rawData = document.getElementById('raw-data').textContent.trim();
+        
+        // Match the blocks using Regex
+        // Every question block ends with "Answer: X" or "Answers: X"
+        const blockRegex = /([\s\S]*?)(?:Answers?\s*:?\s*([A-D]))/gi;
+        const blocks = [...rawData.matchAll(blockRegex)];
+        
+        const quizData = [];
+        let totalScore = 0;
+        let qCount = 1;
+
+        blocks.forEach((blockMatch) => {
+            let block = blockMatch[1].trim();
+            let expectedAns = blockMatch[2].toUpperCase();
+
+            // Clean up headers if any
+            block = block.replace(/MACHINE DESIGN[\s\S]*?JACSTONE REVIEW CENTER/i, '').trim();
+
+            // Match options A, B, C, D
+            const optRegex = /(?:^|\n)\s*A\.(.*?)(?:^|\n)\s*B\.(.*?)(?:^|\n)\s*C\.(.*?)(?:^|\n)\s*D\.(.*)/is;
+            const optMatch = block.match(optRegex);
+
+            if (optMatch) {
+                let qText = block.substring(0, optMatch.index).trim();
+                let options = [
+                    { letter: 'A', text: optMatch[1].trim() },
+                    { letter: 'B', text: optMatch[2].trim() },
+                    { letter: 'C', text: optMatch[3].trim() },
+                    { letter: 'D', text: optMatch[4].trim() }
+                ];
+                quizData.push({
+                    num: qCount++,
+                    qText: qText,
+                    options: options,
+                    ans: expectedAns,
+                    userAnswer: null
+                });
+            }
+        });
+
+        // Initialize App
+        let currentIdx = 0;
+
+        function initApp() {
+            if (quizData.length === 0) {
+                document.getElementById('q-text').innerHTML = "<span class='error-message'>Parse Error: Could not extract questions from the provided file.</span>";
+                return;
+            }
+            document.getElementById('nav-header').innerText = `${quizData.length} Problems Navigator`;
+            document.getElementById('controls').style.display = 'flex';
+            buildNav();
+            renderQuestion();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            grid.innerHTML = '';
+            quizData.forEach((q, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-btn';
+                btn.id = `nav-${i}`;
+                btn.innerText = q.num;
+                btn.onclick = () => { 
+                    currentIdx = i; 
+                    renderQuestion(); 
+                    if(window.innerWidth <= 768) toggleSidebar(); 
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateNavStyles() {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${currentIdx}`).classList.add('active');
+        }
+
+        function renderQuestion() {
+            const q = quizData[currentIdx];
+            document.getElementById('q-num').innerText = `Question ${q.num} of ${quizData.length}`;
+            document.getElementById('q-text').innerText = q.qText;
+            
+            const grid = document.getElementById('opt-grid');
+            grid.innerHTML = '';
+            
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'feedback';
+            feedback.innerText = '';
+
+            q.options.forEach((opt) => {
+                const btn = document.createElement('div');
+                btn.className = 'option';
+                btn.innerHTML = `<span class="opt-letter">${opt.letter}.</span> ${opt.text}`;
+                
+                if (q.userAnswer) {
+                    btn.classList.add('disabled');
+                    if (opt.letter === q.ans) {
+                        btn.classList.add('actual-correct');
+                    }
+                    if (opt.letter === q.userAnswer && q.userAnswer !== q.ans) {
+                        btn.classList.add('selected-wrong');
+                    }
+                } else {
+                    btn.onclick = () => handleAnswer(opt.letter);
+                }
+                grid.appendChild(btn);
+            });
+
+            if (q.userAnswer) {
+                if (q.userAnswer === q.ans) {
+                    feedback.className = 'feedback success';
+                    feedback.innerText = 'Correct!';
+                } else {
+                    feedback.className = 'feedback error';
+                    feedback.innerText = `Incorrect! The correct answer is ${q.ans}.`;
+                }
+            }
+
+            // Update Controls
+            document.getElementById('btn-prev').disabled = currentIdx === 0;
+            
+            const btnNext = document.getElementById('btn-next');
+            const btnRetake = document.getElementById('btn-retake');
+
+            if (currentIdx === quizData.length - 1) {
+                btnNext.style.display = 'none';
+                btnRetake.style.display = 'inline-block';
+            } else {
+                btnNext.style.display = 'inline-block';
+                btnRetake.style.display = 'none';
+            }
+
+            updateNavStyles();
+        }
+
+        function handleAnswer(letter) {
+            const q = quizData[currentIdx];
+            q.userAnswer = letter;
+            
+            const navBtn = document.getElementById(`nav-${currentIdx}`);
+            if (letter === q.ans) {
+                totalScore++;
+                navBtn.classList.add('correct');
+            } else {
+                navBtn.classList.add('wrong');
+            }
+            
+            document.getElementById('score-display').innerText = `Score: ${totalScore}`;
+            renderQuestion();
+        }
+
+        function nextQ() { if (currentIdx < quizData.length - 1) { currentIdx++; renderQuestion(); } }
+        function prevQ() { if (currentIdx > 0) { currentIdx--; renderQuestion(); } }
+
+        function retakeQuiz() {
+            quizData.forEach(q => { q.userAnswer = null; });
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('correct');
+                b.classList.remove('wrong');
+            });
+            totalScore = 0;
+            currentIdx = 0;
+            document.getElementById('score-display').innerText = `Score: 0`;
+            renderQuestion();
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
