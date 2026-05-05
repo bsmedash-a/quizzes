@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Design Elements | Questions 101-203</title>
+    <!-- MathJax for rendering equations -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --main-color: #ffffff;
+            --text-color: #2c3e50;
+            --accent-color: #2c3e50;
+            --highlight-color: #2980b9;
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            border-bottom: 4px solid var(--highlight-color);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: white;
+            margin-right: 20px;
+            transition: color 0.2s;
+        }
+
+        .hamburger:hover { color: var(--highlight-color); }
+
+        .top-bar h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            width: 320px;
+            background-color: #34495e;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            position: fixed;
+            height: calc(100% - 60px);
+            top: 60px;
+            z-index: 99;
+            transform: translateX(-100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        #sidebar.open { transform: translateX(0); }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background-color: #2c3e50;
+            text-align: center;
+            border-bottom: 1px solid #1a252f;
+        }
+
+        .nav-grid {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .nav-btn {
+            background-color: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover { background-color: #95a5a6; }
+        .nav-btn.active { background-color: var(--highlight-color); box-shadow: inset 0 0 0 2px white; }
+        .nav-btn.correct { background-color: var(--correct-color); color: white; }
+        .nav-btn.wrong { background-color: var(--wrong-color); color: white; }
+
+        /* Main Content */
+        #main-content {
+            flex: 1;
+            margin-top: 60px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .quiz-card {
+            background-color: var(--main-color);
+            width: 100%;
+            max-width: 900px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            height: fit-content;
+            margin-bottom: 40px;
+        }
+
+        .question-header {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: var(--text-color);
+            white-space: pre-wrap;
+        }
+
+        /* 2-Column Layout for Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+
+        .option {
+            background-color: #f8f9fa;
+            border: 2px solid #bdc3c7;
+            padding: 16px 20px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            color: var(--text-color);
+        }
+
+        .option:hover:not(.disabled) {
+            background-color: #ebf5fb;
+            border-color: var(--highlight-color);
+        }
+
+        .option.actual-correct {
+            background-color: #e8f8f5;
+            border-color: var(--correct-color);
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .option.selected-wrong {
+            background-color: #fdedec;
+            border-color: var(--wrong-color);
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .option.disabled { cursor: default; }
+
+        .opt-letter {
+            font-weight: bold;
+            margin-right: 15px;
+            color: var(--highlight-color);
+        }
+
+        .feedback {
+            padding: 20px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .feedback.success { background-color: #e8f8f5; color: #27ae60; border: 1px solid var(--correct-color); display: block; }
+        .feedback.error { background-color: #fdedec; color: #c0392b; border: 1px solid var(--wrong-color); display: block; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            border-top: 2px solid #ecf0f1;
+            padding-top: 20px;
+        }
+
+        .btn {
+            background-color: var(--highlight-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+
+        .btn:hover:not(:disabled) { background-color: #1f618d; }
+        .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        
+        .btn-retake { background-color: #e67e22; }
+        .btn-retake:hover { background-color: #d35400; }
+
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 98; display: none; }
+        #overlay.show { display: block; }
+        
+        .error-message { color: var(--wrong-color); font-weight: bold; text-align: center; display: block; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h1>Machine Design Elements | Questions 101-203</h1>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header" id="nav-header">Loading...</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div id="main-content">
+        <div class="quiz-card" id="quizCard">
+            <div class="question-header">
+                <span id="q-num">Initializing...</span>
+                <span id="score-display" style="color: var(--highlight-color);">Score: 0</span>
+            </div>
+            
+            <div class="question-text" id="q-text">Parsing problem set (this may take a moment)...</div>
+            <div class="options-grid" id="opt-grid"></div>
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="controls" id="controls" style="display:none;">
+                <button class="btn" id="btn-prev" onclick="prevQ()">&#8592; Previous</button>
+                <button class="btn btn-retake" id="btn-retake" style="display:none;" onclick="retakeQuiz()">Retake Quiz</button>
+                <button class="btn" id="btn-next" onclick="nextQ()">Next &#8594;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Injection strictly for questions 101-203 -->
+    <script id="raw-data" type="text/plain">
+101|Which of the following materials can easily be machined?|AISI C1020|AISI C1112|AISI C1030|AISI C1010|B
+102|Wood is an _____ material; that is, its mechanical properties are unique and independent in three mutually perpendicular directions-longitudinal, radial, and tangential.|Isotopic|Anisotropic|Orthotropic|Any of these|C
+103|A stepped torsion shaft has diameters of 16 mm and 12 mm and a fillet radius of 2 mm. The shaft is subjected to a torque of 12.5 N-m. Find the maximum induced stress caused by the fillet. Consider a stress concentration factor of 1.25.|36.84 MPaa|46.05 MPa|38.64 MPa|45.06 MPa|B
+104|A steam engine that has a stroke of 12 inches has an overhung crank of 11 inches. The maximum tangential force, P, on the crank may be assumed as 75000 lb. Assuming an allowable stress in shear as 4400 psi, determine the crankshaft diameter.|4.77 inches|3.77 inches|2.77 inches|1.77 inches|A
+105|The principal raw materials used in steelmaking are iron ore, coal, and|Coke|Limestone|Slag|Flux|B
+106|The steel part is heated to a temperature of 900-1150 degrees F in an atmosphere of ammonia gas and dissociated ammonia for an extended period of time that depends on the case depth desired.|Nitriding|Carburizing|Case hardening|Cyaniding|A
+107|Determine the Hp lost when a collar is loaded with 2000 lb, rotates at 50 rpm, and has a coefficient of friction of 0.15. The outside diameter of the collar is 4 inches and the inside diameter is 2 inches.|0.7314 Hp|0.3714 Hp|0.4713 Hp|0.4371 Hp|B
+108|The primary application of high-speed steels is to tools used for the working of metals|that are too hard|at high cutting speeds|that are too soft|at slow cutting speeds|B
+109|A parallel helical gear-set consists of a 19-tooth pinion driving a 57-teeth gear. The pinion has a left-hand helix angle of 20º, a normal pressure angle of 14 1/2° and a normal diametal pitch of 10 teeth/inch. If the pinion is to transmit 50 Hp at a speed of 1750 rpm. Determine the center distance of the two gears.|2.02 inches|6.06 inches|4.04 inches|2.06 inches|C
+110|In gearing, this is the ratio of the arc of action to the circular pitch.|Speed ratio|Arc ratio|Contact ratio|Gear ratio|C
+111|A single square thread power screw is to raise a load of 70 kN. The screw has a major diameter of 36 mm and a pitch of 6 mm. The coefficient of thread friction and collar friction are 0.13 and 0.10 respectively. If the collar mean diameter is 90 mm and the screw turns at 60 rpm, find the axial linear speed of the screw.|5 mm/s|6 mm/s|7 mm/s|5.5 mm/s|B
+112|Flywheel arms are usually of elliptical cross-section, the strength of the arms should equal _____ the strength of the shaft in torsion.|Three-fourths|One-half|Two-thirds|One-fourth|A
+113|This alloy (nickel, iron, chromium, cobalt is a non-magnetic, corrosion resistant material suitable for sub-zero temperatures and temperatures up to about 750 degrees F., provided that torsional stresses are kept below 75,000 pounds per square inch. It is precipitation-hardened to produce hardnesses of 48 to 50 Rockwell C and is used in watch and instrument springs.|Elinvar|Monel|Inconel|Dynavar|D
+114|To ensure an adequate factor of safety in the design of a shaft with standard keyway, the key width should be about:|One half of the shaft diameter|One fourth of the shaft diameter|One eighth of the shaft diameter|One third of the shaft diameter|B
+115|What is the property of matter that causes it to resist any change in its motion or state of rest?|Momentum|Kinetic Energy|Inertia|Section modulus|C
+116|This is defined as the cutting time to reach a predetermined wear, called the tool wear criterion.|Wear duration|Cycle time|Tool life|Life cycle|C
+117|Which of the following G-codes refers to rapid traverse in CNC machining?|G00|G01|G02|G03|A
+118|An acronym in CNC machining which means access of the machine operator to insert machining instructions directly into the NC machine control system via push buttons, pressure pads, knobs, or other arrangements.|FMS|FMC|CIM|MDI|D
+119|The variable polarity plasma arc (VPPA) process was developed for welding metals that form an oxide skin, such as|Steel|Copper|Cast iron|Aluminum|D
+120|Which of the following statements is NOT true?|The terms "polishing" and "buffing" are sometimes applied to similar classes of work in different plants.|Polishing is any operation performed with wheels having abrasive glued to the working surfaces|Buffing is done with wheels having the abrasive applied loosely|Polishing is not so harsh an operation as buffing, and it is commonly utilized to obtain very fine surfaces having a "grainless finish."|D
+121|If the steel is strongly deoxidized by the addition of deoxidizing elements, no gas is evolved, and the steel is technically called _____ because it lies quietly in the molds.|Quenched|Annealed|Killed steel|Tempered|C
+122|Stainless steels generally contain at least _____ per cent chromium, with or without other elements.|18|16|12|10|D
+123|What grades of stainless steels are nonmagnetic in the annealed condition, although some may become slightly magnetic after cold working?|Ferritic grades|Austenitic grades|Martensitic grades|Any of these|B
+124|These steels (SAE Steels 1006, 1008, 1010, 1015) are the lowest carbon steels of the plain carbon type, and are selected where _____ is the primary requisite of the user.|Strength|Cold formability|Ductility|Durability|B
+125|Steel is heated to a temperature above the critical range, after which it is cooled in still air to produce a generally fine pearlite structure. The purpose is to promote uniformity of structure and properties after a hot-working operation such as forging or extrusion. What was the heat treatment involved?|Annealing|Normalizing|Tempering|Stress relieving|B
+126|At certain speeds called the critical speeds, a rotating shaft will become dynamically unstable and the resulting vibrations and deflections can result in damage not only to the shaft but to the machine of which it is a part. At what percentage of the critical speed should a shaft be safely operated?|Plus or minus 20%|Plus or minus 5%|Plus or minus 10%|Any of these|A
+127|This is the most widely used of all spring materials for small springs operating at temperatures up to about 250 degrees F. It is tough, has a high tensile strength, and can withstand high stresses under repeated loading.|Music wire|Hard drawn spring wire|Oil tempered spring wire|Stainless steel spring wire|A
+128|It is an acronym in machining. This process uses an electrode to remove metal from a workpiece by generating electric sparks between conducting surfaces.|MIG|GMAW|EDM|CNC|C
+129|In die casting accurate parts made of steel, what shrinkage allowance in inches per inch is recommended?|0.011|0.022|0.033|0.044|B
+130|This are gears used to connect shafts that are non-intersecting and non-parallel. They are a cross between spriral bevel gears and worm gears.|Helical gears|Hypoid gears|Planetary gears|Bevel gears|B
+131|This is a type of seal used where some form of relative motion occurs between rigid parts of an assembly.|Gasket|Distorted seal|Vibratory seal|Dynamic seal|D
+132|It is a lubrication for roller chains wherein the lubricant is supplied by a circulating pump capable of supplying the chain drive with a continuous flow of oil inside the chain loop evenly across the chain width and directly at the slack strand.|Oil stream lubrication|Bath lubrication|Drip lubrication|Recirculated lubrication|A
+133|In manufacturing, this is the operation of cutting out flat area to some desired shape and is usually the first step in a series of operation.|Turning|Facing|Blanking|Finishing|C
+134|An M-code which generally refers to start spindle rotation in a clockwise direction.|M03|M04|M05|M06|A
+135|A final operation to improve the polish of a metal and to bring out the maximum luster|Finishing|Surface grinding|Broaching|Buffing|D
+136|Machining operations with the proper application of a cutting fluid generally has the following attributes except:|Higher cutting speeds|Higher feed rates|Lengthened tool life|Higher cutting accuracy|D
+137|A material of construction (only developed commercially in the late 1940's concurrently with zirconium) offers the unique combination of wide ranging corrosion resistance, low density, and high strength.|Tungsten|Titanium|Vanadium|Molybdenum|B
+138|Which of the following is the lightest of all structural metals?|Aluminum|Copper|Magnesium|Manganese|C
+139|This process reduces internal stresses, caused by machining, cold working, or welding, by heating the steel to a temperature below the critical range and holding it there long enough to equalize the temperature throughout the piece.|Annealing|Normalizing|Tempering|Stress Relieving|D
+140|A free-cutting steel has a higher _____ content than comparable carbon steels.|Sulfur|Cobalt|Nickel|Chromium|A
+141|This property designates the steels resistance to the softening effect of elevated temperature.|Hot hardness|Machinability|Toughness|Elasticity|A
+142|Use of hard solders, silver solders and smelter solders which have silver, copper, or nickel bases and have melting points above 800 degrees F is known as|Soldering|Welding|Brazing|Any of these|C
+143|In braking, the term backstop refers to a brake that is:|Self locking in one direction|Self energizing|Self locking in both directions|Any of these|A
+144|How do you call a fixed crane consisting of a supported vertical member from which extends a horizontal swinging arm carrying a trolley hoist or other hoisting mechanism?|Jib crane|Gantry crane|Overhead crane|Tower crane|A
+145|This iron is also known as a ductile cast iron. How do you call this iron?|Malleable iron|Nodular cast iron|White cast iron|Gray cast iron|B
+146|It is the ability to deform plastically to compensate for irregularities in bearing assembly. How do you call this?|Plasticity|Conformability|Embeddability|Elasticity|B
+147|A material of construction (only developed commercially in the late 1940's concurrently with zirconium) offers the unique combination of wide ranging corrosion resistance, low density, and high strength.|Titanium|Tungsten|Vanadium|Molybdenum|A
+148|Newton's law of motion that describes that if a force acts to change the state of motion of the body, the body offers a resistance equal and directly opposite to the force.|Second law|Third law|First law|Universal gravitation|B
+149|These are steels most widely used of engineering materials. No other material offers comparable versatility for product design.|Wrought steels|Low carbon steels|Medium carbon steels|Tool steels|B
+150|Which of the following steels does not readily respond to heat treatment?|SAE 1045|AISI 6150|SAE 1020|SAE 1095|C
+151|What is an element added to steel to improve its machinability?|Carbon|Sulfur|Cobalt|Chromium|B
+152|Which of the following information is FALSE regarding steel that has increased carbon content?|Its strength is increased|Its BHN becomes greater|Its ductility is improved|Its % reduction or elongation is reduced|C
+153|In manufacturing, what is the operation of cutting out flat area to some desired shape and is usually the first step in a series of operation?|Turning|Blanking|Facing|Finishing|B
+154|This is a metal joining process which uses a non-ferrous filler metal with a melting point below that of the base metals but above 800°F. How do you call this process?|Brazing|Arc welding|Soldering|Riveting|A
+155|Rivet holes are made usually _____ inch larger in diameter than the nominal diameter of the rivet.|1/8|1/16|1/4|1/32|B
+156|Which of the following equations/formulas does not belong to the group?|Lame's equation|Euler's formula|J. B. Johnson's equation|Secant formula|A
+157|In CNC programming, which of the following G code commands is for dwell or rest?|G01|G04|G03|G02|B
+158|In CNC programming, which of the following M code commands is for a tool change?|M06|M04|M03|M10|A
+159|Which of the following is a material description referring to unique properties in three mutually perpendicular planes?|Isotropy|Anisotropy|Orthotropy|Isometry|C
+160|The true stress-strain curve in a stress-stress diagram appears to be:|Lower than the engineering stress-strain curve|Higher than the engineering stress-strain curve|The same as the engineering stress strain curve|Symmetrical with the engineering stress-strain curve|B
+161|This is a hardening treatment for steels having low carbon content.|Tempering|Case hardening|Normalizing|Anodizing|B
+162|What is a manufacturing process used for the production of aluminum?|Forging|Extrusion|Blow molding|Injection molding|B
+163|This refers to a loss of material from the interface of two metal surfaces that are in intimate contact. How do you call this?|Interfacing|Interference|Wear|Fretting corrosion|D
+164|This is a type of fit that requires heating the hub to expand its inside diameter. What do you call this type of fit?|Expansion fit|Force fit|Shrink fit|Any of these|C
+165|AFBMA is an acronym for an association involved in what machine elements?|Ball and roller bearings|Journal bearings|Flat belts and other belt types|Any type of gears|A
+166|What is the general description for mild steel?|Medium carbon steel|Low carbon steel|High carbon steel|Cold rolled steel|B
+167|Von Mises theory is the other term used for|Maximum principal stress theory|Octahedral shear-stress theory|Maximum shear-stress theory|Energy distortion theory|B
+168|A type of key in which width and thickness are equal is called as:|Flat key|Square key|Pin key|Barth key|B
+169|In the design of key, the typical hub lengths are in accordance with the following relation where D is shaft diameter.|1.25D to 2.4D|0.5D to 1.25D|2.4D to 3.5D|Depends on shaft diameter|A
+170|A coupling that allows axial flexibility/movement in the operation. Made of alternate bolting of steel, leather, fabric and/or plastic material into two flanges.|Flexible disk coupling|Flexible toroidal spring coupling|Flexible Oldham coupling|Elastic material bonded coupling|A
+171|It is a machine member that supports another part that rotates, slides, or oscillates in or on it.|Pulley|Key|Bearing|Shaft|C
+172|It is a bearing that permits constrained relative motion of rigid parts; lubricant is generally inserted or supplied between the mating surfaces to reduce friction and wear, and to carry away the heat generated.|Sliding Contact Bearing|Rolling Contact Bearing|Thrust Bearing|Journal Bearing|A
+173|These are surfaces that do not conform to each other very well as in the rolling-element bearings.|Conformal surfaces|Non-conformal surfaces|Sliding surfaces|Rolling surfaces|B
+174|The study of lubrication, friction, and wear of moving or stationary parts is known as:|Lubrication|Tribology|Hydrodynamics|Hydrostatics|B
+175|A bearing where surfaces are non-conformed and motion is primarily rolling, it composed of rolling elements interposed between an outer ring and inner ring.|Sliding-element bearing|Rolling-element bearing|Conformal surfaces bearing|Non-conformal surfaces bearing|B
+176|In a straight bevel gear, how do you call the angle between an element on the pitch cone and an element on the face cone?|Face angle|Pitch angle|Addendum angle|Dedendum angle|C
+177|It is a Grashof four-bar mechanism in which the shortest link is the frame or fixed link and the other two cranks completely rotate with their axes. How do you call this Grashof four-bar mechanism?|Drag-link mechanism|Crank-rocker mechanism|Double-rocker mechanism|Triple-rocker mechanism|A
+178|"For a planar four-bar linkage, the sum of the shortest and longest lengths cannot be greater than the sum of the remaining two link lengths if there is to be a continuous relative rotation between two members." How do you call the preceding statement?|Grubler's Law|Coriolli's Law|Grashof's Law|Freudentein's Law|C
+179|Which of the following is not true for an instant center or centro of planar linkages?|Centro is a point common to two bodies having the same velocity in each.|Centro is a point in one body about which another body does not rotate.|Centro is a point in one body about which another body actually turns.|Centro is a point in one body about which another body tends to turn.|B
+180|This is the most common work holding device of a shaper machine with the base graduated in degrees that make it possible to swivel any angle. What is this working device?|Shaper vise|Parallel bars and hold down bars|Lathe holder|Swivel head|A
+181|This is a shaper operation, which is shaping the given stock and having the excess material remain with a tolerable allowance for finishing. How do you call this operation?|Roughing|Finishing|Angular cutting|Contouring|A
+182|How do you call a cutting tool that has two or more cutting edges as in drill presses and milling machine cutters?|Grinder|Single-point cutting tool|Multi-point cutting tool|Two point cutting tool|C
+183|This is the trade name for a patented alloy made up chiefly of cobalt, chromium, and tungsten in varying proportions. What is this trade name?|Stellite|Carboloy|Stainless steel|Copper|A
+184|It is called as the transformation of concepts and ideas into useful machinery. What is this?|Design|Synthesis|Analysis|Theorem|A
+185|This is a combination of mechanisms and other components that transforms, transmits, or uses energy, load, or motion for a specific purpose. How do you call this?|Mechanism|Engine|Machine|Linkage|C
+186|It is defined as synergistic collection of machine elements; synergistic because as a design it represents an idea or concept greater than the sum of the individual pats. What is this system?|System of mechanisms|Mechanical system|Design system|Expert system|B
+187|It may be defined as the displacement per length produced in a solid and as the result of stress. How do you call this?|Deformation|Elongation|Strain|Stress|C
+188|What is the combination of applied normal and shear stresses that produces maximum principal normal stress or minimum principal normal stress, with a third principal stress between or equivalent to the extremes?|Principal shear stress|Principal normal stress|Maximum shear stress|Bending and shear stresses|B
+189|How do you call a load that is applied transversely to longitudinal axis of member?|Combined loads|Concentrated load|Bending load|Distributed load|C
+190|What is the ability of the material to absorb energy up to fracture?|Toughness|Rigidity|Resilience|Stiffness|A
+191|What is the other term for the Maximum-Shear-Stress Theory, as a failure prediction theory?|von Mises criterion|Tresca yield criterion|Coulomb-Mohr theory|Modified Mohr theory|B
+192|It is a failure prediction theory, which states that a part subjected to any combination of loads will fail (by yielding or fracturing) whenever the maximum shear stress exceeds a critical value. How do you call this failure prediction theory?|Distortion-energy theory|Maximum-shear-stress theory|Internal friction theory|Modified Mohr theory|B
+193|This is a theory in cyclic and impact loading, which states that damage at any stress level, is proportional to number of cycles. What is this theory commonly called?|Miner's Rule|Paris Power Law|Goodman Rule|Manson-Coffin Relationship|A
+194|This is a lubrication where the load-carrying surfaces of the bearing are separated by a relatively thick film of lubricant, so as to prevent metal-to-metal contact; and where the stability of the film can be explained by the laws of fluid mechanics. How do you call this type of lubrication?|Hydrostatic lubrication|Hydrodynamic lubrication|Elastohydrodynamic lubrication|Boundary lubrication|B
+195|How do call the speed at which a rotating shaft becomes dynamically unstable?|Normal speed|Variable speed|Critical speed|Average speed|C
+196|How do you call a ball bearing with race containing pronounced groove for rolling elements?|Crown bearing|Conrad bearing|Angular-contact bearing|Cylindrical bearing|B
+197|This is a machining process for producing internal straight cylindrical surface or profiles, with process characteristics and tooling similar to those for turning operations. What is this machining process?|Boring|Drilling|Reaming|Milling|A
+198|What is a set of specification for parts, materials, or processes intended to achieve uniformity, efficiency, and a specified quality?|Code|Standard|Law|Theorem|B
+199|This is a set of specifications for the analysis, design, manufacture, and construction of something; the purpose of which is to achieve a specified degree of safety, efficiency, and performance or quality. How do you call this set of specifications?|Code|Standard|Law|Theorem|A
+200|How do call the size to which limits or deviations is assigned and is the same for both members of the fit; it is the exact theoretical size?|Nominal size|Basic size|Allowance|Maximum size|B
+201|What is the algebraic difference between a size and the corresponding basic size?|Tolerance|Allowance|Deviation|Minimum size|C
+202|What is the difference between the maximum and minimum size limits of a part?|Allowance|Tolerance|Deviation|Limit|B
+203|This is used either for very accurate angular measurements or for locating work at a given angle; is used together with precision gage blocks. What is this?|Protractor|Compound rest|Sine bar|Micrometer|C
+    </script>
+
+    <script>
+        const rawText = document.getElementById('raw-data').textContent.trim();
+        const quizData = [];
+        let totalScore = 0;
+        let currentIdx = 0;
+
+        function initApp() {
+            const lines = rawText.split('\n');
+            lines.forEach(line => {
+                if (line.trim() === '') return;
+                const parts = line.split('|');
+                if (parts.length === 7) {
+                    quizData.push({
+                        num: parseInt(parts[0]),
+                        qText: parts[1].trim(),
+                        options: [
+                            { letter: 'A', text: parts[2].trim() },
+                            { letter: 'B', text: parts[3].trim() },
+                            { letter: 'C', text: parts[4].trim() },
+                            { letter: 'D', text: parts[5].trim() }
+                        ],
+                        ans: parts[6].trim().toUpperCase(),
+                        userAnswer: null
+                    });
+                }
+            });
+
+            if (quizData.length === 0) {
+                document.getElementById('q-text').innerHTML = "<span class='error-message'>Parse Error: Could not extract questions from the provided file.</span>";
+                return;
+            }
+            
+            document.getElementById('nav-header').innerText = `101 to 203 Navigator`;
+            document.getElementById('controls').style.display = 'flex';
+            buildNav();
+            renderQuestion();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            grid.innerHTML = '';
+            quizData.forEach((q, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-btn';
+                btn.id = `nav-${i}`;
+                btn.innerText = q.num;
+                btn.onclick = () => { 
+                    currentIdx = i; 
+                    renderQuestion(); 
+                    if(window.innerWidth <= 768) toggleSidebar(); 
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateNavStyles() {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${currentIdx}`).classList.add('active');
+        }
+
+        function renderQuestion() {
+            const q = quizData[currentIdx];
+            document.getElementById('q-num').innerText = `Question ${q.num} (Problem ${currentIdx + 1} of ${quizData.length})`;
+            document.getElementById('q-text').innerText = q.qText;
+            
+            const grid = document.getElementById('opt-grid');
+            grid.innerHTML = '';
+            
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'feedback';
+            feedback.innerText = '';
+            feedback.style.display = 'none';
+
+            q.options.forEach((opt) => {
+                const btn = document.createElement('div');
+                btn.className = 'option';
+                btn.innerHTML = `<span class="opt-letter">${opt.letter}.</span> ${opt.text}`;
+                
+                if (q.userAnswer) {
+                    btn.classList.add('disabled');
+                    if (opt.letter === q.ans) {
+                        btn.classList.add('actual-correct');
+                    }
+                    if (opt.letter === q.userAnswer && q.userAnswer !== q.ans) {
+                        btn.classList.add('selected-wrong');
+                    }
+                } else {
+                    btn.onclick = () => handleAnswer(opt.letter);
+                }
+                grid.appendChild(btn);
+            });
+
+            if (q.userAnswer) {
+                feedback.style.display = 'block';
+                if (q.userAnswer === q.ans) {
+                    feedback.className = 'feedback success';
+                    feedback.innerText = 'Correct!';
+                } else {
+                    feedback.className = 'feedback error';
+                    feedback.innerText = `Incorrect! The correct answer is ${q.ans}.`;
+                }
+            }
+
+            // Update Controls
+            document.getElementById('btn-prev').disabled = currentIdx === 0;
+            
+            const btnNext = document.getElementById('btn-next');
+            const btnRetake = document.getElementById('btn-retake');
+
+            if (currentIdx === quizData.length - 1) {
+                btnNext.style.display = 'none';
+                btnRetake.style.display = 'inline-block';
+            } else {
+                btnNext.style.display = 'inline-block';
+                btnRetake.style.display = 'none';
+            }
+
+            updateNavStyles();
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('quizCard')]);
+            }
+        }
+
+        function handleAnswer(letter) {
+            const q = quizData[currentIdx];
+            q.userAnswer = letter;
+            
+            const navBtn = document.getElementById(`nav-${currentIdx}`);
+            if (letter === q.ans) {
+                totalScore++;
+                navBtn.classList.add('correct');
+            } else {
+                navBtn.classList.add('wrong');
+            }
+            
+            document.getElementById('score-display').innerText = `Score: ${totalScore}`;
+            renderQuestion();
+        }
+
+        function nextQ() { if (currentIdx < quizData.length - 1) { currentIdx++; renderQuestion(); } }
+        function prevQ() { if (currentIdx > 0) { currentIdx--; renderQuestion(); } }
+
+        function retakeQuiz() {
+            quizData.forEach(q => { q.userAnswer = null; });
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('correct');
+                b.classList.remove('wrong');
+            });
+            totalScore = 0;
+            currentIdx = 0;
+            document.getElementById('score-display').innerText = `Score: 0`;
+            renderQuestion();
+            document.getElementById('main-content').scrollTo(0,0);
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
