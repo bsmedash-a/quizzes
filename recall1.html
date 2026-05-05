@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Design Elements | Quick 100 Quiz</title>
+    <!-- MathJax for rendering equations -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --main-color: #ffffff;
+            --text-color: #2c3e50;
+            --accent-color: #1a252f;
+            --highlight-color: #3498db;
+            --correct-color: #27ae60;
+            --wrong-color: #e74c3c;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            border-bottom: 4px solid var(--highlight-color);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: white;
+            margin-right: 20px;
+            transition: color 0.2s;
+        }
+
+        .hamburger:hover { color: var(--highlight-color); }
+
+        .top-bar h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            width: 320px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            position: fixed;
+            height: calc(100% - 60px);
+            top: 60px;
+            z-index: 99;
+            transform: translateX(-100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        #sidebar.open { transform: translateX(0); }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background-color: #1a252f;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .nav-grid {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .nav-btn {
+            background-color: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover { background-color: #95a5a6; }
+        .nav-btn.active { background-color: var(--highlight-color); box-shadow: inset 0 0 0 2px white; }
+        .nav-btn.correct { background-color: var(--correct-color); color: white; }
+        .nav-btn.wrong { background-color: var(--wrong-color); color: white; }
+
+        /* Main Content */
+        #main-content {
+            flex: 1;
+            margin-top: 60px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .quiz-card {
+            background-color: var(--main-color);
+            width: 100%;
+            max-width: 900px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            height: fit-content;
+            margin-bottom: 40px;
+        }
+
+        .question-header {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: var(--text-color);
+            white-space: pre-wrap;
+        }
+
+        /* 2-Column Layout for Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+
+        .option {
+            background-color: #f8f9fa;
+            border: 2px solid #bdc3c7;
+            padding: 16px 20px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            color: var(--text-color);
+        }
+
+        .option:hover:not(.disabled) {
+            background-color: #ebf5fb;
+            border-color: var(--highlight-color);
+        }
+
+        .option.actual-correct {
+            background-color: #e8f8f5;
+            border-color: var(--correct-color);
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .option.selected-wrong {
+            background-color: #fdedec;
+            border-color: var(--wrong-color);
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .option.disabled { cursor: default; }
+
+        .opt-letter {
+            font-weight: bold;
+            margin-right: 15px;
+            color: var(--highlight-color);
+        }
+
+        .feedback {
+            padding: 20px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .feedback.success { background-color: #e8f8f5; color: #27ae60; border: 1px solid var(--correct-color); display: block; }
+        .feedback.error { background-color: #fdedec; color: #c0392b; border: 1px solid var(--wrong-color); display: block; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            border-top: 2px solid #ecf0f1;
+            padding-top: 20px;
+        }
+
+        .btn {
+            background-color: var(--highlight-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+
+        .btn:hover:not(:disabled) { background-color: #2980b9; }
+        .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        
+        .btn-retake { background-color: #e67e22; }
+        .btn-retake:hover { background-color: #d35400; }
+
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 98; display: none; }
+        #overlay.show { display: block; }
+        
+        .error-message { color: var(--wrong-color); font-weight: bold; text-align: center; display: block; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h1>Machine Design Elements | Top 100 Quiz</h1>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header" id="nav-header">Loading...</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div id="main-content">
+        <div class="quiz-card" id="quizCard">
+            <div class="question-header">
+                <span id="q-num">Initializing...</span>
+                <span id="score-display" style="color: var(--highlight-color);">Score: 0</span>
+            </div>
+            
+            <div class="question-text" id="q-text">Parsing problem set (this may take a moment)...</div>
+            <div class="options-grid" id="opt-grid"></div>
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="controls" id="controls" style="display:none;">
+                <button class="btn" id="btn-prev" onclick="prevQ()">&#8592; Previous</button>
+                <button class="btn btn-retake" id="btn-retake" style="display:none;" onclick="retakeQuiz()">Retake Quiz</button>
+                <button class="btn" id="btn-next" onclick="nextQ()">Next &#8594;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Raw Data Embed: Injecting exactly as specified -->
+    <script id="raw-data" type="text/plain">
+1. Determine the estimated weight of an A-36 steel plate size 3/16" x 6' x 20'
+A. 919 lbs *
+B. 1012 lbs
+C. 829 lbs
+D. 735 lbs
+2. The minimum clearance allowed for meshing spur gears with a circular pitch of 0.1571 and diametral pitch of 20. The spur gear has 25 teeth.
+A. 0.007855 *
+B. 0.008578
+C. 0.007558
+D. 0.007585
+3. A 3" diameter short shaft carrying two pulleys close to the bearings transmit how much horsepower if the shaft makes 280 rpm?
+A. 199 Hp *
+B. 198 Hp
+C. 200 Hp
+D. 210 Hp
+4. What pressure is required to punch a hole 2" diameter through a 1/4" steel plate?
+A. 10 tons
+B. 20 tons
+C. 30 tons
+D. 40 tons *
+5. Compute the working strength of 1" bolt which is screwed up tightly in packed joint when the allowable working stress is 13,000 psi.
+A. 3600 lbs
+B. 3950 lbs
+C. 3900 lbs *
+D. 3800 lbs
+6. What is the working strength of a 2" bolt which is screwed up tightly in a packed joint when the allowable working stress 12,000 psi?
+A. 20,120 lbs
+B. 20,400 lbs
+C. 20.400 lbs *
+D. 20,200 lbs
+7. Compute the speed of the gear mounted on a 52.5 mm diameter shaft receiving power from a driving motor with 250 hp.
+A. 2182 rpm
+B. 2071 rpm
+C. 2282 rpm *
+D. 2341 rpm
+8. The minimum whole depth of spur gear of 14-1/2 deg. involute type with diameter pitch of 24 and circular pitch of 0.1309:
+A. 0.09000
+B. 0.09900
+C. 0.089875 *
+D. 0.089758
+9. Heating of the metal to a temperature above the critical temperature and then cooling slowly usually in the furnace to reduce the hardness and improve the machinability is called:
+A. annealing *
+B. tempering
+C. normalizing
+D. quenching
+10. What is the frictional HP acting on a collar loaded with 100 kg weight? The collar has an outside diameter of 100 mm and an internal diameter of 40mm. The collar rotates at 1000 rpm and the coefficient of friction between the collar and the pivot surface is 0.15.
+A. 0.8 HP *
+B. 0.5 HP
+C. 0.3 HP
+D. 1.2 HP
+11. A solid cylindrical shaft 48.2 cm long is used for a transmission of mechanical power at a rate of 37 KW running at 1760 rpm. The Ss is 8.13 MPa. Calculate the diameter
+A. 30 mm
+B. 35 mm
+C. 40 mm
+D. 50 mm *
+12. An internal gear is set up with a 5-in diameter pinion and center distance of 18 inches. Find the diameter of the internal gear.
+A. 36"
+B. 21.5"
+C. 26"
+D. 41" *
+13. What force P is required to punch a 1/2 in. hole on a 3/8 in. thick plate if the ultimate shear strength of the plate is 42,000 psi?
+A. 24,940 lbs
+B. 24,620 lbs
+C. 24,960 lbs
+D. 24,740 lbs *
+14. A 2.5" diameter by 2 in. long journal bearing is to carry a 5500-lb load at 3600 rpm using SAE 40 lube oil at 200 F through a single hole at 25 psi. Compute the bearing pressure.
+A. 1100 psi *
+B. 900 psi
+C. 1000 psi
+D. 950 psi
+15. In a uniformly loaded simple beam, the maximum vertical shearing force occurs
+A. at the center
+B. at the section of maximum moment
+C. at beam bottom fiber
+D. at either end support *
+16. A hollow shaft has an inner diameter of 0.035 m and outer diameter of 0.06 m. Determine the polar moment of inertia of the hollow shaft.
+A. 1.512 x 10^-6 m^4
+B. 1.215 x 10^-6 m^4
+C. 1.52 x 10^-6 m^4
+D. 1.125 x 10^-6 m^4 *
+17. Determine the thickness of a steel air receiver with 30 inches diameter and pressure load of 120 psi, design stress of 8000 psi.
+A. 1/4 in. *
+B. 5/8 in.
+C. 3/8 in.
+D. 2 in.
+18. A short 61 mm shaft transmits 120 Hp. Compute the linear speed of a pulley 55 cm mounted on the shaft.
+A. 1796 fpm
+B. 1766 fpm
+C. 1856 fpm *
+D. 2106 fpm
+19. A 2-in. solid shaft is driven by a 36-in. gear and transmits power at 120 rpm. If allowable shearing stress is 12 ksi, what horsepower can be transmitted?
+A. 29.89
+B. 35.89 *
+C. 38.89
+D. 34.89
+20. Using oxyacetylene welding method to weld a 3 ft. long seam in a 3/8 in. thick plate at a consumption rate of 9 cu. ft. /ft. of weld for oxygen and 7 cu. ft./ft. for acetylene. What is the total combined gas consumption in cu. ft. ?
+A. 51
+B. 48 *
+C. 45
+D. 55
+21. A coiled spring with 5 cm of outside diameter is required to work under the load of 190 N. The wire diameter is 5 mm, the spring is to have 6 active coils and the ends are to be closed and ground. Determine the total number of coils. The modulus of rigidity is 809 GPa and the mean radius is to be 23 mm, with 7 mm pitch of the spring.
+A. 6.5 coils
+B. 7.5 coils
+C. 8.5 coils *
+D. 9.5 coils
+22. A helical spring having squared and ground ends has a total of 18 coils and its material has modulus of elasticity in shear of 78.910 GPa. If the spring has an outside diameter of 10.42 cm and a wire diameter of 0.625 cm, compute in the spring due to a load of 50 kgs.
+A. 302 mm
+B. 490 mm *
+C. 490 mm
+D. 322 mm
+23. Design the size of solid steel shaft to be used for a 500 hp, 250 rpm application if the allowable torsional deflection is 1 deg and the allowable stress is 10,000 psi modulus of rigidity is 13 x 10^6 psi.
+A. 5" dia.
+B. 4-5/8" dia.
+C. 4-7/8" dia. *
+D. 4-3/4" dia.
+24. With the electric are welding rate of 8 in./min, how long will it take to weld a 1/2 in. thick plate by 3 ft long seam?
+A. 3 min.
+B. 2 min. *
+C. 1.5 min.
+D. 4 min.
+25. How long will it take to mill a 3/4" by 2" long keyway in a 3" diameter shafting with a 24 tooth cutter turning at 100 rpm and 0.005" feed/tooth?
+A. 0.136 min.
+B. 0.196 min.
+C. 0.166 min. *
+D. 0.106 min.
+26. How long will it take to saw a rectangular piece of aluminum plate 8 in. wide and 1 1/2 in. thick if the length of the cut is 8 in., the power hacksaw makes 120 rev/min and average feed per stroke is 0.0060 in.?
+A. 13.11
+B. 11.11 *
+C. 14.01
+D. 12.03
+27. A cast iron flywheel is rotated at a speed of 1200 rpm and having a mean rim radius of 1 foot. If the weight of the rim is 30 lbs. what is the centrifugal force? Use factor C=41.
+A. 14,800 lbs
+B. 7 ft
+C. 14,860 lbs
+D. 14,760 lbs *
+28. A steel cylindrical air receiver with 5 ft diameter and pressure load of 180 psi, design stress of 9500 psi maximum. The pressure vessel is to be provided with 1 1/2 in. diameter drain valve installed at the bottom of the vessel and safety pressure relief valve installed either at the top most or at the side with pop out rating of 200 psi. Assume a 100% weld joint efficiency. The lap welding tensile strength is 65,000 psi. Determine the bursting pressure of this air receiver.
+A. 1154 psi
+B. 1354 psi *
+C. 1454 psi
+D. 1254 psi
+29. The tooth thickness of a gear is 0.5 inch and its circular pitch is 1.0 inch. Calculate the dedendum of the gear.
+A. 0.3183
+B. 1.250
+C. 0.3979 *
+D. 0.1114
+30. A hollow shaft has an inner diameter of 0.035 m and an outer diameter of 0.06 m. Compute for the torque if the shear stress is not to exceed 120 MPa in Nm.
+A. 4500 *
+B. 4100
+C. 4300
+D. 4150
+31. The path of contact in involute gears where the force/power is actually transmitted. It is a straight imaginary line passing through the pitch point and tangent to the base circle.
+A. principal reference plane
+B. pitch point
+C. front angle
+D. line of action *
+32. It is a problem of expansion and shrinkage of steel material so that the slightly bigger shafting of 2" diameter can be inserted / fitted to the slightly smaller hole of a steel bushing of 1.999 diameter with the following process/material/data to apply: Coefficient of expansion of carbon steel = 0.0000068 in/in F Temperature raised by gas heating = 24.5 F Cooling media to use dry ice with boiling point of -109.3 F (-78.5 C) Shrinkage rate below boiling point is 0.00073 in/in. Determine the final clearance between the expanded steel bushing hole against the shrinkage of the steel shaft.
+A. 0.000793 in. *
+B. 0.000693 in.
+C. 0.000750 in.
+D. 0.000800 in.
+33. What modulus of elasticity in tension is required to obtain a unit deformation of 0.00105 m/m from a load producing a unit tensile stress of 44,000 psi?
+A. 42.300 x 10^6 psi
+B. 41.202 x 10^6 psi
+C. 43.101 x 10^6 psi
+D. 41.905 x 10^6 psi *
+34. Compute the pitch angle of a bevel gear given the pinion's number of teeth of 14 and 42 teeth on the gear.
+A. 18.4 *
+B. 28.4
+C. 33.4
+D. 38.4
+35. Compute for the tooth thickness of 14 1/2 spur gear with diameter pitch = 5.
+A. 0.3979
+B. 3.1831
+C. 0.03141
+D. 0.31416 *
+36. What is the difference between a shaper and a planer?
+A. the tool of the shaper moves while on the planer is stationary *
+B. the shaper can perform slotting operation while the planer cannot
+C. the shaper handles large pieces while the planer handle only small pieces
+D. the tool of the shaper moves in reciprocating motion while the tool in the planer moves in rotary motion
+37. If the ultimate shear strength of a steel plate is 42,000 lb/in^2, what force is necessary to punch a 0.75 inch diameter hole in a 0.625 inch thick plate?
+A. 63.008 lbs
+B. 68,080 lbs
+C. 61,800 lbs *
+D. 66,800 lbs
+38. A steel tie rod on bridge must be made to withstand a pull of 5000 lbs. Find the diameter of the rod assuming a factor of safety of 5 and ultimate stress of 64,000 lb/in^2.
+A. 0.75 in.
+B. 0.71 in *
+C. 0.84 in.
+D. 0.79 in.
+39. If the weight of 6" diameter by 48" long SAE 1030 shafting is 174.5 kg. then what will be the weight of chromium SAE 51416 of same size?
+A. 305.5 lbs
+B. 426.4 lbs
+C. 384.6 lbs *
+D. 465.1 lbs
+40. Compute the circular pitch (in inch) of a pair of gears having a ratio of 4 and a center distance of 10.23. Each gear has 72 teeth and pinion has 18 teeth.
+A. 0.8095
+B. 0.7825 *
+C. 0.8035
+D. 0.8085
+41. A journal bearing with diameter of 76.2 mm is subjected to a load of 4900 N while rotating at 200 rpm. If its coefficient of friction is 0.02 and L/D=2.5, find its projected area in mm^2.
+A. 12,090
+B. 14,165
+C. 13,050
+D. 14,516 *
+42. A flywheel rotates at 120 rpm or 12.57 rad/sec slowed down to 102 rpm or 10.68 rad/sec during the punching operation that requires ¾ second of the punching portion of the cycle. Compute the angular acceleration of the flywheel in rad/sec^2.
+A. -2.52 rad/sec^2 *
+B. 3.15 rad/sec^2
+C. -2.75 rad/sec^2
+D. 2.22 rad/sec^2
+43. A drop hammer of 1 ton dead weight capacity is propelled down ward by a 12 in diameter cylinder. At 100 psi air pressure what is the impact velocity if the stroke is 28 inches?
+A. 63.2 fps
+B. 15.8 fps
+C. 31.6 fps *
+D. 47.4 fps
+44. Compute the nominal shear stress at the surface in MPa for a 40 mm diameter shaft that transmits 750 kW at 1500 rpm. Axial and bending loads assumed negligible. Torsional shearing stress is 28 N/mm^2.
+A. 218
+B. 312
+C. 232
+D. 380 *
+45. A truck skids to stop 60 m after the application of the brakes while travelling at 90 km/hr. What is the acceleration in m/sec^2?
+A. -5.21 m/s^2 *
+B. 6.36
+C. -7.06
+D. 5.76
+46. A spur pinion rotates at 1800 rpm and transmits to a mating gear 30 HP. The pitch diameter is 4" and the pressure angle is 14 1/2. Determine the tangential load in lbs.
+A. 495
+B. 525 *
+C. 535
+D. 475
+47. A high alloy spring having squared and ground ends and has a total of 16 coils and modulus of elasticity in shear of 85 GPa. Compute the Wahl factor. The spring outside diameter is 9.66 cm and wire diameter is 0.65 cm.
+A. 1.058
+B. 1.10 *
+C. 1.185
+D. 1.2
+48. Two idlers of 28 T and 26 T are introduced between the 24 T pinion with a turning speed of 400 rpm driving a final 96 T gear. What would be the final speed of the driven gear and its direction relative to the driving gear rotation?
+A. 120 rpm and opposite direction
+B. 100 rpm and opposite direction *
+C. 80 rpm and same direction
+D. 100 rpm and same direction
+49. Compute the line shaft diameter to transmit 12 HP at 180 rpm with torsional deflection of 0.08 degrees per ft length.
+A. 3 in.
+B. 5 cm
+C. 2.35 in *
+D. 62 mm
+50. The allowable stresses that are generally used in practice are 4 ksi for main power transmitting shaft, 6 ksi for line shaft carrying pulleys and 8.5 ksi for small short shaft/countershaft, etc. With these allowable stresses what will be the simplified formula to determine transmitted HP, diameter of the shaft or even the rpm(N)?
+A. HP=D^3N/80
+B. HP=D^3N/53.5
+C. all of these
+D. HP=D^3N/38 *
+51. Calculate the rpm for machining a cast iron workpiece 6 inches in diameter. The lowest cutting speed for cast iron is 50 fpm.
+A. 35.3
+B. 33.3 *
+C. 43.3
+D. 53.32
+52. A helical gear a 14 1/2 normal pressure angle and transverse diameter pitch of 2.3622 per cm. the helix angle is at 45° and has 8 teeth. Compute the transverse pressure angle in degrees.
+A. 22.2
+B. 19.3
+C. 18.9
+D. 20.1 *
+53. Compute the maximum unit shear in a 3 inch diameter steel shafting that transmits 2400 in lb. of torque at 99 rpm.
+A. 4530 psi *
+B. 4250 psi
+C. 3860 psi
+D. 4930 psi
+54. To facilitate the milling (roughing) work of a cast steel material using a 1 1/2 inch diameter cutter choose between the two available stock. Find the speed of the cutter in rpm. high speed steel cutter with a cutting speed of 50 fpm, carbide tipped cutter with a cutting speed of 200 fpm
+A. 389
+B. 572
+C. 509 *
+D. 412
+55. The U.S standard gage for iron and steel was established in 1893 which is primarily a weight gage. The basis is the weight of wrought iron which is at lbs. per cubic foot.
+A. 480 *
+B. 493
+C. 490
+D. 488
+56. Calculate the cutting speed in fpm when spindle speed of a lathe is turning 8 inch diameter bronze casting using a spindle speed of 120 rpm.
+A. 220 fpm
+B. 3016 fpm
+C. 2510 fpm
+D. 251 fpm *
+57. The lathe compound is used for:
+A. angle cutting
+B. grooving
+C. facing *
+D. shaping
+58. If the ultimate shear stress of a 1/8 inch thick drawn steel plates is 35 ksi what force is required to punch a 1 1/2 inch diameter hole?
+A. 10.011 lbs
+B. 22.322 lbs
+C. 11 Mtons
+D. 20620 lbs *
+59. Brazing is more superior than soldering in joining metals because:
+A. all of these *
+B. molten metal flaws between joints because of capillary forces
+C. it has slight diffusion of metal involved
+D. higher melting temperature joining
+60. To finally complete milling (finishing) work of steel material the operator has the option to choose the better available cutter in stock and these are: both 1 1/2 inch diameter, high speed steel with recommended cutting speed of 90 fpm, carbide tipped with cutting speed of 300 fpm. Compute the rpm of the cutter
+A. 801
+B. 620
+C. 764 *
+D. 264
+61. A ball is thrown vertically upward with a speed of 24.38 m/s. Then 2 seconds later a second ball is projected vertically upward too with a speed of 18.28 m/s. At what point above will they meet?
+A. 17.62m
+B. 15.62 m
+C. 16.62 m *
+D. 21.62 m
+62. Babbit bearing material maybe melted in a pouring ladle over an open fire. The temperature is about right when a wooden pine stick used for stirring chars but does not ignite and at that stage the molten metal temperature is in the vicinity of F.
+A. 1010
+B. 870 *
+C. 760
+D. 590
+63. The purpose of is to prevent gears from jamming together and making contact on both sides of their teeth simultaneously
+A. tooth fillet
+B. stress relieving
+C. backlash *
+D. all of these
+64. Any internal/residual stress in a steel work can be remedied by:
+A. tempering
+B. stress relieving
+C. annealing
+D. all of these *
+65. The usual shrinkage allowance specified for patterns to compensate for the expected shrinking of cast steel parts construction of steel casting in cooling:
+A. 1/8 inch/ft
+B. 3/16 inch/ft *
+C. 3/32 to 1/8 inch/ft
+D. 5/32 to 7/32 inch/ft
+66. Choose the economical type of material for gears that give/sustain good operating quality/life for intended operation
+A. plane carbon steel
+B. high alloy steel
+C. all of these
+D. heat treated carbon steel *
+67. A material plane was subjected to a load. When the load was removed the strain disappeared. From the structural change which of the following can be considered about this material?
+A. it does not follow Hooke's Law
+B. it has high modules of elasticity
+C. it is elastic *
+D. it is plastic
+68. Compute the power transmitted in HP by the shaft rotating 1200 rpm and subjected to torsional moment of 1200 MN.
+A. 202 *
+B. 252
+C. 150
+D. 171
+69. Instantaneous center is also called
+A. all of these
+B. virtual center *
+C. centro
+D. rotopole
+70. What is the stress to strain ratio within the elastic limit?
+A. elastic limit
+B. modulus of elasticity *
+C. elasticity
+D. compressive ratio
+71. A spur pinion supported on each side by ball bearings rotates 1750 rpm and transmit to a mating gear at 25 Hp. The pressure angle is 20 degrees and the pitch diameter is 5. Determine the tangential load in lbs.
+A. 420
+B. 300
+C. 360 *
+D. 400
+72. In a spring design, spring index of 7 through 9 is best 4 through 7 and 9 through 16 are often used but spring index of should be avoided due to difficulties in making etc.
+A. all of these
+B. less than 5 *
+C. 5 or less
+D. 4
+73. Allowance added in the casting pattern to compensate for the contraction of metal
+A. tapering allowance
+B. shrinkage allowance *
+C. finish allowance
+D. draft pattern
+74. Ratio of the angle of action to the pitch angle
+A. contact ratio *
+B. approach ratio
+C. ratio of gearing
+D. module
+75. General purpose grade of steel used for broiler plate, structurals etc. usually with carbon content of
+A. 0.20 to 0.30%C *
+B. 0.35 to 0.50%C
+C. all of these
+D. 0.15 to 0.25%C
+76. The angle made by the helix of the thread(in a straight thread) at the pitch diameter with a plane perpendicular to the axis called
+A. angle of thread
+B. truncation
+C. lead angle *
+D. lead
+77. The principle materials used in the production of metal working tools:
+A. high carbon steel *
+B. tungsten, silicon, hadfield Mn
+C. titanium, phosphorous
+D. vanadium, chromium, molybdenum
+78. In the interest of design simplification and good kinematic compromise bevel gears adopted a standard pressure angle of degrees.
+A. 20 involute stub
+B. 20° *
+C. 14 1/2 involute full depth
+D. 17 1/2
+79. The property of material that relates the lateral strain to longitudinal strain.
+A. stress
+B. strain
+C. Poisson's ratio *
+D. endurance limit
+80. Also called eccentrically loaded bearing is
+A. full bearings
+B. offset bearing *
+C. partial bearing
+D. fitted bearings
+81. In the selection of wire rope, regular lay means wires and strands are arranged in the following manner:
+A. twisted in the same direction
+B. twisted in any direction
+C. twisted in opposite direction *
+D. twisted in along direction
+82. In involute teeth, the pressure angle is often defined as the angle between the line of action and the line of tangent to the pitch circle. It is also termed as-
+A. helix angle
+B. angle of recess
+C. Angle of obliquity *
+D. Arc of action
+83. A lineshaft runs at 360 rpm. An 18" pulley on the same shaft is belt connected to a 12" pulley on the countershaft. From a 15" pulley on the countershaft motion is transmitted to the machine. Compute/check the required size of the pulley on the machine to give a spindle speed of 660 rpm.
+A. 16"
+B. 12 1/4" *
+C. 10 1/2"
+D. 3 1/2"
+84. Height of tooth above pitch circle or the radial distance between pitch circle and top land of the tooth.
+A. top root
+B. addendum *
+C. land
+D. hunting tooth
+85. The function of clutch in the machine tool is?
+A. lowering of drive speed
+B. to disconnect or connect at will the drive *
+C. alignment of drive shaft
+D. to insure that two shaft line up at high speed
+86. It is generally recommended and normal for a designer to add a hunting tooth to evenly distribute the wear on meshing teeth like a 53 teeth gears mesh with 30 teeth pinion. Find the rotation of pinion to mesh with same pair of teeth again
+A. 120
+B. 81
+C. 61
+D. 53 *
+87. The shaft whose torque varies from 2000 to 6000 in lbs has 1 1/2 in in diameter and 60000 psi yield strength. Compute for the shaft mean average stress.
+A. 6036 psi *
+B. 6810 psi
+C. 5162 psi
+D. 5550 psi
+88. The angle made by the helix of the thread (in a straight thread) at the pitch diameter with a plane perpendicular to the axis is called
+A. lead angle *
+B. truncation
+C. lead
+D. angle of thread
+89. The rule of thumb in journal bearing design; the clearance ratio/clearance should be.
+A. 0.0090
+B. 0.0042
+C. 0.0010 *
+D. 0.00120
+90. The moment of inertia of a rectangle whose base is "b" height "h" about its base is
+A. bh^3/4
+B. bh^3/12
+C. bh^3/24
+D. bh^3/3 *
+91. Cold rolled shafting is not available in diameter larger than
+A. 6 inches
+B. 5 inches *
+C. 6 1/2 inches
+D. 5 inches
+92. What power would a spindle 55 mm in diameter transmit at 480 rpm. Stress allowed for short shaft is 59 newtons/mm^2
+A. 45.12 kw *
+B. 50.61 kw
+C. 45 Hp
+D. 39.21 kw
+93. The cast iron flywheels are commonly designed with a factor of safety of
+A. 14 to 15
+B. 10 to 13 *
+C. 8 to 9
+D. 6 to 12
+94. A pair of equal and opposite (not collinear) forces that tend cause a rotation of a body
+A. couple *
+B. centroids
+C. equilibrium
+D. vector
+95. The ratio of the pitch diameter in inches to the number of teeth
+A. pitch circle
+B. English module *
+C. module
+D. pitch diameter
+96. When the motion is diminished/decreasing instead of increasing is called.
+A. deceleration
+B. uniform negative impulse
+C. retarded motion *
+D. all of these
+97. is a unit or energy?
+A. ft.-lb. *
+B. hp
+C. BTU/hr.
+D. watt
+98. When high strength and durability are a requirements for choosing gear materials it is preferable to use
+A. hardened bronze
+B. steel *
+C. phenolic laminated.
+D. white iron
+99. forces when action are parallel
+A. couple
+B. non collinear
+C. resultant
+D. non concurrent *
+100. The product of the mass and the velocity of the center of gravity of the body is called.
+A. linear momentum *
+B. angular impulse
+C. linear impulse
+D. angular momentum
+    </script>
+
+    <script>
+        // Parse the raw data
+        const rawText = document.getElementById('raw-data').textContent;
+        const quizData = [];
+        let totalScore = 0;
+        let currentIdx = 0;
+
+        // Custom parser to extract exactly 100 questions sequentially from the text
+        function parseQuestions() {
+            // Regex to find numbered questions "1. " to "100. "
+            const regex = /(?:^|\n)(\d{1,3})\.\s+([\s\S]*?)(?=(?:\n\d{1,3}\.\s)|$)/g;
+            let match;
+            
+            while ((match = regex.exec(rawText)) !== null) {
+                let num = parseInt(match[1]);
+                let body = match[2];
+
+                // Find options block using strict A, B, C, D anchors
+                let optStart = body.search(/\n\s*[A-D]\.\s/);
+                if (optStart === -1) optStart = body.search(/(?:^|\s)[A-D]\.\s/);
+                
+                if (optStart !== -1) {
+                    let qText = body.substring(0, optStart).trim();
+                    let optString = body.substring(optStart).trim();
+                    
+                    let patterns = [
+                        { id: 'A', regex: /(?:^|\s)[A]\.\s+/i },
+                        { id: 'B', regex: /(?:^|\s)[B]\.\s+/i },
+                        { id: 'C', regex: /(?:^|\s)[C]\.\s+/i },
+                        { id: 'D', regex: /(?:^|\s)[D]\.\s+/i }
+                    ];
+                    
+                    let positions = [];
+                    patterns.forEach(p => {
+                        let m = optString.match(p.regex);
+                        if(m) {
+                            positions.push({ id: p.id, index: m.index, length: m[0].length });
+                        }
+                    });
+                    
+                    positions.sort((a,b) => a.index - b.index);
+                    
+                    let optionsObj = { A: "N/A", B: "N/A", C: "N/A", D: "N/A" };
+                    for(let i=0; i<positions.length; i++) {
+                        let start = positions[i].index + positions[i].length;
+                        let end = (i+1 < positions.length) ? positions[i+1].index : optString.length;
+                        optionsObj[positions[i].id] = optString.substring(start, end).trim();
+                    }
+
+                    let optionsArray = [
+                        { letter: 'A', text: optionsObj.A },
+                        { letter: 'B', text: optionsObj.B },
+                        { letter: 'C', text: optionsObj.C },
+                        { letter: 'D', text: optionsObj.D }
+                    ];
+
+                    let ans = 'A'; // default
+                    optionsArray.forEach(o => {
+                        if (o.text.includes('*')) {
+                            ans = o.letter;
+                            o.text = o.text.replace(/\*/g, '').trim();
+                        }
+                    });
+
+                    quizData.push({
+                        num: num,
+                        qText: qText,
+                        options: optionsArray,
+                        ans: ans,
+                        userAnswer: null
+                    });
+                }
+            }
+            // Strict sort by sequential number
+            quizData.sort((a, b) => a.num - b.num);
+        }
+
+        function initApp() {
+            parseQuestions();
+            if (quizData.length === 0) {
+                document.getElementById('q-text').innerHTML = "<span class='error-message'>Parse Error: Could not extract questions.</span>";
+                return;
+            }
+            document.getElementById('nav-header').innerText = `${quizData.length} Problems Navigator`;
+            document.getElementById('controls').style.display = 'flex';
+            buildNav();
+            renderQuestion();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            grid.innerHTML = '';
+            quizData.forEach((q, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-btn';
+                btn.id = `nav-${i}`;
+                btn.innerText = q.num;
+                btn.onclick = () => { 
+                    currentIdx = i; 
+                    renderQuestion(); 
+                    if(window.innerWidth <= 768) toggleSidebar(); 
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateNavStyles() {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${currentIdx}`).classList.add('active');
+        }
+
+        function renderQuestion() {
+            const q = quizData[currentIdx];
+            document.getElementById('q-num').innerText = `Question ${q.num} of ${quizData.length}`;
+            document.getElementById('q-text').innerText = q.qText;
+            
+            const grid = document.getElementById('opt-grid');
+            grid.innerHTML = '';
+            
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'feedback';
+            feedback.innerText = '';
+            feedback.style.display = 'none';
+
+            q.options.forEach((opt) => {
+                const btn = document.createElement('div');
+                btn.className = 'option';
+                btn.innerHTML = `<span class="opt-letter">${opt.letter}.</span> ${opt.text}`;
+                
+                if (q.userAnswer) {
+                    btn.classList.add('disabled');
+                    if (opt.letter === q.ans) {
+                        btn.classList.add('actual-correct');
+                    }
+                    if (opt.letter === q.userAnswer && q.userAnswer !== q.ans) {
+                        btn.classList.add('selected-wrong');
+                    }
+                } else {
+                    btn.onclick = () => handleAnswer(opt.letter);
+                }
+                grid.appendChild(btn);
+            });
+
+            if (q.userAnswer) {
+                feedback.style.display = 'block';
+                if (q.userAnswer === q.ans) {
+                    feedback.className = 'feedback success';
+                    feedback.innerText = 'Correct!';
+                } else {
+                    feedback.className = 'feedback error';
+                    feedback.innerText = `Incorrect! The correct answer is ${q.ans}.`;
+                }
+            }
+
+            // Update Controls
+            document.getElementById('btn-prev').disabled = currentIdx === 0;
+            
+            const btnNext = document.getElementById('btn-next');
+            const btnRetake = document.getElementById('btn-retake');
+
+            if (currentIdx === quizData.length - 1) {
+                btnNext.style.display = 'none';
+                btnRetake.style.display = 'inline-block';
+            } else {
+                btnNext.style.display = 'inline-block';
+                btnRetake.style.display = 'none';
+            }
+
+            updateNavStyles();
+            if (window.MathJax) MathJax.typesetPromise([document.getElementById('quizCard')]);
+        }
+
+        function handleAnswer(letter) {
+            const q = quizData[currentIdx];
+            q.userAnswer = letter;
+            
+            const navBtn = document.getElementById(`nav-${currentIdx}`);
+            if (letter === q.ans) {
+                totalScore++;
+                navBtn.classList.add('correct');
+            } else {
+                navBtn.classList.add('wrong');
+            }
+            
+            document.getElementById('score-display').innerText = `Score: ${totalScore}`;
+            renderQuestion();
+        }
+
+        function nextQ() { if (currentIdx < quizData.length - 1) { currentIdx++; renderQuestion(); } }
+        function prevQ() { if (currentIdx > 0) { currentIdx--; renderQuestion(); } }
+
+        function retakeQuiz() {
+            quizData.forEach(q => { q.userAnswer = null; });
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('correct');
+                b.classList.remove('wrong');
+            });
+            totalScore = 0;
+            currentIdx = 0;
+            document.getElementById('score-display').innerText = `Score: 0`;
+            renderQuestion();
+            document.getElementById('main-content').scrollTo(0,0);
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
