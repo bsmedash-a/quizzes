@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Design Elements | Questions 1-100</title>
+    <!-- MathJax for rendering equations -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --main-color: #ffffff;
+            --text-color: #2c3e50;
+            --accent-color: #2c3e50;
+            --highlight-color: #2980b9;
+            --correct-color: #27ae60;
+            --wrong-color: #c0392b;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            border-bottom: 4px solid var(--highlight-color);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: white;
+            margin-right: 20px;
+            transition: color 0.2s;
+        }
+
+        .hamburger:hover { color: var(--highlight-color); }
+
+        .top-bar h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            width: 320px;
+            background-color: #34495e;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            position: fixed;
+            height: calc(100% - 60px);
+            top: 60px;
+            z-index: 99;
+            transform: translateX(-100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        #sidebar.open { transform: translateX(0); }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background-color: #2c3e50;
+            text-align: center;
+            border-bottom: 1px solid #1a252f;
+        }
+
+        .nav-grid {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .nav-btn {
+            background-color: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover { background-color: #95a5a6; }
+        .nav-btn.active { background-color: var(--highlight-color); box-shadow: inset 0 0 0 2px white; }
+        .nav-btn.correct { background-color: var(--correct-color); color: white; }
+        .nav-btn.wrong { background-color: var(--wrong-color); color: white; }
+
+        /* Main Content */
+        #main-content {
+            flex: 1;
+            margin-top: 60px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .quiz-card {
+            background-color: var(--main-color);
+            width: 100%;
+            max-width: 900px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            height: fit-content;
+            margin-bottom: 40px;
+        }
+
+        .question-header {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: var(--text-color);
+            white-space: pre-wrap;
+        }
+
+        /* 2-Column Layout for Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+
+        .option {
+            background-color: #f8f9fa;
+            border: 2px solid #bdc3c7;
+            padding: 16px 20px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            color: var(--text-color);
+        }
+
+        .option:hover:not(.disabled) {
+            background-color: #ebf5fb;
+            border-color: var(--highlight-color);
+        }
+
+        .option.actual-correct {
+            background-color: #e8f8f5;
+            border-color: var(--correct-color);
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .option.selected-wrong {
+            background-color: #fdedec;
+            border-color: var(--wrong-color);
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .option.disabled { cursor: default; }
+
+        .opt-letter {
+            font-weight: bold;
+            margin-right: 15px;
+            color: var(--highlight-color);
+        }
+
+        .feedback {
+            padding: 20px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .feedback.success { background-color: #e8f8f5; color: #27ae60; border: 1px solid var(--correct-color); display: block; }
+        .feedback.error { background-color: #fdedec; color: #c0392b; border: 1px solid var(--wrong-color); display: block; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            border-top: 2px solid #ecf0f1;
+            padding-top: 20px;
+        }
+
+        .btn {
+            background-color: var(--highlight-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+
+        .btn:hover:not(:disabled) { background-color: #1f618d; }
+        .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        
+        .btn-retake { background-color: #e67e22; }
+        .btn-retake:hover { background-color: #d35400; }
+
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 98; display: none; }
+        #overlay.show { display: block; }
+        
+        .error-message { color: var(--wrong-color); font-weight: bold; text-align: center; display: block; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h1>Machine Design Elements | Questions 1-100</h1>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header" id="nav-header">Loading...</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div id="main-content">
+        <div class="quiz-card" id="quizCard">
+            <div class="question-header">
+                <span id="q-num">Initializing...</span>
+                <span id="score-display" style="color: var(--highlight-color);">Score: 0</span>
+            </div>
+            
+            <div class="question-text" id="q-text">Parsing problem set (1-100)...</div>
+            <div class="options-grid" id="opt-grid"></div>
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="controls" id="controls" style="display:none;">
+                <button class="btn" id="btn-prev" onclick="prevQ()">&#8592; Previous</button>
+                <button class="btn btn-retake" id="btn-retake" style="display:none;" onclick="retakeQuiz()">Retake Quiz</button>
+                <button class="btn" id="btn-next" onclick="nextQ()">Next &#8594;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Injection strictly for questions 1-100 -->
+    <script id="raw-data" type="text/plain">
+1|In the LRT II project, steel railroad rails of 10 meters long are to be installed. If lowest temperature considered is 16 °C, and a maximum temperature of 36 °C is designed for, assuming coefficient of thermal expansion of steel to be 11.6 x 10^-6 m/m and modulus of elasticity of steel to be 207,000 MPa. Should the excessive high summer tempeature of 40 °C occur, determine the induced stress in the rails at that temperature.|9.6048 Mpa|6.6342 Mpa|4.4178 MPa|7.7841 Mpa|A
+2|An engine part is being tested with a load of 30,000 lb. The allowable tensile stress is 10,000 psi, modulus of elasticity of 40 x 10^6 psi. If the original length of specimen is 42 inches with elongation not exceeding 0.0015 inch, what diameter of the specimen is required?|4.2 in|3.0 in|2.5 in|5.17 in|D
+3|A solid transmission shaft is 3.5 inches in diameter. It is desired to replace it with a hollow shaft of the same material and same torsional strength but its weight should only be half as much as the solid shaft. Find the outside diameter and inside diameter of the hollow shaft in millimeters.|107.315 mm; 86.97 mm|112.231 mm 84.60 mm|120.217 mm; 65.97 mm|131.204 mm; 54.30 mm|A
+4|A machine shaft turning at 600 rpm is supported on bearings 76 cm apart. Fifteen kW is supplied through a 46 cm pulley located 26 cm to the right bearing. Power is transmitted from the shaft through a 20 cm spur gear located 25 cm to the right of the left bearing. The belt drive is at an angle of 60° above the horizontal. The pulley weighs 90 kg to provide some flywheel effect. The ratio of the belt tension is 3:1. The gear has a 20° tooth form and meshes with another gear directly located above the shaft. Shaft materials has Su = 482,500, sy = 320 MPa. Design the shaft.|30 mm|58 mm|39 mm|47 mm|C
+5|A 76 mm solid shaft is to be replaced with a hollow shaft of equal torsional strength. Find the inside diameter and the percentage of weight saved, if the outside diameter of the hollow shaft is 100 mm.|56.53 %|67.31 %|48.49%|72.50%|A
+6|A centrifugal pump is directly coupled to a motor. The pump rating is 3,600 liters per minute against a total head of 8 meters of water. Pump efficiency is 65% at shaft speed of 550 rpm. Calculate the torsional stress induced on the 40 mm diameter motor shaft.|11,193.45 Kpa|12,429.72 Kpa|10,010.85 Kpa|13,113.83 Kpa|C
+7|A steel shaft transmits 40 hp at 1400 rpm. Considering allowable shearing stress based on pure torsion to be 5000 psi, find the torsional deflection of the shaft in degrees per foot.|0.392 degrees/foot|0.246 degrees/foot|0.541 degrees/foot|0.435 degree/foot|B
+8|The maintenance shop of Philippine Air Lines has a motor operated hoisting winch which consists of the following mechanical parts: in mesh with a 56 tooth worm wheel at shaft "B" directly below. Compounded on shaft "B" is a 20 tooth 5 module pinion in mesh with a spur gear keyed on shaft "C" with a horizontal center line distance of 150 mm. Mounted on the same shaft "C" with a horizontal center line diameter hoisting drum. The cable wrap around the drum sustains a load of 500 kg. Find the velocity of the load when the motor is turning at 1750 rpm.|0.382 m/sec|0.284 m/sec|0.230 m/sec|0.327 m/sec|D
+9|An ammonia compressor is driven by a 20 kW motor. The compressor and the motor RPM are 360 and 1750, respectively. The small sheave has a pitch diameter of 152.4 mm. If the belt to used is standard C-120, determine the center distance between sheaves. Note: From PSME Code: Length of C-120 belt = 122.9 in.|709 mm|865 mm|806 mm|686 mm|C
+10|A certain farm equipment which requires 2200 Newton Metre torque at 500 RPM has a diesel engine to operate at 1500 RPM as its prime mover. A No. 60 roller chain with a total length of 60 pitches and a small sprocket with 23-teeth are to be used with an operating temperature to remain constant at 45°C. Determine the approximate number of strands.|7|6|8|9|D
+11|A multiple disc clutch of 10 steel disc and 9 bronze disc. the effective outside and inside diameter are 20.32 cm and 15.24 cm, respectively if the axial force of 450 Newton is applied and the shaft turns at 1200 rpm, find the horsepower capacity, assume a coefficient of friction of 0.27.|39.566 hp|40.482 hp|37.456 hp|35.659 hp|A
+12|An engine of a motor vehicle with a wheel diameter of 712 mm develops 50 kW at 2,000 rpm combined efficiency of the differential and transmission is 75% with an over-all speed reduction to. 1 determine he torque to be delivered by the clutch N-m.|239 N-m|359 N-m|432 N-m|471 N-m|A
+13|Determine the diameter of the stud bolt that are required to fasten down the cylinder head of a 203 mm x 304 mm gas engine. There are ten bolts on the block. The explosion pressure is 31 kg/sq sq.cm and studs are made of ordinary bolts material SAE 1020. How deep should the bolt be drilled?|38.1 mm|40.2 mm|37.3 mm|35.5 mm|A
+14|A single square thread power screw is to raise a load of 70 kN. The screw has a major diameter of 36 mm and a pitch of 6 mm. The coefficient of thread friction and collar friction are 0.13 and 0.10 respectively. If the collar mean diameter is 90 mm and the screw turns at 60rpm, find the combined efficiency of screw and collar.|13.438%|15.530%|14.526%|12.526%|D
+15|A simple band brake has a 76 cm and fitted with a steel band 2/5 cm thick lined with a brake lining having a coefficient of friction of 0.25. the arc of contact is 245 deg. the drum is attached to a 60 cm hoisting drum that sustain a rope load of 820 kg. the operating force has a moment arm of 1.50 m and the band is attached 12 cm from the pivot point. Find a torque just required to support the load (clockwise)|2413.26 N-m|3492.31 N-m|2453.29 N-m|1894.82 N-m|A
+16|A pulley is keyed to a 2 and 1/2 inches diameter shaft by a 7/16 in x 3 in flat key. The shaft rotates at 50 rpm. The allowable compressive stress for the key, hub and shaft are 66 ksi. 59 ksi and 72 ksi, repectively. Determine the maximum torque the pulley can safety deliver.|48398.4 in-lb|54140.6 in-lb|51562.5 in-lb|67495.2 in-lb|A
+17|A cylinder having an internal diameter of 20 in and an external diameter of 36 in is subjected to an internal pressure of 10,000 psi and an external pressure of 2,500 psi. Determine the hoop stress at the inner surface of the cylinder.|24,705.16 psi|19,028.52 psi|13,142.86 psi|11,696.43 psi|C
+18|An elevator having a floor area of 18 m² has a minimum capacity of _____ persons.|4|2|6|8|B
+19|Find the maximum load in kgs of an elevator having a net inside platform area of 10 m².|5738 kgs|5436 kgs|1866.5 kgs|1567.4 kgs|A
+20|Design the size of solid steel shaft to be used for a 500 hp, 250 rpm application if the allowable torsional deflection is 1 degree and the allowable stress is 10,000 psi modulus of rigidity is 13 x 10^6 psi.|5" dia.|4-5/8" dia.|4-7/8" dia.|4-3/4" dia.|C
+21|With the electric are welding rate of 18 in./min, how long will it take to weld a 1/2 in. thick plate by 3 ft long seam?|3 min.|2 min.|1.5 min.|4 min.|B
+22|How long will it take to mill a 3/4" by 2" long keyway in a 3" diameter shafting with a 24 tooth cutter turning at 100 rpm and 0.005" feed/tooth?|0.136 min.|0.196 min.|0.166 min.|0.106 min.|C
+23|How long will it take to saw a rectangular piece of aluminum plate 8 in. wide and 1 1/2 in. thick if the length of the cut is 8 in., the power hacksaw makes 120 rev/min and average feed per stroke is 0.0060 in.?|13.11|11.11|14.01|12.03|B
+24|A cast iron flywheel is rotated at a speed of 1200 rpm and having a mean rim radius of 1 foot. If the weight of the rim is 30 lbs. what is the centrifugal force? Use factor C=41.|14,700 lbs|14,800 lbs|14,860 lbs|14,760 lbs|D
+25|Determine the estimated weight of an A-36 steel plate size 3/16" x 6' x 20'|919 lbs|1012 lbs|829 lbs|735 lbs|A
+26|The minimum clearance allowed for meshing spur gears with a circular pitch of 0.1571 and diametral pitch of 20. The spur gear has 25 teeth.|0.007855|0.008578|0.007558|0.007585|A
+27|A coiled spring with 5 cm of outside diameter is required to work under the load of 190 N. The wire diameter is 5 mm, the spring is to have 6 active coils and the ends are to be closed and ground. Determine the total number of coils. The modulus of rigidity is 809 GPa and the mean radius is to be 23 mm, with 7 mm pitch of the spring.|6.5 coils|7.5 coils|8.5 coils|9.5 coils|C
+28|A helical spring having squared and ground ends has a total of 18 coils and its material has modulus of elasticity in shear of 78.910 GPa. If the spring has an outside diameter of 10.42 cm and a wire diameter of 0.625 cm, compute in the spring due to a load of 50 kgs.|302 mm|470 mm|490 mm|322 mm|C
+29|Two parallel shaft connected by pure rolling turn in the same direction and having a speed ratio of 4. What is the distance of the two shaft if the small cylinder is 8 cm?|10 cm|12 cm|18 cm|20 cm|B
+30|What modulus of elasticity in tension is required to obtain a unit deformation of 0.00107 m/m from a load producing a unit tensile stress of 50, 000 psi?|34.5 x 10^6 psi|46.7 x 10^5 psi|46.7 x 10^6 psi|4.67 x 10^6 psi|C
+31|Determine the bursting steam pressure of a steel plate with a diameter of 12 in. and made of 1/4 in steel plate. The joint efficiency is at 75% and the tensile strength is 55 ksi.|3,440 psi|3,437 psi|3,430 psi|3,427 psi|A
+32|What is the working strength of a 2 in bolt which is screwed up tightly in a packed joint when the allowable working stress is 11,000 psi?|12,400 lb|15,500 lb|18,700 lb|22,500 lb|C
+33|The process by which high pressure is applied to a heated metal billet or blank which causes it to flow through restricted orifice.|Extrusion|Intrusion|Forging|Hot rolling|A
+34|A thin hollow sphere of radius 10 in and thickness 0.1 in is subjected to an internal pressure of 100 psig. The maximum normal stress on an element of the sphere is|2500 psi|5000 psi|7,070 psi|10,000 psi|B
+35|In designing a cylindrical pressure tank 3 feet in diameter, a factor of safety of 2.5 is used. The cylinder is made of steel (yield stress = 30 ksi) and will contain pressures up to1000 psi. What is the required wall thickness, t, based on circumferential stress considerations?|0.75 in.|1.50 in.|3 in.|3.75 in.|B
+36|A flywheel weighing 6 kN has a mean diameter of 90 cm. The maximum speed of the flywheel is 7 rev/sec slowed down to 4 rev/sec during the shearing process. Determine the energy released by the flywheel.|7856 kg-m|8145 kg-m|9872 kg-m|8241 kg-m|D
+37|All four compression coil spring support one load of 700 kg/mm. All four springs are arranged in parallel and rated same at 0.609 kg/mm. Compute the deflection in mm.|64|147|178|287|D
+38|A body weighing 1000 lb falls 6 inches and strikes a 2000 lb per in spring. The deformation of the spring is:|1 in|2 in|3 in|6 in|C
+39|A 60 inch diameter steel pipe, 3/8 inch thick, carries water under a pressure head of 550 ft. Determine the hoop stress in the steel.|34,320 psi|25,780 psi|19,066 psi|15,920 psi|C
+40|The maximum moment induced in a simply supported beam of 20 ft span, by a 2000 pound load at midspan is|125,000 ft-lb|15,000 ft-lb|30,000 ft-lb|10,000 ft-lb|D
+41|Determine the length of belt needed for a two flat belt pulleys having a diameter of 70 cm and 30 cm. The center distance is 400 cm and pulleys rotate in same direction. Assume power transmitted is 10 hp at 200 rpm.|958 cm|859 cm|589 cm|895 cm|A
+42|A round steel bar 12 inches long is to withstand a dead load of 40,000 lb in compression. The rod must not shorten more than 0.004 inch and have a factor safety of at least 10. Assume the ultimate strength of the material to be 110,000 psi and modulus of elasticity to be 15,500,000 psi. Determine the diameter of the rod.|2.14 in.|3.14 in|4.14 in.|5.14 in.|B
+43|SAE 51XXX belongs to what steel family?|Carbon|Manganese|Chromium|Nickel|C
+44|What are considered as the "building blocks" for engineering materials?|Atoms|Elements|Matters|Compounds|A
+45|What are the major classes of engineering materials?|Metals, ceramics and semiconductors|Polymers, metals and composites|Metals, ceramics, polymers and semiconductors|Metals, ceramics, polymers, semiconductors and composites|D
+46|What types of materials behave like iron when placed in a magnetic field?|Crystals|Amorphous materials|Ferromagnetic materials|Metalloids|C
+47|What do you call metals reinforced by ceramics or other materials, usually in fiber form?|Metalloids|Matrix alloys|Metal lattices|Metal Matrix composites|D
+48|What is a combination of one or more metals with a nonmetallic element?|Metalloids|Matrix Composite|Inert|Ceramic|D
+49|A white metal, almost as bright as silver and is malleable and ductile and can be welded.|Nickel|Aluminum|White iron|Lead|A
+50|It is a silvery dull, soft metal and the second lightest of all metals used in the industry.|Nickel|Aluminum|White iron|Lead|B
+51|The least among iron ores for it contains many impurities, poor in iron content and commonly used in England.|Hermatite|Magnetite|Limonite|Siderite|D
+52|Which of the following is not considered to be precious metal?|Silver|Gold|Platinum|Steel|D
+53|It is an alloy of copper and zinc. It is approximately 1/3 zinc and 2/3 copper.|Brass|Bronze|Muntz metal|Silver|A
+54|Which of the following where pipe wrench (Stillson) was designed to be used?|Hexagonal objects|Square objects|Round objects|Flat objects|C
+55|In which of the following where pipe is measured?|Inside diameter|Thickness of wall|Outside diameter|Wire gage|A
+56|What is the use of shims?|Separate fresh-and salt-water lines|Replace fuses|Adjust cylinder liners|Adjust bearing clearances|D
+57|How do you call the process used to retard corrosion (rust) on iron pipe and fitting?|Tinning|Galvanizing|Soldering|Sulphurizing|B
+58|In pipe fittings the term "offset" refers to what?|A cut-off running at right angles to the original piping|Two pipes running parallel to each other|A bend in the pipe|Two sizes of pipe in the same run|C
+59|In machine shop, if the lips of a drill are of different lengths than which of the following will likely happen?|The drill will not cut|The hole will be larger than the drill|The hole will be smaller than the drill|None of these will happen|B
+60|What structure is formed when transformation occurs at temperatures down to the knee of the curve?|Pearlite|Bainite|Austenite|Martensite|A
+61|What allotropic form of iron refers to iron that has a temperature range of room temperature to 1670° F?|Beta iron|Gamma iron|Delta iron|Alpha iron|D
+62|What steel surface hardening process requires heating at 1000°F for up to 100 hours in an ammonia atmosphere, followed by slow cooling?|Nitriding|Flame hardening|Precipitation hardening|Carburizing|A
+63|What is the chief ore of tin?|Cassiterite|Bauxite|Ilmanite|Galena|A
+64|What is the chief ore of zinc?|Cassiterite|Bauxite|Sphalerite|Ilmanite|C
+65|What is the chief ore of titanium?|Sphalerite|Ilmanite|Bauxite|Cassiterite|B
+66|What is the mixture of gibbsite and diaspore, of which aluminum is derived?|Bauxite|Rutile|Galera|Sphalerite|A
+67|A tolerance where the size of a part is permitted to be either larger or smaller than the given dimension.|Bilateral|Unilateral|Lateral|None of these|A
+68|In a pressure vessel, the ratio of minimum strength of joint to the strength of solid joint is known as|Efficiency|Performance factor|Joint efficiency|Relative strength|D
+69|When tested in compression, ductile material usually exhibit _______ characteristics up to the yield strength as they do when tested in tension.|the same|less than|more than|approximately the same|D
+70|In pure torsion, the maximum stress is at the center of the|peripheral sides|long sides|medium sides|short sides|B
+71|The ability of a material to absorb energy within its proportional limit is known as|resilience|endurance|toughness|spring action|A
+72|A method whereby a gear is run with another gear that has abrasive surface material.|Hobbing|Honing|lapping|milling|C
+73|Heating above the transformation range usually 1300 F to 1350 F, and cooling slowly to soften the metal and increase in machining.|Annealing|Hardening|Normalizing|Tempering|A
+74|Heating above the transformation temperature and quenching usually oil, for the purpose of increasing the hardness.|Annealing|Hardening|Normalizing|Tempering|B
+75|Reheating to a temperature below the transformation range, followed by any desired rate of cooling to attain the desired properties of the metal.|Annealing|Hardening|Tempering|Stress Relieving|C
+76|Heating to a subcritical temperature about 1,100 F to 1,300 F and holding at that temperature for a suitable time for the purpose of reducing internal residual stresses.|Annealing|Hardening|Tempering|Stress Relieving|D
+77|Heating to some 100 F above the transformation range with subsequent cooling to below that range in still air at room temperature to produce uniform structure of the metal.|Annealing|Hardening|Normalizing|Tempering|C
+78|A machine tool for producing holes in metal by the use of a cutting tool called drill.|Drilling machine|Boring machine|Milling machine|Broaching machine|A
+79|A machine tool used to form metal parts by removing metal from a workpiece by the use of the revolving cutter with many teeth each tooth having a cutting edge which removes its share of the stock.|Drilling machine|Boring machine|Milling machine|Broaching machine|C
+80|When measuring a drill for size measure across the:|margins|flutes|shank|point|A
+81|The tool used in precision work to smooth or enlarge holes is called a:|round out|drift pin|reamer|protractor|C
+82|Which of the following chisels would be used for cutting oil grooves?|diamond-point chisel|cold chisel|round-nose chisel|hot chisel|C
+83|Which of the following is not a cut of file?|smooth|second cut|half-round|bastard|C
+84|Which of the following is the smallest size drill?|# 80|# 60|# 1|# 0|A
+85|Which of the following is the largest size drill?|A|X|Z|XX|C
+86|The size of a drill is stamped on the:|point|shank|margin|flute|B
+87|Which of the following safety precautions should be followed when pouring babbitt?|operator must wear goggles|the surface to be babbitted must be free of moisture|the surface to be babbitted must be clean|all of the above|D
+88|Which of the following safety precautions should be followed when renewing a flange gasket?|drain the line thoroughly|tie down isolation valves|isolate the section to be worked on|all of the above|D
+89|Before installing a new flange gasket be sure that the:|flange faces are painted|flange faces are absolutely clean|isolating valves are open|old gasket is in place|B
+90|On a standard wire gage:|#10 is larger than #5|#25 is smaller than #20|# 1is smaller than #2|#30 is larger than #25|B
+91|Which of the following tools would be most useful when taking leads on bearings?|dividers|outside calipers|micrometer|center gage|C
+92|Before splicing electric wires, they should be:|tinned|cleaned and tinned|soldered|insulated|B
+93|Which of the following is not a standard thread form?|Square|American National|Double flute|60 deg. sharp V|C
+94|Which of the following does not have to be lubricated when drilling?|steel|brass|monel|tool steel|B
+95|The formula to find out the number of turn of the crank simple indexing is|T=20/N|T=40/N|T=N/20|T=N/40|B
+96|In a standard dividing head the ratio between the worm wheel and the worm is|10:1|20:1|30:1|40:1|D
+97|There are two different movements of the crank in|Simple indexing|Differential indexing|Compound indexing|Angular indexing|C
+98|Planer type built machine is built up for work of|light duty|medium duty|heavy duty|None of the above|C
+99|In a straddle milling operation how many cutters are used to mill the work?|One|Three or more|Two|Any one of the above|C
+100|A final operation to improve the polish of a metal and to bring out the maximum luster|Finishing|Surface grinding|Broaching|Buffing|D
+    </script>
+
+    <script>
+        const rawText = document.getElementById('raw-data').textContent.trim();
+        const quizData = [];
+        let totalScore = 0;
+        let currentIdx = 0;
+
+        function initApp() {
+            const lines = rawText.split('\n');
+            lines.forEach(line => {
+                if (line.trim() === '') return;
+                const parts = line.split('|');
+                if (parts.length === 7) {
+                    quizData.push({
+                        num: parseInt(parts[0]),
+                        qText: parts[1].trim(),
+                        options: [
+                            { letter: 'A', text: parts[2].trim() },
+                            { letter: 'B', text: parts[3].trim() },
+                            { letter: 'C', text: parts[4].trim() },
+                            { letter: 'D', text: parts[5].trim() }
+                        ],
+                        ans: parts[6].trim().toUpperCase(),
+                        userAnswer: null
+                    });
+                }
+            });
+
+            if (quizData.length === 0) {
+                document.getElementById('q-text').innerHTML = "<span class='error-message'>Parse Error: Could not extract questions from the provided file.</span>";
+                return;
+            }
+            
+            document.getElementById('nav-header').innerText = `1 to 100 Navigator`;
+            document.getElementById('controls').style.display = 'flex';
+            buildNav();
+            renderQuestion();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            grid.innerHTML = '';
+            quizData.forEach((q, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-btn';
+                btn.id = `nav-${i}`;
+                btn.innerText = q.num;
+                btn.onclick = () => { 
+                    currentIdx = i; 
+                    renderQuestion(); 
+                    if(window.innerWidth <= 768) toggleSidebar(); 
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateNavStyles() {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${currentIdx}`).classList.add('active');
+        }
+
+        function renderQuestion() {
+            const q = quizData[currentIdx];
+            document.getElementById('q-num').innerText = `Question ${q.num} (Problem ${currentIdx + 1} of ${quizData.length})`;
+            document.getElementById('q-text').innerText = q.qText;
+            
+            const grid = document.getElementById('opt-grid');
+            grid.innerHTML = '';
+            
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'feedback';
+            feedback.innerText = '';
+            feedback.style.display = 'none';
+
+            q.options.forEach((opt) => {
+                const btn = document.createElement('div');
+                btn.className = 'option';
+                
+                // Clear any leftover asterisks in the displayed text
+                let textToDisplay = opt.text.replace(/\*$/, '').trim();
+
+                btn.innerHTML = `<span class="opt-letter">${opt.letter}.</span> ${textToDisplay}`;
+                
+                if (q.userAnswer) {
+                    btn.classList.add('disabled');
+                    if (opt.letter === q.ans) {
+                        btn.classList.add('actual-correct');
+                    }
+                    if (opt.letter === q.userAnswer && q.userAnswer !== q.ans) {
+                        btn.classList.add('selected-wrong');
+                    }
+                } else {
+                    btn.onclick = () => handleAnswer(opt.letter);
+                }
+                grid.appendChild(btn);
+            });
+
+            if (q.userAnswer) {
+                feedback.style.display = 'block';
+                if (q.userAnswer === q.ans) {
+                    feedback.className = 'feedback success';
+                    feedback.innerText = 'Correct!';
+                } else {
+                    feedback.className = 'feedback error';
+                    feedback.innerText = `Incorrect! The correct answer is ${q.ans}.`;
+                }
+            }
+
+            // Update Controls
+            document.getElementById('btn-prev').disabled = currentIdx === 0;
+            
+            const btnNext = document.getElementById('btn-next');
+            const btnRetake = document.getElementById('btn-retake');
+
+            if (currentIdx === quizData.length - 1) {
+                btnNext.style.display = 'none';
+                btnRetake.style.display = 'inline-block';
+            } else {
+                btnNext.style.display = 'inline-block';
+                btnRetake.style.display = 'none';
+            }
+
+            updateNavStyles();
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('quizCard')]);
+            }
+        }
+
+        function handleAnswer(letter) {
+            const q = quizData[currentIdx];
+            q.userAnswer = letter;
+            
+            const navBtn = document.getElementById(`nav-${currentIdx}`);
+            if (letter === q.ans) {
+                totalScore++;
+                navBtn.classList.add('correct');
+            } else {
+                navBtn.classList.add('wrong');
+            }
+            
+            document.getElementById('score-display').innerText = `Score: ${totalScore}`;
+            renderQuestion();
+        }
+
+        function nextQ() { if (currentIdx < quizData.length - 1) { currentIdx++; renderQuestion(); } }
+        function prevQ() { if (currentIdx > 0) { currentIdx--; renderQuestion(); } }
+
+        function retakeQuiz() {
+            quizData.forEach(q => { q.userAnswer = null; });
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('correct');
+                b.classList.remove('wrong');
+            });
+            totalScore = 0;
+            currentIdx = 0;
+            document.getElementById('score-display').innerText = `Score: 0`;
+            renderQuestion();
+            document.getElementById('main-content').scrollTo(0,0);
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
