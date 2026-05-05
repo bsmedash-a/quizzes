@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Design Elements | Questions 1-100</title>
+    <!-- MathJax for rendering equations -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --main-color: #ffffff;
+            --text-color: #2c3e50;
+            --accent-color: #1a252f;
+            --highlight-color: #3498db;
+            --correct-color: #27ae60;
+            --wrong-color: #e74c3c;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            border-bottom: 4px solid var(--highlight-color);
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: white;
+            margin-right: 20px;
+            transition: color 0.2s;
+        }
+
+        .hamburger:hover { color: var(--highlight-color); }
+
+        .top-bar h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sidebar Navigation */
+        #sidebar {
+            width: 320px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            position: fixed;
+            height: calc(100% - 60px);
+            top: 60px;
+            z-index: 99;
+            transform: translateX(-100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        #sidebar.open { transform: translateX(0); }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background-color: #1a252f;
+            text-align: center;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .nav-grid {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .nav-btn {
+            background-color: #7f8c8d;
+            color: white;
+            border: none;
+            padding: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover { background-color: #95a5a6; }
+        .nav-btn.active { background-color: var(--highlight-color); box-shadow: inset 0 0 0 2px white; }
+        .nav-btn.correct { background-color: var(--correct-color); color: white; }
+        .nav-btn.wrong { background-color: var(--wrong-color); color: white; }
+
+        /* Main Content */
+        #main-content {
+            flex: 1;
+            margin-top: 60px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .quiz-card {
+            background-color: var(--main-color);
+            width: 100%;
+            max-width: 900px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            height: fit-content;
+            margin-bottom: 40px;
+        }
+
+        .question-header {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: var(--text-color);
+            white-space: pre-wrap;
+        }
+
+        /* 2-Column Layout for Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+
+        .option {
+            background-color: #f8f9fa;
+            border: 2px solid #bdc3c7;
+            padding: 16px 20px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            color: var(--text-color);
+        }
+
+        .option:hover:not(.disabled) {
+            background-color: #ebf5fb;
+            border-color: var(--highlight-color);
+        }
+
+        .option.actual-correct {
+            background-color: #e8f8f5;
+            border-color: var(--correct-color);
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .option.selected-wrong {
+            background-color: #fdedec;
+            border-color: var(--wrong-color);
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .option.disabled { cursor: default; }
+
+        .opt-letter {
+            font-weight: bold;
+            margin-right: 15px;
+            color: var(--highlight-color);
+        }
+
+        .feedback {
+            padding: 20px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .feedback.success { background-color: #e8f8f5; color: #27ae60; border: 1px solid var(--correct-color); display: block; }
+        .feedback.error { background-color: #fdedec; color: #c0392b; border: 1px solid var(--wrong-color); display: block; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            border-top: 2px solid #ecf0f1;
+            padding-top: 20px;
+        }
+
+        .btn {
+            background-color: var(--highlight-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+
+        .btn:hover:not(:disabled) { background-color: #2980b9; }
+        .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        
+        .btn-retake { background-color: #e67e22; }
+        .btn-retake:hover { background-color: #d35400; }
+
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 98; display: none; }
+        #overlay.show { display: block; }
+        
+        .error-message { color: var(--wrong-color); font-weight: bold; text-align: center; display: block; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <h1>Machine Design & Shop Practice | Problems 1-100</h1>
+    </div>
+
+    <div id="overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div class="sidebar-header" id="nav-header">Loading...</div>
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div id="main-content">
+        <div class="quiz-card" id="quizCard">
+            <div class="question-header">
+                <span id="q-num">Initializing...</span>
+                <span id="score-display" style="color: var(--highlight-color);">Score: 0</span>
+            </div>
+            
+            <div class="question-text" id="q-text">Parsing problem set (1-100)...</div>
+            <div class="options-grid" id="opt-grid"></div>
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="controls" id="controls" style="display:none;">
+                <button class="btn" id="btn-prev" onclick="prevQ()">&#8592; Previous</button>
+                <button class="btn btn-retake" id="btn-retake" style="display:none;" onclick="retakeQuiz()">Retake Quiz</button>
+                <button class="btn" id="btn-next" onclick="nextQ()">Next &#8594;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Injection formatted explicitly for robustness -->
+    <script id="raw-data" type="text/plain">
+1|A thin hollow sphere of radius 10 in and thickness 0.1 in is subjected to an internal pressure of 100 psig. The maximum normal stress on an element of the sphere is|2500 psi|5000 psi|7,070 psi|10,000 psi|B
+2|In designing a cylindrical pressure tank 3 feet in diameter, a factor of safety of 2.5 is used. The cylinder is made of steel (yield stress = 30 ksi) and will contain pressures up to1000 psi. What is the required wall thickness, t, based on circumferential stress considerations?|0.75 in.|1.50 in.|3 in.|3.75 in.|B
+3|A flywheel weighing 6 kN has a mean diameter of 90 cm. The maximum speed of the flywheel is 7 rev/sec slowed down to 4 rev/sec during the shearing process. Determine the energy released by the flywheel.|7856 kg-m|8145 kg-m|9872 kg-m|8241 kg-m|D
+4|When measuring a drill for size measure across the:|margins|flutes|shank|point|A
+5|The tool used in precision work to smooth or enlarge holes is called a:|round out|drift pin|reamer|protractor|C
+6|Which of the following chisels would be used for cutting oil grooves?|diamond-point chisel|cold chisel|round-nose chisel|hot chisel|C
+7|Which of the following is not a cut of file?|smooth|second cut|half-round|bastard|C
+8|Which of the following is the smallest size drill?|# 80|# 60|# 1|# 0|A
+9|Two parallel shaft connected by pure rolling turn in the same direction and having a speed ratio of 4. What is the distance of the two shaft if the small cylinder is 8 cm?|10 cm|12 cm|18 cm|20 cm|B
+10|What modulus of elasticity in tension is required to obtain a unit deformation of 0.00107 m/m from a load producing a unit tensile stress of 50, 000 psi?|34.5 x 10^6 psi|46.7 x 10^5 psi|46.7 x 10^6 psi|4.67 x 10^6 psi|C
+11|Determine the bursting steam pressure of a steel plate with a diameter of 12 in. and made of 1/4 in steel plate. The joint efficiency is at 75% and the tensile strength is 55 ksi.|3, 440 psi|3, 437 psi|3, 430 psi|3, 427 psi|B
+12|What is the working strength of a 2 in bolt which is screwed up tightly in a packed joint when the allowable working stress is 11,000 psi?|12,400 lb|15,500 lb|18,700 lb|22,500 lb|C
+13|Which of the following is the largest size drill?|A|X|Z|XX|C
+14|The size of a drill is stamped on the:|point|shank|margin|flute|B
+15|Which of the following safety precautions should be followed when pouring babbitt?|operator must wear goggles|the surface to be babbitted must be free of moisture|the surface to be babbitted must be clean|all of the above|D
+16|Which of the following safety precautions should be followed when renewing a flange gasket?|drain the line thoroughly|tie down isolation valves|isolate the section to be worked on|all of the above|D
+17|Before installing a new flange gasket be sure that the:|flange faces are painted|flange faces are absolutely clean|isolating valves are open|old gasket is in place|B
+18|On a standard wire gage:|#10 is larger than #5|#25 is smaller than #20|#1 is smaller than #2|#30 is larger than #25|B
+19|Which of the following tools would be most useful when taking leads on bearings?|dividers|outside calipers|micrometer|center gage|C
+20|The cutting action in on both stokes in|Open side planer|Pit planer|Double housing planer|Universal planer|D
+21|The straddle milling is done by means of two|Side milling cutters|Face milling cutters|Plain milling cutters|Form cutters|A
+22|The formula to find out the number of turn of the crank simple indexing is|T=20/N|T=40/N|T=N/20|T=N/40|B
+23|In a standard dividing head the ratio between the worm wheel and the worm is|10:1|20:1|30:1|40:1|D
+24|There are two different movements of the crank in|Simple indexing|Differential indexing|Compound indexing|Angular indexing|C
+25|In a vertical milling machine the spindle is situated to the|Horizontal|Angular|vertical|None of the above|C
+26|Planer type built machine is built up for work of|light duty|medium duty|heavy duty|None of the above|C
+27|In a straddle milling operation how many cutters are used to mill the work?|One|Three or more|Two|Any one of the above|C
+28|All four compression coil spring support one load of 700 kg/mm. All four springs are arranged in parallel and rated same at 0.609 kg/mm. Compute the deflection in mm.|64|147|178|287|D
+29|A body weighing 1000 lb falls 6 inches and strikes a 2000 lb per in spring. The deformation of the spring is:|1 in|2 in|3 in|6 in|C
+30|A 60 inch diameter steel pipe, 3/8 inch thick, carries water under a pressure head of 550 ft. Determine the hoop stress in the steel.|34,320 psi|25,780 psi|19,066 psi|15,920 psi|D
+31|The maximum moment induced in a simply supported beam of 20 ft span, by a 2000 pound load at midspan is|125,000 ft lb|15,000 ft lb|30,000 ft-lb|10,000 ft lb|D
+32|Determine the length of belt needed for a two flat belt pulleys having a diameter of 70 cm and 30 cm. The center distance is 400 cm and pulleys rotate in same direction. Assume power transmitted is 10 hp at 200 rpm.|958 cm|859 cm|589 cm|895 cm|A
+33|A round steel bar 12 inches long is to withstand a dead load of 40,000 lb in compression. The rod must not shorten more than 0.004 inch and have a factor safety of at least 10. Assume the ultimate strength of the material to be 110,000 psi and modulus of elasticity to be 15,500,000 psi. Determine the diameter of the rod.|2.14 in.|3.14 in|4.14 in.|5.14 in.|B
+34|How long will it take to saw a rectangular piece of steel plate size 1/2" x 4' x 8' the length of cut is 4 ft. The power hacksaw makes 120 rpm and the feed per stroke is 0.008 in.?|48 min.|0.83 hr|50 hr|52 min.|B
+35|For gear cutting which cutter is used?|End mill cutter|Form relieve cutter|Plain milling cutter|All of the above|B
+36|In a slotter, the table gets different feeds|One|Three|Two|None of the above|B
+37|If a clearance of a cutting edge is 15 deg, the lip (wedge) angle in 75 deg, the rake angle will be|80 deg|10 deg|70 deg|None of the above|B
+38|The approximate hardness of HSS end mill cutter is|45 HRC|62 HRC|52 HRC|72 HRC|B
+39|When the feed motion takes place in a slotting machine|during the cutting motion.|after each forward stroke.|at the end of return motion.|after each double stroke.|C
+40|Which of the following conditions may cause error during knurling?|to much longitudinal feed.|clamped length of tool too short.|surface speed too low.|unnecessary support with tail stock center.|A
+41|Mark the milling method during which the formation of the chatter marks is very likely|during down cut milling with a straight tooth cutter.|during up cut milling with a straight tooth cutter.|during face milling with a straight tooth cutter.|while using spiral tooth cutter.|B
+42|Mark the cutter which works simultaneously with up cut and down cut process|Side milling cutter.|Semi-circular milling cutter.|Shell end mill.|Plain milling cutter.|C
+43|A polygon with 9 flats is to be milled using the indexing head. The indexing head transmission ratio is 40:1.Determine the number of crank rotation and mark the correct answer|9 full rotation.|5 full rotation, 2 holes on the 36 hole circle.|4 full rotation, 12 holes on the 27 hole circle.|2 full rotation, 16 hole on the 47hole circle.|C
+44|Where the relieved cutters are reground?|on the circumstances|relieved cutters are not reground|on the flank|on the side faces|C
+45|What happens if the job is loosely fitted between centers in cylindrical grindings?|the job will be out of round.|the job will be oversize.|the job will be thrown out.|the job will not rotate.|A
+46|Internal and external taper on cylindrical jobs are ground in|plain cylindrical grinding machine.|universal cylindrical grinding machine.|internal grinding machine.|centreless grinding machine.|B
+47|Which of the following is used to clean the gauge blocks before and after use?|Brush|Cotton waste|Chamois leather or lenen cloth|None of the above|C
+48|The grade of grinding wheel depends upon|Grain size|Kind of abrasive|Structure|Hardness of bond|D
+49|Which kind of bond is commonly used?|Vitrified|Shellac|Rubber|None of the above|A
+50|The symbol conventionally used for resinoid bond is|'V'|'B'|'R'|'E'|B
+51|A grinding wheel is marked as 51A 46L 5V 23, out of these 5 means|Kind of abrasive|Structure|Kind of bond|Grain size|B
+52|Balancing of grinding wheel is done to|make the outside diameter concentric with the bore.|make the sides of wheel parallel.|equalize the weight in every portion of the wheel.|None of the above.|C
+53|Taps are resharpened by grindings|Flutes|Diameter|Threads|Relief|A
+54|The purpose is to prevent gears from jamming together and making contact on both sides of their teeth simultaneously|tooth fillet|stress relieving|backlash|all of these|C
+55|Choose the economical type of material for gears that give/sustain good operating quality/life for intended operation|plane carbon steel|high alloy steel|all of these|heat treated carbon steel|D
+56|Allowance added in the casting pattern to compensate for the contraction of metal|tapering allowance|shrinkage allowance|finish allowance|draft pattern.|B
+57|Ratio of the angle of action to the pitch angle|contact ratio|approach ratio|ratio of gearing|module|A
+58|The principle materials used in the production of metal working tools:|high carbon steel|titanium, phosphorous|tungsten, silicon, hadfield Mn|vanadium, chromium, molybdenum|A
+59|Also called eccentrically loaded bearing is|full bearings|offset bearing|partial bearing|fitted bearings|B
+60|In the selection of wire rope, regular lay means wires and strands are arranged in the following manner:|twisted in the same direction|twisted in opposite direction|twisted in any direction|twisted in along direction|B
+61|In involute teeth, the pressure angle is often defined as the angle between the line of action and the line of tangent to the pitch circle. It is also termed as-|helix angle|angle of recess|Angle of obliquity|Arc of action|C
+62|Height of tooth above pitch circle or the radial distance between pitch circle and top land of the tooth.|top root|addendum|land|hunting tooth|B
+63|The function of clutch in the machine tool is?|lowering of drive speed|to disconnect or connect at will the drive|alignment of drive shaft|to insure that two shaft line up at high speed|B
+64|The rule of thumb in journal bearing design; the clearance ratio/clearance should be.|0.0090|0.0042|0.0010|0.00120|C
+65|Cold rolled shafting is not available in diameter larger than|6 inches|5 inches|6 inches|5½ inches|B
+66|The cast iron flywheels are commonly designed with a factor of safety of|14 to 15|10 to 13|8 to 9|6 to 12|B
+67|A pair of equal and opposite (not collinear) forces that tend cause a rotation of a body|couple|centroids|equilibrium|vector|A
+68|The ratio of the pitch diameter in inches to the number of teeth|pitch circle|English module|module|pitch diameter|B
+69|When high strength and durability are a requirements for choosing gear materials it is preferable to use material|hardened bronze|steel|phenolic laminated|white iron|B
+70|The distance between similar, equally-spaced tooth surfaces in a given direction and along a given line.|pitch circle|pitch plane|pitch|pitch diameter|C
+71|The use of hardened steel for the mating metal gear appears to give the best results and longer operational life. The usual hardness is in the range of-|over 600 BHN|300 to 400 BHΝ|below 350 BHΝ|over 400 BHN|A
+72|Continuous stretching under load even if the stress is less than the yield point|plasticity|elasticity|creep|ductility|C
+73|The most known lubricants being utilized in whatever category of load and speed are oil, air, grease and dry lubricants like|bronze|lead|silicon|graphite|D
+74|A coupling that allows axial flexibility/movement in the operation. Made of alternate bolting of steel, leather, fabric and/or plastic material into the two flanges|Flexible disk coupling|flexing Oldham coupling|Flexible toroidal spring coupling|Elastic-material bonded coupling|B
+75|It consists of two cranks, a stationary piece called the line of centers and the connecting rod is a|five-bar linkage|four-crank braces|three-crank linkage|four-bar linkage|D
+76|Find the torsional moment in N-m developed when the shaft delivers 40.2 hp at 260 rpm.|901 x 10 to the 3rd power|901 x 10 to the 2nd power|1102 x 10 to the 2nd power|1102 x 10 to the 3rd power|D
+77|Compute how many 3/8 inch diameter set screws required to transmit 3 HP at a shaft speed of 900 rpm. The shaft diameter is 1 1/4 in|2|3|4|2.5|C
+78|A pair of gear and pinion having a ratio of 4 with the gear having 100 teeth and the pinion with 25 teeth. Find the circular pitch, if the center distance is 15 and the pitch is at 6.|0.94|0.754|0.610|0.552|B
+79|A gear of 80 teeth and a pinion of 20 teeth has a gear and pinion ratio of 4. Find the center distance in inches, if the circular pitch is 0.885.|14.1|15.1|16.1|17.1|A
+80|The section modulus of a circle of radius 5 cm is equal to:|58.2 cm³|78.2 cm³|98.2 cm³|108.2 cm³|C
+81|A hollow shaft with outside diameter of 14 cm and wall thickness of 0.08 cm transmits 200 kW at 400 rpm. What must be the angular deflection of the shaft if the length is 5 meters? Take G = 12,000,000 psi.|0.019 deg|1.14 deg|1.94 deg|2.44 deg|B
+82|Compute the safe wall thickness of a 90 cm diameter steel tank. The tank is subjected to 7 MPa pressure and the steel material has yield stress of 220 MPa. Use a factor of safety of 3.|4.3 cm|3.8 cm|3.2 cm|2.5 cm|A
+83|A bolt has a tensile load of 300 lbs. The bolt is made of SAE 1040 material with sy=55 ksi, what is the stress area of the bolt?|0.1023 in²|0.1230 in²|0.327 in²|0.5190 in²|A
+84|With an electric arc welding rate of 18 in/min, how long will it take to weld a 1/2 in. thick plate by 3 ft long seam?|3 min.|2 min.|1.5 min.|4 min.|B
+85|Determine the power transmitted, in kW, by a main power transmitting steel shaft with 2 3/8 inches in diameter using SAE 1060 material mounting a 12 inches pulley at a speed of 170 rpm.|21.3|25.8|28.5|0.75|A
+86|Determine the polar section modulus, Z (in³) of a shaft delivering 5 hp at 150 rpm. The diameter of the shaft is 1 inch and allowable stress of 6000 psi.|0.175|0.196|0.489|0.895|B
+87|Compute the deflection of a 20 coils helical spring having a load of 120 kgs. The modulus of elasticity in shear of spring is 98 GPa, outside diameter of 10 cm and wire diameter of 10 mm. The spring is squared and ground ends.|162.1 mm|154.4 mm|134.1 mm|126.1 mm|D
+88|The torsional deflection of steel shaft is 0.6 deg per meter length. The shear stress is 60 MPa. Compute the diameter of the shaft in mm. Steel modulus of elasticity is 79 GPa.|90 mm|105 mm|130 mm|145 mm|D
+89|What is the size of an air cylinder operating at 10 bar with a required force of 7854 N? Use a load ratio of 90%. Load ratio means the ratio of required force and theoretical force.|100 mm|105 mm|150 mm|300 mm|B
+90|A steel rod 30 ft long used in a control mechanism must transmit a tensile force of 980 lb without stretching more than 1/8 in. nor exceeding an allowable stress of 20,000 psi. What must the diameter of the rod be? (E = 30 x 10^6 psi)|1/4 in|3/8 in|1/2 in|3/4 in|B
+91|A steel bar initially free of stress, is held between rigid supports. Determine the stress in the bar if the temperature drops 130 deg F. (k=6.5 x 10^-6 per deg F)|11,400 psi|15,600 psi|20,600 psi|25,400 psi|D
+92|When working on bearings and checking for high spots, it is customary to apply:|white lead|red lead|dykem blue|Prussian blue|D
+93|If you wanted to check the face of a pump slide valve or other flat-faced valve, you could check for trueness on a:|flat board|surface plate|piece of glass|bearing plate|B
+94|Before splicing electric wires, they should be:|tinned|cleaned and tinned|soldered|insulated|B
+95|Which of the following is not a standard thread form?|Square|American National|Double flute|60 deg. sharp V|C
+96|Hand taps are provided in sets of three called:|taper, plug and end|short, taper and bottom|taper, plug and bottom|short, medium and long|C
+97|When preparing to tap a hole, the size of the drill will be|equal to the size of the tap|larger than the size of the tap|smaller than the size of the tap|none of the above|B
+98|When preparing to tap a hole for a pipe fitting the size of the drill will be:|larger than the tap size|smaller than the tap size|equal to the size of the tap|none of the above|A
+99|Which of the following does not have to be lubricated when drilling?|steel|brass|monel|tool steel|B
+100|The tool to use when cutting a hole in the side of a round piece of metal is called a:|vise|jaw holder|"V" block|chuck|C
+    </script>
+
+    <script>
+        const rawText = document.getElementById('raw-data').textContent.trim();
+        const quizData = [];
+        let totalScore = 0;
+        let currentIdx = 0;
+
+        function initApp() {
+            const lines = rawText.split('\n');
+            lines.forEach(line => {
+                if (line.trim() === '') return;
+                const parts = line.split('|');
+                if (parts.length === 7) {
+                    quizData.push({
+                        num: parseInt(parts[0]),
+                        qText: parts[1].trim(),
+                        options: [
+                            { letter: 'A', text: parts[2].trim() },
+                            { letter: 'B', text: parts[3].trim() },
+                            { letter: 'C', text: parts[4].trim() },
+                            { letter: 'D', text: parts[5].trim() }
+                        ],
+                        ans: parts[6].trim().toUpperCase(),
+                        userAnswer: null
+                    });
+                }
+            });
+
+            if (quizData.length === 0) {
+                document.getElementById('q-text').innerHTML = "<span class='error-message'>Parse Error: Could not extract questions from the provided file.</span>";
+                return;
+            }
+            
+            document.getElementById('nav-header').innerText = `1 to 100 Navigator`;
+            document.getElementById('controls').style.display = 'flex';
+            buildNav();
+            renderQuestion();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('show');
+        }
+
+        function buildNav() {
+            const grid = document.getElementById('navGrid');
+            grid.innerHTML = '';
+            quizData.forEach((q, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'nav-btn';
+                btn.id = `nav-${i}`;
+                btn.innerText = q.num;
+                btn.onclick = () => { 
+                    currentIdx = i; 
+                    renderQuestion(); 
+                    if(window.innerWidth <= 768) toggleSidebar(); 
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function updateNavStyles() {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${currentIdx}`).classList.add('active');
+        }
+
+        function renderQuestion() {
+            const q = quizData[currentIdx];
+            document.getElementById('q-num').innerText = `Question ${q.num} (Problem ${currentIdx + 1} of ${quizData.length})`;
+            document.getElementById('q-text').innerText = q.qText;
+            
+            const grid = document.getElementById('opt-grid');
+            grid.innerHTML = '';
+            
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'feedback';
+            feedback.innerText = '';
+            feedback.style.display = 'none';
+
+            q.options.forEach((opt) => {
+                const btn = document.createElement('div');
+                btn.className = 'option';
+                
+                // Clear any leftover asterisks in the displayed text
+                let textToDisplay = opt.text.replace(/\*$/, '').trim();
+
+                btn.innerHTML = `<span class="opt-letter">${opt.letter}.</span> ${textToDisplay}`;
+                
+                if (q.userAnswer) {
+                    btn.classList.add('disabled');
+                    if (opt.letter === q.ans) {
+                        btn.classList.add('actual-correct');
+                    }
+                    if (opt.letter === q.userAnswer && q.userAnswer !== q.ans) {
+                        btn.classList.add('selected-wrong');
+                    }
+                } else {
+                    btn.onclick = () => handleAnswer(opt.letter);
+                }
+                grid.appendChild(btn);
+            });
+
+            if (q.userAnswer) {
+                feedback.style.display = 'block';
+                if (q.userAnswer === q.ans) {
+                    feedback.className = 'feedback success';
+                    feedback.innerText = 'Correct!';
+                } else {
+                    feedback.className = 'feedback error';
+                    feedback.innerText = `Incorrect! The correct answer is ${q.ans}.`;
+                }
+            }
+
+            // Update Controls
+            document.getElementById('btn-prev').disabled = currentIdx === 0;
+            
+            const btnNext = document.getElementById('btn-next');
+            const btnRetake = document.getElementById('btn-retake');
+
+            if (currentIdx === quizData.length - 1) {
+                btnNext.style.display = 'none';
+                btnRetake.style.display = 'inline-block';
+            } else {
+                btnNext.style.display = 'inline-block';
+                btnRetake.style.display = 'none';
+            }
+
+            updateNavStyles();
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('quizCard')]);
+            }
+        }
+
+        function handleAnswer(letter) {
+            const q = quizData[currentIdx];
+            q.userAnswer = letter;
+            
+            const navBtn = document.getElementById(`nav-${currentIdx}`);
+            if (letter === q.ans) {
+                totalScore++;
+                navBtn.classList.add('correct');
+            } else {
+                navBtn.classList.add('wrong');
+            }
+            
+            document.getElementById('score-display').innerText = `Score: ${totalScore}`;
+            renderQuestion();
+        }
+
+        function nextQ() { if (currentIdx < quizData.length - 1) { currentIdx++; renderQuestion(); } }
+        function prevQ() { if (currentIdx > 0) { currentIdx--; renderQuestion(); } }
+
+        function retakeQuiz() {
+            quizData.forEach(q => { q.userAnswer = null; });
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('correct');
+                b.classList.remove('wrong');
+            });
+            totalScore = 0;
+            currentIdx = 0;
+            document.getElementById('score-display').innerText = `Score: 0`;
+            renderQuestion();
+            document.getElementById('main-content').scrollTo(0,0);
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
